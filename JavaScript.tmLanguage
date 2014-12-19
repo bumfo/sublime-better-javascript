@@ -595,7 +595,7 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(super|this)\b</string>
+			<string>\b(super|this|arguments)\b</string>
 			<key>name</key>
 			<string>variable.language.js</string>
 		</dict>
@@ -614,25 +614,25 @@
 		<dict>
 			<key>match</key>
 			<string>(?x)\b(
-				s(h(ift|ow(Mod(elessDialog|alDialog)|Help))|croll(X|By(Pages|Lines)?|Y|To)?|t(op|rike)|i(n|zeToContent|debar|gnText)|ort|u(p|b(str(ing)?)?)|pli(ce|t)|e(nd|t(Re(sizable|questHeader)|M(i(nutes|lliseconds)|onth)|Seconds|Ho(tKeys|urs)|Year|Cursor|Time(out)?|Interval|ZOptions|Date|UTC(M(i(nutes|lliseconds)|onth)|Seconds|Hours|Date|FullYear)|FullYear|Active)|arch)|qrt|lice|avePreferences|mall)|
+				s(h(ift|ow(Mod(elessDialog|alDialog)|Help))|croll(X|By(Pages|Lines)?|Y|To)?|t(op|rike)|i(n|zeToContent|debar|gnText)|o(me|rt)|u(p|b(str(ing)?)?)|pli(ce|t)|e(nd|t(Re(sizable|questHeader)|M(i(nutes|lliseconds)|onth)|Seconds|Ho(tKeys|urs)|Year|Cursor|Time(out)?|Interval|ZOptions|Date|UTC(M(i(nutes|lliseconds)|onth)|Seconds|Hours|Date|FullYear)|FullYear|Active)|arch)|qrt|lice|avePreferences|mall)|
 				h(ome|andleEvent)|
 				navigate|
-				c(har(CodeAt|At)|o(s|n(cat|textual|firm)|mpile)|eil|l(one|ear(Timeout|Interval)?)|a(ptureEvents|ll)|reate(StyleSheet|Popup|EventObject)?)|
+				c(har(CodeAt|At)|o(s|n(cat|t(ains|extual)|firm)|mpile)|eil|l(one|ear(Timeout|Interval)?)|a(ptureEvents|ll)|reate(StyleSheet|Popup|EventObject))|
 				t(o(GMTString|S(tring|ource)|U(TCString|pperCase)|Lo(caleString|werCase))|est|a(n|int(Enabled)?))|
 				i(s(NaN|Finite)|ndexOf|talics)|
 				d(isableExternalCapture|ump|etachEvent)|
 				u(n(shift|taint|escape|watch)|pdateCommands)|
 				j(oin|avaEnabled)|
 				p(o(p|w)|ush|lugins.refresh|a(ddings|rse(Int|Float)?)|r(int|ompt|eference))|
-				e(scape|nableExternalCapture|val|lementFromPoint|x(p|ec(Script|Command)?|tend))|
+				e(scape|nableExternalCapture|v(al|ery)|lementFromPoint|x(p|ec(Script|Command)?|tend))|
 				valueOf|
 				UTC|
 				queryCommand(State|Indeterm|Enabled|Value)|
-				f(i(nd|le(ModifiedDate|Size|CreatedDate|UpdatedDate)|xed)|o(nt(size|color)|r(ward|Each))|loor|romCharCode)|
+				f(i(nd(Index)?|le(ModifiedDate|Size|CreatedDate|UpdatedDate)|xed)|o(nt(size|color)|r(ward|Each))|loor|romCharCode)|
 				watch|
 				l(ink|o(ad|g)|astIndexOf)|
 				a(sin|nchor|cos|t(tachEvent|ob|an(2)?)|pply|lert|b(s|ort))|
-				r(ou(nd|teEvents)|e(duce|size(By|To)|calc|turnValue|place|verse|l(oad|ease(Capture|Events)))|andom)|
+				r(ou(nd|teEvents)|e(duce(Right)?|size(By|To)|calc|turnValue|place|verse|l(oad|ease(Capture|Events)))|andom)|
 				g(o|et(ResponseHeader|M(i(nutes|lliseconds)|onth)|Se(conds|lection)|Hours|Year|Time(zoneOffset)?|Da(y|te)|UTC(M(i(nutes|lliseconds)|onth)|Seconds|Hours|Da(y|te)|FullYear)|FullYear|A(ttention|llResponseHeaders)))|
 				m(ap|in|ove(B(y|elow)|To(Absolute)?|Above)|ergeAttributes|a(tch|rgins|x))|
 				b(toa|ig|o(ld|rderWidths)|link|ack|ind)
@@ -642,7 +642,55 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(s(ub(stringData|mit)|plitText|e(t(NamedItem|Attribute(Node)?)|lect))|has(ChildNodes|Feature)|namedItem|c(l(ick|o(se|neNode))|reate(C(omment|DATASection|aption)|T(Head|extNode|Foot)|DocumentFragment|ProcessingInstruction|E(ntityReference|lement)|Attribute))|tabIndex|i(nsert(Row|Before|Cell|Data)|tem)|open|delete(Row|C(ell|aption)|T(Head|Foot)|Data)|focus|write(ln)?|a(dd|ppend(Child|Data))|re(set|place(Child|Data)|move(NamedItem|Child|Attribute(Node)?)?)|get(NamedItem|Element(sBy(Name|TagName)|ById)|Attribute(Node)?)|blur)\b(?=\()</string>
+			<string>(?x)\b(
+				create|
+				keys|
+				get(
+					PrototypeOf|
+					Own(
+						PropertyNames|
+						PropertyDescriptor
+					)
+				)|
+				define(
+					Property|
+					Properties
+				)|
+				is(
+					Extensible|
+					Frozen|
+					Sealed|
+					PrototypeOf
+				)?|
+				freeze|
+				preventExtensions|
+				seal|
+				has(
+					OwnProperty
+				)|
+				propertyIsEnumerable
+			)\b(?=\()</string>
+			<key>name</key>
+			<string>support.function.object.js</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>(?x)\b(
+				s(ub(stringData|mit)|plitText|e(t(NamedItem|Attribute(Node)?)|lect))|
+				has(ChildNodes|Feature)|
+				namedItem|
+				c(l(ick|o(se|neNode))|reate(C(omment|DATASection|aption)|T(Head|extNode|Foot)|DocumentFragment|ProcessingInstruction|E(ntityReference|lement)|Attribute))|
+				tabIndex|
+				i(nsert(Row|Before|Cell|Data)|tem)|
+				open|
+				delete(Row|C(ell|aption)|T(Head|Foot)|Data)|
+				focus|
+				write(ln)?|
+				a(dd|ppend(Child|Data))|
+				re(set|place(Child|Data)|move(NamedItem|Child|Attribute(Node)?)?)|
+				get(NamedItem|Element(sBy(Name|TagName)|ById)|Attribute(Node)?)|
+				blur
+			)\b(?=\()</string>
 			<key>name</key>
 			<string>support.function.dom.js</string>
 		</dict>
@@ -666,7 +714,24 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\bon(R(ow(s(inserted|delete)|e(nter|xit))|e(s(ize(start|end)?|et)|adystatechange))|Mouse(o(ut|ver)|down|up|move)|B(efore(cut|deactivate|u(nload|pdate)|p(aste|rint)|editfocus|activate)|lur)|S(croll|top|ubmit|elect(start|ionchange)?)|H(over|elp)|C(hange|ont(extmenu|rolselect)|ut|ellchange|l(ick|ose))|D(eactivate|ata(setc(hanged|omplete)|available)|r(op|ag(start|over|drop|en(ter|d)|leave)?)|blclick)|Unload|P(aste|ropertychange)|Error(update)?|Key(down|up|press)|Focus|Load|A(ctivate|fter(update|print)|bort))\b</string>
+			<string>(?x)\b
+				on(
+					R(ow(s(inserted|delete)|e(nter|xit))|e(s(ize(start|end)?|et)|adystatechange))|
+					Mouse(o(ut|ver)|down|up|move)|
+					B(efore(cut|deactivate|u(nload|pdate)|p(aste|rint)|editfocus|activate)|lur)|
+					S(croll|top|ubmit|elect(start|ionchange)?)|
+					H(over|elp)|
+					C(hange|ont(extmenu|rolselect)|ut|ellchange|l(ick|ose))|
+					D(eactivate|ata(setc(hanged|omplete)|available)|r(op|ag(start|over|drop|en(ter|d)|leave)?)|blclick)|
+					Unload|
+					P(aste|ropertychange)|
+					Error(update)?|
+					Key(down|up|press)|
+					Focus|
+					Load|
+					A(ctivate|fter(update|print)|bort)
+				)
+			\b</string>
 			<key>name</key>
 			<string>support.function.event-handler.js</string>
 		</dict>
