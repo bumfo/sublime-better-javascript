@@ -619,7 +619,7 @@
 				navigate|
 				c(har(CodeAt|At)|o(s|n(cat|t(ains|extual)|firm)|mpile)|eil|l(one|ear(Timeout|Interval)?)|a(ptureEvents|ll)|reate(StyleSheet|Popup|EventObject))|
 				t(o(GMTString|S(tring|ource)|U(TCString|pperCase)|Lo(caleString|werCase))|est|a(n|int(Enabled)?))|
-				i(s(NaN|Finite)|ndexOf|talics)|
+				i(s(NaN|Finite|Array)|ndexOf|talics)|
 				d(isableExternalCapture|ump|etachEvent)|
 				u(n(shift|taint|escape|watch)|pdateCommands)|
 				j(oin|avaEnabled)|
@@ -628,14 +628,15 @@
 				valueOf|
 				UTC|
 				queryCommand(State|Indeterm|Enabled|Value)|
-				f(i(nd(Index)?|le(ModifiedDate|Size|CreatedDate|UpdatedDate)|xed)|o(nt(size|color)|r(ward|Each))|loor|romCharCode)|
+				f(i(nd(Index)?|le(ModifiedDate|Size|CreatedDate|UpdatedDate)|xed)|o(nt(size|color)|r(ward|Each))|loor|rom(CharCode)?)|
 				watch|
 				l(ink|o(ad|g)|astIndexOf)|
 				a(sin|nchor|cos|t(tachEvent|ob|an(2)?)|pply|lert|b(s|ort))|
 				r(ou(nd|teEvents)|e(duce(Right)?|size(By|To)|calc|turnValue|place|verse|l(oad|ease(Capture|Events)))|andom)|
 				g(o|et(ResponseHeader|M(i(nutes|lliseconds)|onth)|Se(conds|lection)|Hours|Year|Time(zoneOffset)?|Da(y|te)|UTC(M(i(nutes|lliseconds)|onth)|Seconds|Hours|Da(y|te)|FullYear)|FullYear|A(ttention|llResponseHeaders)))|
 				m(ap|in|ove(B(y|elow)|To(Absolute)?|Above)|ergeAttributes|a(tch|rgins|x))|
-				b(toa|ig|o(ld|rderWidths)|link|ack|ind)
+				b(toa|ig|o(ld|rderWidths)|link|ack|ind)|
+				of
 			)\b(?=\()</string>
 			<key>name</key>
 			<string>support.function.js</string>
