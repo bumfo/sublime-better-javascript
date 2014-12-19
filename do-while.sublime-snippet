@@ -1,0 +1,6 @@
+<snippet>
+    <content><![CDATA[do {${0:$TM_SELECTED_TEXT}} while (${1:true});]]></content>
+    <tabTrigger>do</tabTrigger>
+    <scope>source.js</scope>
+    <description>do … while</description>
+</snippet>
