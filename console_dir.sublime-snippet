@@ -3,5 +3,5 @@
 ]]></content>
 	<tabTrigger>dir</tabTrigger>
 	<scope>source.js</scope>
-	<description>console.dir(...);</description>
+	<description>console.dir(…);</description>
 </snippet>
