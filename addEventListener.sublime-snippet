@@ -1,0 +1,6 @@
+<snippet>
+    <content><![CDATA[addEventListener("${1:input}", function(e) {${0:$TM_SELECTED_TEXT}});]]></content>
+    <tabTrigger>addEventListener</tabTrigger>
+    <scope>source.js</scope>
+    <description>(…, function)</description>
+</snippet>
