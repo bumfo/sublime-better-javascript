@@ -1,6 +1,6 @@
 <snippet>
-    <content><![CDATA[${1:value_name}:${0:value},]]></content>
-    <tabTrigger>:,</tabTrigger>
-    <scope>source.js</scope>
-    <description>Object Value JS</description>
+    <content><![CDATA[: $0,]]></content>
+    <tabTrigger>:</tabTrigger>
+    <scope>source.js meta.object.literal.js -meta.function.expression.js</scope>
+    <description>Object key: value,</description>
 </snippet>
