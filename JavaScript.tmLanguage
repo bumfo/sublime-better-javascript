@@ -289,7 +289,7 @@
 						valueOf|
 						UTC|
 						queryCommand(State|Indeterm|Enabled|Value)|
-						f(i(nd(Index)?|le(ModifiedDate|Size|CreatedDate|UpdatedDate)|xed)|o(nt(size|color)|r(ward|Each))|loor|rom(CharCode)?)|
+						f(i(nd(Index)?|l(ter|e(ModifiedDate|Size|CreatedDate|UpdatedDate))|xed)|o(nt(size|color)|r(ward|Each))|loor|rom(CharCode)?)|
 						watch|
 						l(ink|o(ad|g)|astIndexOf)|
 						a(sin|nchor|cos|t(tachEvent|ob|an(2)?)|pply|lert|b(s|ort))|
