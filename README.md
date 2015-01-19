@@ -1,5 +1,12 @@
-Sublime Better Javascript
-=========================
+# bumfo/Sublime Better Javascript
+
+Real syntax highlighting rather than "keyword" highlighting. 
+
+![Object key & Arrow function](http://bumfo.github.io/sublime-real-javascript/s/screenshot-object-key-arrow.png)
+
+----------
+
+# Sublime Better Javascript
 
 This package is an improved version of Sublime Text's JavaScript package, focused mainly on improving symbol navigation.
 
