@@ -1,4 +1,4 @@
-# bumfo/Sublime Better Javascript
+# bumfo/Sublime Real Javascript
 
 Real syntax highlighting rather than "keyword" highlighting. 
 
