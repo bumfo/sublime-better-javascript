@@ -53,8 +53,8 @@ repository:
     - include: '#class-declaration'
     - include: '#for-statement'
     - include: '#parentheses-statement'
-    - include: '#expressions'
     - include: '#statement-group'
+    - include: '#expressions'
     - name: punctuation.terminator.statement.js
       match: \;
 
@@ -96,7 +96,7 @@ repository:
 
   statement-group:
     name: meta.statement-group
-    begin: \{
+    begin: (?<![=(:\[,]|return|yield|yield\*|&&|\|\||!|[+\-*\/]|\s)\s*\{
     beginCaptures:
       '0': {name: punctuation.definition.statementgroup.begin.js}
     end: \}
@@ -415,7 +415,7 @@ repository:
 
   object-initializer:
     name: meta.declaration.object.js
-    begin: (?<=[=(:\[,]|return|yield|yield\*|&&|\|\||!|[+\-*\/])\s*(\{)
+    begin: \{
     end: \}
     patterns:
     - name: meta.object.property.js

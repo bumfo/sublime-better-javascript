@@ -737,7 +737,7 @@
 		<key>object-initializer</key>
 		<dict>
 			<key>begin</key>
-			<string>(?&lt;=[=(:\[,]|return|yield|yield\*|&amp;&amp;|\|\||!|[+\-*\/])\s*(\{)</string>
+			<string>\{</string>
 			<key>end</key>
 			<string>\}</string>
 			<key>name</key>
@@ -1332,7 +1332,7 @@
 		<key>statement-group</key>
 		<dict>
 			<key>begin</key>
-			<string>\{</string>
+			<string>(?&lt;![=(:\[,]|return|yield|yield\*|&amp;&amp;|\|\||!|[+\-*\/]|\s)\s*\{</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>0</key>
@@ -1383,11 +1383,11 @@
 				</dict>
 				<dict>
 					<key>include</key>
-					<string>#expressions</string>
+					<string>#statement-group</string>
 				</dict>
 				<dict>
 					<key>include</key>
-					<string>#statement-group</string>
+					<string>#expressions</string>
 				</dict>
 				<dict>
 					<key>match</key>
