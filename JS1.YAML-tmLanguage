@@ -51,24 +51,48 @@ repository:
     patterns:
     - include: '#comments'
     - include: '#class-declaration'
-    - include: '#if-statement'
+    - include: '#for-statement'
+    - include: '#parentheses-statement'
     - include: '#expressions'
     - include: '#statement-group'
     - name: punctuation.terminator.statement.js
       match: \;
 
-  if-statement: 
-    name: meta.statement.if.js
+  for-statement: 
+    name: meta.statement.for.js
     begin: |
       (?x)
-      \b(if)\b\s*
-      (?=\(.*?\)\s*{)
+      \b(for)\b\s*
+      (?=\(.*?\)\s*\{?)
     beginCaptures:
-      '1': {name: keyword.control.if.js}
-    end: (?<=})
+      '1': {name: keyword.control.for.js}
+    end: (?<=})|(?<=[)])(?!\s*\{)
+    patterns:
+    - name: meta.parentheses.js
+      begin: \(
+      beginCaptures:
+        '0': {name: punctuation.parentheses.begin.js}
+      end: \)
+      endCaptures:
+        '0': {name: punctuation.parentheses.end.js}
+      patterns:
+      - include: '#expressions'
+      - name: punctuation.terminator.statement.js
+        match: \;
+    - include: '#statements'
+
+  parentheses-statement: 
+    name: meta.statement.parentheses.js
+    begin: |
+      (?x)
+      \b(if|while|switch)\b\s*
+      (?=\(.*?\)\s*\{?)
+    beginCaptures:
+      '1': {name: keyword.control.for.js}
+    end: (?<=})|(?<=[)])(?!\s*\{)
     patterns:
     - include: '#expression-parentheses'
-    - include: '#statement-group'
+    - include: '#statements'
 
   statement-group:
     name: meta.statement-group
@@ -84,17 +108,20 @@ repository:
 # expressions
   expressions:
     patterns:
+    - include: '#comments'
     - name: meta.delimiter.object.comma.js
-      match: \,[ |\t]* 
-    
+      match: \, #[ |\t]*
     - include: '#primary-expressions'
     - include: '#keywords'
+    - include: '#new-expression'
     - include: '#identifier-expressions'
-    - include: '#parentheses-expression'
+    - include: '#arguments-parentheses'
+    - include: '#expression-group'
+    - include: '#property-accessor'
     - name: meta.delimiter.method.period.js
       match: \.(?![0-9])
 
-  parentheses-expression:
+  expression-group:
     name: meta.brace.round.js
     comment: Primary Expressions of Expressions
     begin: (?<![\}\]\)]|["'])\(
@@ -109,6 +136,13 @@ repository:
   primary-expressions:
     patterns:
     - include: '#numeric'
+    - include: '#string-expressions'
+    - include: '#regular-expression'
+    - include: '#function-declaration'
+    - include: '#object-initializer'
+
+  string-expressions:
+    patterns:
     - name: string.quoted.single.js
       begin: "'"
       beginCaptures:
@@ -129,40 +163,123 @@ repository:
       patterns:
       - name: constant.character.escape.js
         match: '\\(x\h{2}|[0-2][0-7]{,2}|3[0-6][0-7]|37[0-7]?|[4-7][0-7]?|.)'
-    - name: string.regexp.js
-      begin: (?<=[=(:\[,]|^|return|yield|yield\*|&&|\|\||!)\s*(/)(?![/*+{}?])
-      beginCaptures:
-        '1': {name: punctuation.definition.string.begin.js}
-      end: (/)[igm]*
-      endCaptures:
-        '1': {name: punctuation.definition.string.end.js}
-      patterns:
-      - name: constant.character.escape.js
-        match: \\.
-    - include: '#function-declaration'
+
+  regular-expression:
+    name: string.regexp.js
+    begin: (?<=[=(:\[,]|^|return|yield|yield\*|&&|\|\||!|[+\-*\/])\s*(/)(?![/*+{}?])
+    beginCaptures:
+      '1': {name: punctuation.definition.string.begin.js}
+    end: (/)[igm]*
+    endCaptures:
+      '1': {name: punctuation.definition.string.end.js}
+    patterns:
+    - include: '#regexp'
+
+  new-expression:
+    name: meta.expression.new.js
+    begin: (?<=new)(?<![a-zA-Z0-9_$]new)(?=\s+[a-zA-Z_$][a-zA-Z0-9_$]*)
+    end: (?!(\s*\.\s*)?[a-zA-Z_$])(?<=[a-zA-Z0-9_$])(?![a-zA-Z0-9_$])
+    patterns:
+    - name: meta.delimiter.method.period.js
+      match: \.(?![0-9])
+    - name: support.class.js
+      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*
 
   identifier-expressions:
     name: meta.expression.identifier.js
-    begin: (?=(\.)?\b[a-zA-Z_$][a-zA-Z0-9_$]*\b)
-    end: (?!\s*(\.\s*)?[a-zA-Z_$])\b
+    begin: (?=(\.)?(?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*)
+    end: (?!(\s*\.\s*)?[a-zA-Z_$])(?<=[a-zA-Z0-9_$])(?![a-zA-Z0-9_$])
     patterns:
     - name: meta.delimiter.method.period.js
       match: \.(?![0-9])
     - name: support.function.js
-      match: (?<=\.|)\s*\b[a-zA-Z_$][a-zA-Z0-9_$]*\b(?=\s*\()
+      match: (?<=\.|)\s*(?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\()
     - name: entity.name.function.js
-      match: (?<=\.|)\s*\b[a-zA-Z_$][a-zA-Z0-9_$]*\b(?=\s*\=\s*\bfunction\b)
+      match: (?<=\.|)\s*(?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\=\s*function(?!\$)\b)
     - name: support.class.js
-      match: (?<=\.|)\s*\b[a-zA-Z_$][a-zA-Z0-9_$]*\b(?=\s*\=\s*\bclass\b)
+      match: (?<=\.|)\s*(?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\=\s*class(?!\$)\b)
+    - name: support.class.js
+      match: |
+        (?x)
+        \b(?>
+          Anchor|Applet|Area|Array|Boolean|Button|Checkbox|Date|document|event|FileUpload|Form|Frame|
+          Function|Hidden|History|Image|Java(?>Array|Class|Object|Package)|java|Layer|Link|Location|
+          Math|MimeType|Number|navigator|netscape|Object|Option|Packages|Password|Plugin|Promise|Radio|
+          RegExp|Reset|Select|String|Style|Submit|screen|sun|Text(?>area)?|window|XMLHttpRequest
+        )\b
+    - name: support.function.js
+      match: |
+        (?x)
+        (?<=\.)\s*(?>
+          s(?>h(?>ift|ow(?>Mod(?>elessDialog|alDialog)|Help))|croll(?>X|By(?>Pages|Lines)?|Y|To)?|t(?>op|rike)|i(?>n|zeToContent|debar|gnText)|o(?>me|rt)|u(?>p|b(?>str(?>ing)?)?)|pli(?>ce|t)|e(?>nd|t(?>Re(?>sizable|questHeader)|M(?>i(?>nutes|lliseconds)|onth)|Seconds|Ho(?>tKeys|urs)|Year|Cursor|Time(?>out)?|Interval|ZOptions|Date|UTC(?>M(?>i(?>nutes|lliseconds)|onth)|Seconds|Hours|Date|FullYear)|FullYear|Active)|arch)|qrt|lice|avePreferences|mall)|
+          h(?>ome|andleEvent)|
+          navigate|
+          c(?>har(?>CodeAt|At)|o(?>s|n(?>cat|t(?>ains|extual)|firm)|mpile)|eil|l(?>one|ear(?>Timeout|Interval)?)|a(?>ptureEvents|ll)|reate(?>StyleSheet|Popup|EventObject))|
+          t(?>o(?>GMTString|S(?>tring|ource)|U(?>TCString|pperCase)|Lo(?>caleString|werCase))|est|a(?>n|int(?>Enabled)?))|
+          i(?>s(?>NaN|Finite|Array)|n(?>herit(?>s)?|dexOf)|talics)|
+          d(?>i(?>r|sableExternalCapture)|ump|etachEvent)|
+          u(?>n(?>shift|taint|escape|watch)|pdateCommands)|
+          j(?>oin|avaEnabled)|
+          p(?>o(?>p|w)|ush|lugins.refresh|a(?>ddings|rse(?>Int|Float)?)|r(?>int|ompt|eference))|
+          e(?>scape|nableExternalCapture|v(?>al|ery)|lementFromPoint|x(?>p|ec(?>Script|Command)?|tend))|
+          valueOf|
+          UTC|
+          queryCommand(?>State|Indeterm|Enabled|Value)|
+          f(?>i(?>nd(?>Index)?|l(?>ter|e(?>ModifiedDate|Size|CreatedDate|UpdatedDate))|xed)|o(?>nt(?>size|color)|r(?>ward|Each))|loor|rom(?>CharCode)?)|
+          watch|
+          l(?>ink|o(?>ad|g)|astIndexOf)|
+          a(?>sin|nchor|cos|t(?>tachEvent|ob|an(?>2)?)|pply|lert|b(?>s|ort))|
+          r(?>ou(?>nd|teEvents)|e(?>duce(?>Right)?|size(?>By|To)|calc|turnValue|place|verse|l(?>oad|ease(?>Capture|Events)))|andom)|
+          g(?>o|et(?>ResponseHeader|M(?>i(?>nutes|lliseconds)|onth)|Se(?>conds|lection)|Hours|Year|Time(?>zoneOffset)?|Da(?>y|te)|UTC(?>M(?>i(?>nutes|lliseconds)|onth)|Seconds|Hours|Da(?>y|te)|FullYear)|FullYear|A(?>ttention|llResponseHeaders)))|
+          m(?>ap|in|ove(?>B(?>y|elow)|To(?>Absolute)?|Above)|ergeAttributes|a(?>tch|rgins|x))|
+          b(?>toa|ig|o(?>ld|rderWidths)|link|ack|ind)|
+          of
+        )\b
     - name: support.constant.js #meta.identifier.js
-      match: (?<=\.)\s*[a-zA-Z_$][a-zA-Z0-9_$]*\b
+      match: |
+        (?x)
+        (?<=\.)\s*(?>
+          s(?>ystemLanguage|cr(?>ipts|ollbars|een(?>X|Y|Top|Left))|t(?>yle(?>Sheets)?|atus(?>Text|bar)?)|ibling(?>Below|Above)|ource|uffixes|e(?>curity(?>Policy)?|l(?>ection|f)))|
+          h(?>istory|ost(?>name)?|as(?>h|Focus))|
+          y|
+          X(?>MLDocument|SLDocument)|
+          n(?>ext|ame(?>space(?>s|URI)|Prop))|
+          M(?>IN_VALUE|AX_VALUE)|
+          c(?>haracterSet|o(?>n(?>structor|trollers)|okieEnabled|lorDepth|mp(?>onents|lete))|urrent|puClass|l(?>i(?>p(?>boardData)?|entInformation)|osed|asses)|alle(?>e|r)|rypto)|
+          t(?>o(?>olbar|p)|ext(?>Transform|Indent|Decoration|Align)|ags)|
+          SQRT(?>1_2|2)|
+          i(?>n(?>ner(?>Height|Width)|put)|ds|gnoreCase)|
+          zIndex|
+          o(?>scpu|n(?>readystatechange|Line)|uter(?>Height|Width)|p(?>sProfile|ener)|ffscreenBuffering)|
+          NEGATIVE_INFINITY|
+          d(?>i(?>splay|alog(?>Height|Top|Width|Left|Arguments)|rectories)|e(?>scription|fault(?>Status|Ch(?>ecked|arset)|View)))|
+          u(?>ser(?>Profile|Language|Agent)|n(?>iqueID|defined)|pdateInterval)|
+          _content|
+          p(?>ixelDepth|ort|ersonalbar|kcs11|l(?>ugins|atform)|a(?>thname|dding(?>Right|Bottom|Top|Left)|rent(?>Window|Layer)?|ge(?>X(?>Offset)?|Y(?>Offset)?))|r(?>o(?>to(?>col|type)|duct(?>Sub)?|mpter)|e(?>vious|fix)))|
+          e(?>n(?>coding|abledPlugin)|x(?>ternal|pando)|mbeds)|
+          v(?>isibility|endor(?>Sub)?|Linkcolor)|
+          URLUnencoded|
+          P(?>I|OSITIVE_INFINITY)|
+          f(?>ilename|o(?>nt(?>Size|Family|Weight)|rmName)|rame(?>s|Element)|gColor)|
+          E|
+          whiteSpace|
+          l(?>i(?>stStyleType|n(?>eHeight|kColor))|o(?>ca(?>tion(?>bar)?|lName)|wsrc)|e(?>ngth|ft(?>Context)?)|a(?>st(?>M(?>odified|atch)|Index|Paren)|yer(?>s|X)|nguage))|
+          a(?>pp(?>MinorVersion|Name|Co(?>deName|re)|Version)|vail(?>Height|Top|Width|Left)|ll|r(?>ity|guments)|Linkcolor|bove)|
+          r(?>ight(?>Context)?|e(?>sponse(?>XML|Text)|adyState))|
+          global|
+          x|
+          m(?>imeTypes|ultiline|enubar|argin(?>Right|Bottom|Top|Left))|
+          L(?>N(?>10|2)|OG(?>10E|2E))|
+          b(?>o(?>ttom|rder(?>Width|RightWidth|BottomWidth|Style|Color|TopWidth|LeftWidth))|ufferDepth|elow|ackground(?>Color|Image))
+        )\b
+    - name: entity.name.other-property #entity.name.property #support.constant.js #meta.identifier.js
+      match: (?<=\.)\s*[a-zA-Z_$][a-zA-Z0-9_$]*
     - name: support.class.js #meta.identifier.js
-      match: \b[A-Z_$][a-zA-Z0-9_$]*\b(?=\s*\.)
+      match: (?<![a-zA-Z0-9_$])[A-Z][a-zA-Z0-9_$]*(?=\s*\.)
+    - name: meta.identifier.js #support.class.js
+      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\.)
     - name: meta.identifier.js
-      match: \b[a-zA-Z_$][a-zA-Z0-9_$]*\b(?=\s*\.)
-    - name: meta.identifier.js
-      match: \b[a-zA-Z_$][a-zA-Z0-9_$]*\b
-      
+      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*
 
 # declarations
   class-declaration:
@@ -177,31 +294,66 @@ repository:
       '1': {name: storage.type.class.js}
       '2': {name: support.class.js}
       '3': {name: storage.modifier.js}
-      '4': {name: support.class.js}
+      '4': {name: entity.other.inherited-class} #support.class.js
     end: (?<=})
     patterns:
     - name: meta.class.block.js
       begin: '{'
       end: '}'
       patterns:
-      - name: meta.class.methods.js
-        begin: |
-          (?x)
-          \b(?:(constructor)|([a-zA-Z_$][a-zA-Z0-9_$]*))\s*(?=\([^\)]*\)\s*{)
-        beginCaptures:
-          '1': {name: storage.type.constructor.js}
-          '2': {name: entity.name.function.js}
-        end: (?<=})
-        patterns:
-        - include: '#parameter-declaration'
-        - include: '#statement-group'
+      - include: '#function-declaration'
+      - include: '#shorthand-function'
+
+  shorthand-function: 
+    name: meta.class.methods.js
+    begin: |
+      (?x)
+      (?<![a-zA-Z0-9_$])(?:(constructor)|([a-zA-Z_$][a-zA-Z0-9_$]*))\s*
+      (?=\([^\)]*\)\s*{)
+    beginCaptures:
+      '1': {name: storage.type.constructor.js}
+      '2': {name: entity.name.function.js}
+    end: (?<=})
+    patterns:
+    - include: '#parameter-declaration'
+    - include: '#statement-group'
+
+  shorthand-generator-function:
+    name: meta.function.js
+    begin: |
+      (?x)
+      (\*)\s*
+      ((?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*\s*)?
+      (?=\([^\)]*\)\s*{)
+    beginCaptures:
+      '1': {name: storage.type.function.js}
+      '2': {name: entity.name.function.js}
+    end: (?<=})
+    patterns:
+    - include: '#parameter-declaration'
+    - include: '#statement-group'
+
+  property-function: 
+    name: meta.methods.property.js
+    begin: |
+      (?x)
+      (?<![a-zA-Z0-9_$])(get|set)\s+
+      (?<![a-zA-Z0-9_$])(?>([a-zA-Z_$][a-zA-Z0-9_$]*))\s*
+      (?=\([^\)]*\)\s*{)
+    beginCaptures:
+      '1': {name: storage.type.js}
+      '2': {name: entity.name.function.js}
+    end: (?<=})
+    patterns:
+    - include: '#parameter-declaration'
+    - include: '#statement-group'
   
   function-declaration:
     name: meta.function.js
     begin: |
       (?x)
-      \b(function\b(\*)?)\s*
-      (\b[a-zA-Z_$][a-zA-Z0-9_$]*\s*)?
+      (?<![a-zA-Z0-9_$])(function\b(?!\$)(\*)?)\s*
+      ((?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*\s*)?
       (?=\([^\)]*\)\s*{)
     beginCaptures:
       '1': {name: storage.type.function.js}
@@ -212,7 +364,7 @@ repository:
     - include: '#statement-group'
 
   expression-parentheses:
-    name: meta.parameter.js
+    name: meta.parentheses.js
     begin: \(
     beginCaptures:
       '0': {name: punctuation.parentheses.begin.js}
@@ -222,6 +374,19 @@ repository:
     patterns:
     - include: '#expressions'
 
+  arguments-parentheses:
+    name: meta.arguments.js
+    begin: (?<=[a-zA-Z0-9_$\)\]\}])\s*\(
+    beginCaptures:
+      '0': {name: punctuation.parameters.begin.js}
+    end: \)
+    endCaptures:
+      '0': {name: punctuation.parameters.end.js}
+    patterns:
+    - name: meta.delimiter.object.comma.js
+      match: \,
+    - include: '#expressions'
+    
   parameter-declaration:
     name: meta.parameter.js
     begin: \(
@@ -231,43 +396,180 @@ repository:
     endCaptures:
       '0': {name: punctuation.definition.parameters.end.js}
     patterns:
-    - name: invalid.illegal
-      match: \b(?:super|this|arguments)\b
+    - include: '#reserved-word'
     - name: variable.parameter.function.js
-      match: '[a-zA-Z_$][a-zA-Z0-9_$]*'
+      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*
     - name: meta.delimiter.object.comma.js
-      match: ',[ |\t]*'
+      match: \,[ |\t]*
 
+  property-accessor: 
+    name: meta.accessor.property.js
+    begin: (?<=[a-zA-Z0-9_$\)\]\}])\s*\[
+    beginCaptures:
+      '0': {name: punctuation.accessor.begin.js}
+    end: \]
+    endCaptures:
+      '0': {name: punctuation.accessor.end.js}
+    patterns:
+    - include: '#expressions'
+
+  object-initializer:
+    name: meta.declaration.object.js
+    begin: (?<=[=(:\[,]|return|yield|yield\*|&&|\|\||!|[+\-*\/])\s*(\{)
+    end: \}
+    patterns:
+    - name: meta.object.property.js
+      begin: |
+        (?x)
+        (?:
+          ([0-9]+)|
+          (?:([a-zA-Z_?$][\w?.$]*)|(("|')((?:(?!\4).|(\\\4))*)(\4)))(?=\s*:\s*function(?![a-zA-Z0-9_$]))|
+          (?:([a-zA-Z_?$][\w?.$]*)|(("|')(?:(?!\10).|(\\\10))*(\10)))
+        )\s*(:)
+      beginCaptures:
+        '1':  {name: constant.numeric.js}
+        '2':  {name: entity.name.function.js}
+        '3':  {name: string.quoted.single.js}
+        '4':  {name: punctuation.definition.string.begin.js}
+        '5':  {name: entity.name.function.js}
+        '6':  {name: constant.character.escape.js}
+        '7':  {name: punctuation.definition.string.end.js}
+        '8':  {name: entity.name.property.js}
+        '9':  {name: string.quoted.single.js}
+        '10': {name: punctuation.definition.string.begin.js}
+        '11': {name: constant.character.escape.js}
+        '12': {name: punctuation.definition.string.end.js}
+        '13': {name: punctuation.definition.property.js}
+      end: (,)\s*|(?=})
+      endCaptures:
+        '1': {name: meta.delimiter.object.comma.js}
+      patterns:
+      - include: '#expressions'
+    - name: meta.delimiter.object.comma.js
+      match: \,
+    - include: '#property-function'
+    - include: '#function-declaration'
+    - include: '#shorthand-generator-function'
+    - include: '#shorthand-function'
+
+  regexp:
+    patterns:
+    - name: keyword.other.control.anchors.regexp.js # was entity # was keyword
+      match: \\[bBAZzG]|[$^]
+    - name: string.regexp.set.js
+      begin: \[(\^?\])? # TOCHECK: "[^]]" and "[]]" valid?
+      end: \]
+      patterns:
+      - name: constant.other.posix-bracket.regexp.js
+        match: \[:\^?(?>alnum|alpha|ascii|blank|cntrl|digit|graph|lower|print|punct|space|upper|xdigit|word):\]
+      - include: '#set' # recursive; '$self' would self-include the whole file
+      - include: '#character_class'
+      - include: '#character_property'
+      - include: '#special_escapes'
+      - include: '#escaped_char'
+      - name: constant.other.range.regexp.js
+        match: .-[^\]]
+      - name: keyword.operator.intersection.regexp.js
+        match: (?<!\[)&&(?!\])
+    - name: meta.regexp.group
+      begin: |
+        (?x) ((?#1)\()
+        ((?#2)\?
+          (?:
+           <[=!]
+          |[>=:!]
+          |[imx]{,3}(?:-[imx]{1,3})?(?::(?!\))|(?=\)))
+          |[<']((?#3)\w+)[>']
+          )
+        )?
+      beginCaptures:
+       '1': {name: storage.type.regexp.group.begin}
+       '2': {name: string.regexp constant.other.assertion.regexp}
+       '3': {name: variable.other.regexp}
+      end: \)
+      endCaptures:
+       '0': {name: storage.type.regexp.group.end}
+      patterns:
+      - include: '#regexp'
+    - name: keyword.other.backref.regexp.js
+      match: | # (?<!\|)\g\w+
+        (?x)
+         (\\\d+)
+        |(\\k[<'](-?\d+|\w+([-+]\d+)?)[>'])
+      captures:
+        '1': {name: variable.other.regexp}
+        '2': {name: keyword.other.backref.regexp}
+        '3': {name: variable.other.regexp}
+    - name: support.operator.quantifier.regexp.js # was support # was keyword
+      match: ((?<!\()[?*+][?+]?)|\{\d*(,\d*)?\}
+    - name: keyword.control.character-class.regexp.js
+      match: \\[wWsSdDhH]|\.
+    - name: constant.character.escape.special.regexp.js
+      match: |
+        (?x)\\
+        ([tvnrbfae]   (?# general chars)
+        |[0-8]{3}     (?# octal)
+        |x\h\h        (?# hexadecimal)
+        |x\{7\h{7}\}  (?# wide hexadecimal)
+        |c\d+         (?# control char)
+        |M-(\\C-)?\d+ (?# meta control char)
+        |C-\d+        (?# control char 2)
+        )
+    - name: constant.character.escape.general.regexp.js #constant.character.escape.js
+      match: \\.
+    - name: meta.regexp.other.js
+      match: .
+
+# keywords: 
   keywords:
     patterns:
     - name: keyword.operator.js
-      match: \b(delete|in|instanceof|new|typeof|void|with)\b
+      match: \b(?>delete|new|typeof|void|with)(?![a-zA-Z0-9_$])
     - name: keyword.operator.js
-      match: '!|%|&|\*|(?<![=(:\[,]|^|return|yield|yield\*|&&|\|\||!)\/|\-\-|\-|\+\+|\+|~|===|==|=|!=|!==|<=|>=|<<=|>>=|>>>=|<>|<|>|!|&&|\|\||\?|\:|\*=|(?<!\()/=|%=|\+=|\-=|&=|\^=|\b(in|instanceof)\b'
+      match: '!|%|&|\*|(?<![=(:\[,]|^|return|yield|yield\*|&&|\|\||!)\/|\-\-|\-|\+\+|\+|~|===|==|=|!=|!==|<=|>=|<<=|>>=|>>>=|<>|<|>|!|&&|\|\||\?|\:|\*=|(?<!\()/=|%=|\+=|\-=|&=|\^=|\b(?>in(?>stanceof)?)(?![a-zA-Z0-9_$])'
     - name: storage.type.js
-      match: \b(boolean|byte|char|class|double|enum|float|function|int|interface|long|short|var|void)\b
+      match: \b(?>boolean|byte|char|class|double|enum|float|function|int(?>erface)?|long|short|var|void)(?![a-zA-Z0-9_$])
     - name: storage.modifier.js
-      match: \b(const|export|extends|final|implements|native|private|protected|public|static|synchronized|throws|transient|volatile)\b
+      match: \b(?>const|export|extends|final|implements|native|private|protected|public|static|synchronized|throws|transient|volatile)(?![a-zA-Z0-9_$])
     - name: keyword.control.js
-      match: \b(break|case|catch|continue|default|do|else|finally|for|goto|if|import|package|return|switch|throw|try|while|yield|yield\*)\b
+      match: \b(?>break|case|catch|continue|default|do|else|finally|for|goto|if|import|package|return|switch|throw|try|while|yield(?>\*)?)(?![a-zA-Z0-9_$])
     - name: variable.language.js
-      match: \b(super|this|arguments|self)\b
+      match: \b(?>super|this|arguments|self)(?![a-zA-Z0-9_$])
     - name: constant.language.boolean.true.js
-      match: \btrue\b
+      match: \btrue(?![a-zA-Z0-9_$])
     - name: constant.language.boolean.false.js
-      match: \bfalse\b
+      match: \bfalse(?![a-zA-Z0-9_$])
     - name: constant.language.null.js
-      match: \bnull\b
+      match: \bnull(?![a-zA-Z0-9_$])
+
+  reserved-word:
+    name: meta.invalid #invalid.illegal
+    match: |
+      (?x)
+      \b(?>
+        await|break|case|catch|class|const|continue|debugger|default|delete|do|else|enum|export|extends|false|finally|for|function|let|if|implements|import|in(?>stanceof|terface)?|new|null|private|protected|package|public|static|
+        return|super|switch|this|throw(?>s)?|true|try|typeof|var|void|while|with|yield(?>\*)?
+      )(?![a-zA-Z0-9_$]) # abstract|boolean|byte|char|double|final|float|goto|int|long|native|short|synchronized|transient|volatile|
 
   numeric:
     patterns:
-    - name: constant.numeric.js
-      match: '(?<![a-zA-Z0-9_$])\.[0-9]+\b'
-    - name: constant.numeric.js
-      match: \b(?<!\.)[0-9]+\.(?:[0-9]|([a-zA-Z_$][a-zA-Z0-9_$]*)?)
+    - name: constant.numeric.js # like .01
+      match: (?<![a-zA-Z0-9_$])\.[0-9]+\b
+    - name: constant.numeric.js # like 10.01px
+      match: \b(?<!\.)[0-9]+\.(?:[0-9]*([a-zA-Z_$][a-zA-Z0-9_$]*)?)
+      captures:
+        '1': {name: invalid.illegal}
+    - name: constant.numeric.octal.js
+      match: \b(?<!\.)(?>0(?>o|O|(?![bBxX]))[0-7]*(?![0-9]+))([a-zA-Z8-9_$][a-zA-Z0-9_$]*)?
+      captures:
+        '1': {name: invalid.illegal}
+    - name: constant.numeric.binary.js
+      match: \b(?<!\.)(?>0(?>b|B)[0-1]+)([a-zA-Z2-9_$][a-zA-Z0-9_$]*)?
       captures:
         '1': {name: invalid.illegal}
     - name: constant.numeric.js
-      match: '\b(?<!\.)((0(x|X)[0-9a-fA-F]+)|([0-9]+(\.[0-9]+)?))\b'
+      match: \b(?<!\.)(?>(?>0(?>x|X)[0-9a-fA-F]+)|(?>[0-9]+))([a-zA-Z_$][a-zA-Z0-9_$]*)? # (\.[0-9]+)?
+      captures:
+        '1': {name: invalid.illegal}
 
 ...
