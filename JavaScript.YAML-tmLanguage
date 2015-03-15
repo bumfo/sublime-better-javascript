@@ -1,0 +1,734 @@
+comment: 'JavaScript Syntax: version 2.0'
+fileTypes: []
+firstLineMatch: ^#!/usr/bin/env node
+foldingStartMarker: ^.*\bfunction\s*(\w+\s*)?\([^\)]*\)(\s*\{[^\}]*)?\s*$
+foldingStopMarker: ^\s*\}
+keyEquivalent: ^~J
+name: JavaScript
+patterns:
+- include: '#statements'
+repository:
+  arguments:
+    begin: \(
+    beginCaptures:
+      '0':
+        name: punctuation.parameters.begin.js
+    comment: Arguments
+    end: \)
+    endCaptures:
+      '0':
+        name: punctuation.parameters.end.js
+    name: meta.arguments
+    patterns:
+    - include: '#comma-delimiter'
+    - include: '#expressions'
+  call-expression:
+    patterns:
+    - include: '#function-expressions'
+    - include: '#primary-expressions'
+    - include: '#identifier-accessor'
+    - begin: (?=[\[\(\{])
+      end: (?![\[\(.])
+      name: meta.expression.member
+      patterns:
+      - begin: (?<![\}\]\)]|["'])\[
+        beginCaptures:
+          '0':
+            name: punctuation.definition.array.begin.js
+        comment: Array Literals
+        end: \]
+        endCaptures:
+          '0':
+            name: punctuation.definition.array.end.js
+        name: meta.brace.square.js
+        patterns:
+        - include: '#comma-delimiter'
+        - include: '#expressions'
+      - begin: (?<![\}\]\)]|["'])\(
+        beginCaptures:
+          '0':
+            name: punctuation.parentheses.begin.js
+        comment: Primary Expressions of Expressions
+        end: \)
+        endCaptures:
+          '0':
+            name: punctuation.parentheses.end.js
+        name: meta.brace.round.js
+        patterns:
+        - include: '#expressions'
+      - include: '#object-literal-expression'
+      - include: '#identifier-accessor'
+      - include: '#member-accessor'
+  comma-delimiter:
+    match: ',[ |\t]*'
+    name: meta.delimiter.object.comma.js
+  comments:
+    patterns:
+    - comment: node.js shebang
+      match: ^#!/usr/bin/env node
+      name: comment.line.js
+    - begin: /\*\*(?!/)
+      captures:
+        '0':
+          name: punctuation.definition.comment.js
+      end: \*/
+      name: comment.block.documentation.js
+    - begin: /\*
+      captures:
+        '0':
+          name: punctuation.definition.comment.js
+      end: \*/
+      name: comment.block.js
+    - captures:
+        '1':
+          name: punctuation.definition.comment.js
+      match: (//).*$\n?
+      name: comment.line.double-slash.js
+    - captures:
+        '1':
+          name: punctuation.definition.comment.js
+      match: ^(#!\/).*$\n?
+      name: comment.line.double-slash.js
+    - captures:
+        '0':
+          name: punctuation.definition.comment.html.js
+        '2':
+          name: punctuation.definition.comment.html.js
+      match: (<!--|-->)
+      name: comment.block.html.js
+  expressions:
+    patterns:
+    - include: '#comments'
+    - begin: (?<!=)((?:\+\+|--|\+|-|~|!)|(?:delete|void|typeof)(?=\b))(?!=)
+      beginCaptures:
+        '1':
+          name: keyword.operator.unary.js
+      end: (?=[=\)\]},;]|$)
+      patterns:
+      - include: '#expressions'
+    - begin: (?<!=)(==|===|!=|!==)(?!=)
+      beginCaptures:
+        '1':
+          name: keyword.operator.equality.js
+      end: (?=[=\)\]},;]|$)
+      patterns:
+      - include: '#expressions'
+    - begin: (?<!=)(=|\*=|/=|%=|\+=|-=|<<=|>>=|>>>=|&=|^=|\|=)(?!=)
+      beginCaptures:
+        '1':
+          name: keyword.operator.assignment.js
+      end: (?=[=\)\]},;]|$)
+      patterns:
+      - include: '#expressions'
+    - begin: (&&|\|\|)\s*
+      beginCaptures:
+        '1':
+          name: keyword.operator.logical.js
+      end: (?=[=\)\]},;])|(?<!,|\*/|^)\n
+      name: meta.other.logical
+      patterns:
+      - match: (?<=,|\*/|^)\s+
+        name: meta.whitespace.js
+      - include: '#expressions'
+    - match: '!|%|&|\*|(?<![=(:\[,]|^|return|&&|\|\||!)\/|\-\-|\-|\+\+|\+|~|===|==|=|!=|!==|<=|>=|<<=|>>=|>>>=|<>|<|>|!|&&|\|\||\?|\:|\*=|(?<!\()/=|%=|\+=|\-=|&=|\^=|\b(in|instanceof)\b'
+      name: keyword.operator.js
+    - include: '#lefthandside-expressions'
+    - begin: (,)\s*
+      beginCaptures:
+        '1':
+          name: keyword.operator.comma.js
+      end: (?=[=\)\]},;])|(?<!,|\*/|^)\n
+      name: meta.other.comma.js
+      patterns:
+      - match: (?<=,|\*/|^)\s+
+        name: meta.whitespace.js
+      - include: '#expressions'
+  function-expressions:
+    patterns:
+    - begin: (?=[()a-zA-Z0-9_$\s,]+=>)(?:([a-zA-Z_$][a-zA-Z0-9_$]*)|(\()([a-zA-Z0-9_$\s,]*)(\)))(\s*=>)
+      beginCaptures:
+        '1':
+          name: variable.parameter.function.arrow.js
+        '2':
+          name: punctuation.definition.parameters.begin.js
+        '3':
+          name: variable.parameter.function.arrow.js
+        '4':
+          name: punctuation.definition.parameters.end.js
+        '5':
+          name: punctuation.definition.function.js
+      end: (?<=})|(?=[\)\]},;]|$)
+      name: meta.function.arrow.js
+      patterns:
+      - include: '#statement-group'
+      - include: '#expressions'
+    - begin: \b(function\b)\s*([a-zA-Z_$][a-zA-Z0-9_$]*)?\s*(\()(.*?)(\))\s*(?={)
+      beginCaptures:
+        '1':
+          name: storage.type.function.js
+        '2':
+          name: entity.name.function.js
+        '3':
+          name: punctuation.definition.parameters.begin.js
+        '4':
+          name: variable.parameter.function.js
+        '5':
+          name: punctuation.definition.parameters.end.js
+      comment: "match regular function like: function myFunc(arg) { \u2026 }"
+      end: (?<=})
+      name: meta.function.expression.js
+      patterns:
+      - include: '#statement-group'
+  highlight-identifiers:
+    patterns:
+    - match: \b(Infinity|NaN|undefined)\b
+      name: constant.language.js
+    - match: \b(console)\b
+      name: entity.name.type.object.js.firebug
+    - match: (?<=\.)(warn|info|log|error|time|timeEnd|assert)\b
+      name: support.function.js.firebug
+    - match: \b(debugger)\b
+      name: keyword.other.js
+    - match: \b(Anchor|Applet|Area|Array|Boolean|Button|Checkbox|Date|document|event|FileUpload|Form|Frame|Function|Hidden|History|Image|JavaArray|JavaClass|JavaObject|JavaPackage|java|Layer|Link|Location|Math|MimeType|Number|navigator|netscape|Object|Option|Packages|Password|Plugin|Promise|Radio|RegExp|Reset|Select|String|Style|Submit|screen|sun|Text|Textarea|window|XMLHttpRequest|Vector|Initiable|Body|Mortal|Gun|Projectile|Vehicle|Missile)\b
+      name: support.class.js
+    - match: "(?x)\\b(\n\t\t\t\t\t\ts(h(ift|ow(Mod(elessDialog|alDialog)|Help))|croll(X|By(Pages|Lines)?|Y|To)?|t(op|rike)|i(n|zeToContent|debar|gnText)|o(me|rt)|u(p|b(str(ing)?)?)|pli(ce|t)|e(nd|t(Re(sizable|questHeader)|M(i(nutes|lliseconds)|onth)|Seconds|Ho(tKeys|urs)|Year|Cursor|Time(out)?|Interval|ZOptions|Date|UTC(M(i(nutes|lliseconds)|onth)|Seconds|Hours|Date|FullYear)|FullYear|Active)|arch)|qrt|lice|avePreferences|mall)|\n\
+        \t\t\t\t\t\th(ome|andleEvent)|\n\t\t\t\t\t\tnavigate|\n\t\t\t\t\t\tc(har(CodeAt|At)|o(s|n(cat|t(ains|extual)|firm)|mpile)|eil|l(one|ear(Timeout|Interval)?)|a(ptureEvents|ll)|reate(StyleSheet|Popup|EventObject))|\n\
+        \t\t\t\t\t\tt(o(GMTString|S(tring|ource)|U(TCString|pperCase)|Lo(caleString|werCase))|est|a(n|int(Enabled)?))|\n\
+        \t\t\t\t\t\ti(s(NaN|Finite|Array)|n(herit(s)?|dexOf)|talics)|\n\t\t\t\t\t\t\
+        d(i(r|sableExternalCapture)|ump|etachEvent)|\n\t\t\t\t\t\tu(n(shift|taint|escape|watch)|pdateCommands)|\n\
+        \t\t\t\t\t\tj(oin|avaEnabled)|\n\t\t\t\t\t\tp(o(p|w)|ush|lugins.refresh|a(ddings|rse(Int|Float)?)|r(int|ompt|eference))|\n\
+        \t\t\t\t\t\te(scape|nableExternalCapture|v(al|ery)|lementFromPoint|x(p|ec(Script|Command)?|tend))|\n\
+        \t\t\t\t\t\tvalueOf|\n\t\t\t\t\t\tUTC|\n\t\t\t\t\t\tqueryCommand(State|Indeterm|Enabled|Value)|\n\
+        \t\t\t\t\t\tf(i(nd(Index)?|l(ter|e(ModifiedDate|Size|CreatedDate|UpdatedDate))|xed)|o(nt(size|color)|r(ward|Each))|loor|rom(CharCode)?)|\n\
+        \t\t\t\t\t\twatch|\n\t\t\t\t\t\tl(ink|o(ad|g)|astIndexOf)|\n\t\t\t\t\t\ta(sin|nchor|cos|t(tachEvent|ob|an(2)?)|pply|lert|b(s|ort))|\n\
+        \t\t\t\t\t\tr(ou(nd|teEvents)|e(duce(Right)?|size(By|To)|calc|turnValue|place|verse|l(oad|ease(Capture|Events)))|andom)|\n\
+        \t\t\t\t\t\tg(o|et(ResponseHeader|M(i(nutes|lliseconds)|onth)|Se(conds|lection)|Hours|Year|Time(zoneOffset)?|Da(y|te)|UTC(M(i(nutes|lliseconds)|onth)|Seconds|Hours|Da(y|te)|FullYear)|FullYear|A(ttention|llResponseHeaders)))|\n\
+        \t\t\t\t\t\tm(ap|in|ove(B(y|elow)|To(Absolute)?|Above)|ergeAttributes|a(tch|rgins|x))|\n\
+        \t\t\t\t\t\tb(toa|ig|o(ld|rderWidths)|link|ack|ind)|\n\t\t\t\t\t\tof\n\t\t\
+        \t\t\t)\\b(?=\\()"
+      name: support.function.js
+    - match: "(?x)\\b(\n\t\t\t\t\t\tcreate|\n\t\t\t\t\t\tclone(Extend)?|\n\t\t\t\t\
+        \t\tkeys|\n\t\t\t\t\t\tget(\n\t\t\t\t\t\t\tPrototypeOf|\n\t\t\t\t\t\t\tOwn(\n\
+        \t\t\t\t\t\t\t\tPropertyNames|\n\t\t\t\t\t\t\t\tPropertyDescriptor\n\t\t\t\
+        \t\t\t\t)\n\t\t\t\t\t\t)|\n\t\t\t\t\t\tset(\n\t\t\t\t\t\t\tPrototypeOf\n\t\
+        \t\t\t\t\t)|\n\t\t\t\t\t\tdefine(\n\t\t\t\t\t\t\tProperty|\n\t\t\t\t\t\t\t\
+        Properties\n\t\t\t\t\t\t)|\n\t\t\t\t\t\tis(\n\t\t\t\t\t\t\tExtensible|\n\t\
+        \t\t\t\t\t\tFrozen|\n\t\t\t\t\t\t\tSealed|\n\t\t\t\t\t\t\tPrototypeOf\n\t\t\
+        \t\t\t\t)?|\n\t\t\t\t\t\tfreeze|\n\t\t\t\t\t\tpreventExtensions|\n\t\t\t\t\
+        \t\tseal|\n\t\t\t\t\t\thas(\n\t\t\t\t\t\t\tOwnProperty\n\t\t\t\t\t\t)|\n\t\
+        \t\t\t\t\tpropertyIsEnumerable|\n\t\t\t\t\t\ton|emit|\n\t\t\t\t\t\tdirect(s)?|\n\
+        \t\t\t\t\t\tdelete|\n\t\t\t\t\t\tentries|\n\t\t\t\t\t\tvalues|\n\t\t\t\t\t\
+        \thas|\n\t\t\t\t\t\tnext|\n\t\t\t\t\t\trequire|\n\t\t\t\t\t\tnegative|add|subtract|multiply|divide|dot|cross|equals|square|normalize|\n\
+        \t\t\t\t\t\tangleTo|angleBy|angleBetween|distance|distanceSq|distanceTo|axisX|unit|mix|\n\
+        \t\t\t\t\t\texplode|update|draw\n\t\t\t\t\t)\\b(?=\\()"
+      name: support.function.object.js
+    - match: "(?x)(?<=\\.)(\n\t\t\t\t\t\tsuper|square|angle|min|max|verticalAngle|horizontalAngle|\n\
+        \t\t\t\t\t\tspeed|velocity|pos|acceleration|heading|fraction|friction|mass\n\
+        \t\t\t\t\t)\\b"
+      name: support.constant.object.js
+    - match: "(?x)\\b(\n\t\t\t\t\t\tbeginPath|endPath|arc|fillText|stroke|fill|scale\n\
+        \t\t\t\t\t)\\b(?=\\()"
+      name: support.function.canvas.js
+    - match: "(?x)(?<=\\.)(\n\t\t\t\t\t\tlineWidth|strokeStyle|fillStyle|font|globalAlpha\n\
+        \t\t\t\t\t)\\b"
+      name: support.constant.canvas.js
+    - match: "(?x)\\b(\n\t\t\t\t\t\ts(ub(stringData|mit)|plitText|e(t(NamedItem|Attribute(Node)?)|lect)|top(Propagation|ImmediatePropagation))|\n\
+        \t\t\t\t\t\thas(ChildNodes|Feature)|\n\t\t\t\t\t\tnamedItem|\n\t\t\t\t\t\t\
+        c(l(earRect|ick|o(se|neNode))|reate(C(omment|DATASection|aption)|T(Head|extNode|Foot)|DocumentFragment|ProcessingInstruction|E(ntityReference|lement)|Attribute))|\n\
+        \t\t\t\t\t\ttabIndex|\n\t\t\t\t\t\ti(nsert(Row|Before|Cell|Data)|tem)|\n\t\
+        \t\t\t\t\topen|\n\t\t\t\t\t\tdelete(Row|C(ell|aption)|T(Head|Foot)|Data)|\n\
+        \t\t\t\t\t\tf(illRect|ocus)|\n\t\t\t\t\t\twrite(ln)?|\n\t\t\t\t\t\ta(dd(EventListener)?|ppend(Child|Data))|\n\
+        \t\t\t\t\t\tre(set|place(Child|Data)|move(NamedItem|Child|Attribute(Node)?|EventListener)?|questAnimationFrame)|\n\
+        \t\t\t\t\t\tget(Context|NamedItem|Element(sBy(Name|TagName)|ById)|Attribute(Node)?)|\n\
+        \t\t\t\t\t\tblur|\n\t\t\t\t\t\tquerySelector|\n\t\t\t\t\t\tpreventDefault\n\
+        \t\t\t\t\t)\\b(?=\\()"
+      name: support.function.dom.js
+    - match: "(?x)(?<=\\.)(\n\t\t\t\t\t\ts(ystemLanguage|cr(ipts|ollbars|een(X|Y|Top|Left))|t(yle(Sheets)?|atus(Text|bar)?)|ibling(Below|Above)|ource|uffixes|e(curity(Policy)?|l(ection|f)))|\n\
+        \t\t\t\t\t\th(istory|ost(name)?|as(h|Focus))|\n\t\t\t\t\t\ty|\n\t\t\t\t\t\t\
+        X(MLDocument|SLDocument)|\n\t\t\t\t\t\tn(ext|ame(space(s|URI)|Prop))|\n\t\t\
+        \t\t\t\tM(IN_VALUE|AX_VALUE)|\n\t\t\t\t\t\tc(haracterSet|o(n(structor|trollers)|okieEnabled|lorDepth|mp(onents|lete))|urrent|puClass|l(i(p(boardData)?|entInformation)|osed|asses)|alle(e|r)|rypto)|\n\
+        \t\t\t\t\t\tt(o(olbar|p)|ext(Transform|Indent|Decoration|Align)|ags)|\n\t\t\
+        \t\t\t\tSQRT(1_2|2)|\n\t\t\t\t\t\ti(n(ner(Height|Width)|put)|ds|gnoreCase)|\n\
+        \t\t\t\t\t\tzIndex|\n\t\t\t\t\t\to(scpu|n(readystatechange|Line)|uter(Height|Width)|p(sProfile|ener)|ffscreenBuffering)|\n\
+        \t\t\t\t\t\tNEGATIVE_INFINITY|\n\t\t\t\t\t\td(i(splay|alog(Height|Top|Width|Left|Arguments)|rectories)|e(scription|fault(Status|Ch(ecked|arset)|View)))|\n\
+        \t\t\t\t\t\tu(ser(Profile|Language|Agent)|n(iqueID|defined)|pdateInterval)|\n\
+        \t\t\t\t\t\t_content|\n\t\t\t\t\t\tp(ixelDepth|ort|ersonalbar|kcs11|l(ugins|atform)|a(thname|dding(Right|Bottom|Top|Left)|rent(Window|Layer)?|ge(X(Offset)?|Y(Offset)?))|r(o(to(col|type)|duct(Sub)?|mpter)|e(vious|fix)))|\n\
+        \t\t\t\t\t\te(n(coding|abledPlugin)|x(ternal|pando)|mbeds)|\n\t\t\t\t\t\t\
+        v(isibility|endor(Sub)?|Linkcolor)|\n\t\t\t\t\t\tURLUnencoded|\n\t\t\t\t\t\
+        \tP(I|OSITIVE_INFINITY)|\n\t\t\t\t\t\tf(ilename|o(nt(Size|Family|Weight)|rmName)|rame(s|Element)|gColor)|\n\
+        \t\t\t\t\t\tE|\n\t\t\t\t\t\twhiteSpace|\n\t\t\t\t\t\tl(i(stStyleType|n(eHeight|kColor))|o(ca(tion(bar)?|lName)|wsrc)|e(ngth|ft(Context)?)|a(st(M(odified|atch)|Index|Paren)|yer(s|X)|nguage))|\n\
+        \t\t\t\t\t\ta(pp(MinorVersion|Name|Co(deName|re)|Version)|vail(Height|Top|Width|Left)|ll|r(ity|guments)|Linkcolor|bove)|\n\
+        \t\t\t\t\t\tr(ight(Context)?|e(sponse(XML|Text)|adyState))|\n\t\t\t\t\t\t\
+        global|\n\t\t\t\t\t\tx|\n\t\t\t\t\t\tm(imeTypes|ultiline|enubar|argin(Right|Bottom|Top|Left))|\n\
+        \t\t\t\t\t\tL(N(10|2)|OG(10E|2E))|\n\t\t\t\t\t\tb(o(ttom|rder(Width|RightWidth|BottomWidth|Style|Color|TopWidth|LeftWidth))|ufferDepth|elow|ackground(Color|Image))\n\
+        \t\t\t\t\t)\\b"
+      name: support.constant.js
+    - match: "(?x)(?<=\\.)(\n\t\t\t\t\t\ts(hape|ystemId|c(heme|ope|rolling)|ta(ndby|rt)|ize|ummary|pecified|e(ctionRowIndex|lect(ion(Start|End)|ed(Index)?))|rc)|\n\
+        \t\t\t\t\t\th(space|t(tpEquiv|mlFor)|e(ight|aders)|ref(lang)?)|\n\t\t\t\t\t\
+        \tn(o(Resize|tation(s|Name)|Shade|Href|de(Name|Type|Value)|Wrap)|extSibling|ame)|\n\
+        \t\t\t\t\t\tc(h(ildNodes|Off|ecked|arset)?|ite|o(ntent|o(kie|rds)|de(Base|Type)?|l(s|Span|or)|mpact)|ell(s|Spacing|Padding)|l(ear|assName)|aption)|\n\
+        \t\t\t\t\t\tt(ype|Bodies|itle|Head|ext|a(rget|gName)|Foot)|\n\t\t\t\t\t\t\
+        i(sMap|ndex|d|m(plementation|ages))|\n\t\t\t\t\t\to(ptions|wnerDocument|bject)|\n\
+        \t\t\t\t\t\td(i(sabled|r)|o(c(type|umentElement)|main)|e(clare|f(er|ault(Selected|Checked|Value)))|at(eTime|a))|\n\
+        \t\t\t\t\t\tuseMap|\n\t\t\t\t\t\tp(ublicId|arentNode|r(o(file|mpt)|eviousSibling))|\n\
+        \t\t\t\t\t\te(n(ctype|tities)|vent|lements)|\n\t\t\t\t\t\tv(space|ersion|alue(Type)?|Link|Align)|\n\
+        \t\t\t\t\t\tURL|\n\t\t\t\t\t\tf(irstChild|orm(s)?|ace|rame(Border)?)|\n\t\t\
+        \t\t\t\twidth|\n\t\t\t\t\t\tl(ink(s)?|o(ngDesc|wSrc)|a(stChild|ng|bel))|\n\
+        \t\t\t\t\t\ta(nchors|c(ce(ssKey|pt(Charset)?)|tion)|ttributes|pplets|l(t|ign)|r(chive|eas)|xis|Link|bbr)|\n\
+        \t\t\t\t\t\tr(ow(s|Span|Index)|ules|e(v|ferrer|l|adOnly))|\n\t\t\t\t\t\tm(ultiple|e(thod|dia)|a(rgin(Height|Width)|xLength))|\n\
+        \t\t\t\t\t\tb(o(dy|rder)|ackground|gColor)\n\t\t\t\t\t)\\b"
+      name: support.constant.dom.js
+    - match: "(?x)(?<=\\.)(\n\t\t\t\t\t\tkey|\n\t\t\t\t\t\tview|\n\t\t\t\t\t\tget|set\n\
+        \t\t\t\t\t)\\b"
+      name: support.constant.other.js
+    - match: \b(ELEMENT_NODE|ATTRIBUTE_NODE|TEXT_NODE|CDATA_SECTION_NODE|ENTITY_REFERENCE_NODE|ENTITY_NODE|PROCESSING_INSTRUCTION_NODE|COMMENT_NODE|DOCUMENT_NODE|DOCUMENT_TYPE_NODE|DOCUMENT_FRAGMENT_NODE|NOTATION_NODE|INDEX_SIZE_ERR|DOMSTRING_SIZE_ERR|HIERARCHY_REQUEST_ERR|WRONG_DOCUMENT_ERR|INVALID_CHARACTER_ERR|NO_DATA_ALLOWED_ERR|NO_MODIFICATION_ALLOWED_ERR|NOT_FOUND_ERR|NOT_SUPPORTED_ERR|INUSE_ATTRIBUTE_ERR)\b
+      name: support.constant.dom.js
+    - match: "(?x)\\b\n\t\t\t\t\t\ton(\n\t\t\t\t\t\t\tR(ow(s(inserted|delete)|e(nter|xit))|e(s(ize(start|end)?|et)|adystatechange))|\n\
+        \t\t\t\t\t\t\tMouse(o(ut|ver)|down|up|move)|\n\t\t\t\t\t\t\tB(efore(cut|deactivate|u(nload|pdate)|p(aste|rint)|editfocus|activate)|lur)|\n\
+        \t\t\t\t\t\t\tS(croll|top|ubmit|elect(start|ionchange)?)|\n\t\t\t\t\t\t\t\
+        H(over|elp)|\n\t\t\t\t\t\t\tC(hange|ont(extmenu|rolselect)|ut|ellchange|l(ick|ose))|\n\
+        \t\t\t\t\t\t\tD(eactivate|ata(setc(hanged|omplete)|available)|r(op|ag(start|over|drop|en(ter|d)|leave)?)|blclick)|\n\
+        \t\t\t\t\t\t\tUnload|\n\t\t\t\t\t\t\tP(aste|ropertychange)|\n\t\t\t\t\t\t\t\
+        Error(update)?|\n\t\t\t\t\t\t\tKey(down|up|press)|\n\t\t\t\t\t\t\tFocus|\n\
+        \t\t\t\t\t\t\tLoad|\n\t\t\t\t\t\t\tA(ctivate|fter(update|print)|bort)\n\t\t\
+        \t\t\t\t)\n\t\t\t\t\t\\b"
+      name: support.function.event-handler.js
+  identifier-accessor:
+    begin: (?=[a-zA-Z_$]|\.[a-zA-Z_$])
+    end: (?![\[\(.])
+    name: meta.expression.member
+    patterns:
+    - match: \b(super|this|arguments|self)\b
+      name: variable.language.js
+    - match: \btrue\b
+      name: constant.language.boolean.true.js
+    - match: \bfalse\b
+      name: constant.language.boolean.false.js
+    - match: \bnull\b
+      name: constant.language.null.js
+    - begin: "(?x)\n\t\t\t\t\t\t(?=\n\t\t\t\t\t\t\t[a-zA-Z_$][a-zA-Z0-9_$]*\n\t\t\t\
+        \t\t\t\t(\\.[a-zA-Z_$][a-zA-Z0-9_$]*)*?\n\t\t\t\t\t\t\t(?:\\.prototype\\b\n\
+        \t\t\t\t\t\t\t\t(?!\\s*=\\s*function\\b)\n\t\t\t\t\t\t\t)\n\t\t\t\t\t\t)|\n\
+        \t\t\t\t\t\t(?<![\\.a-zA-Z0-9_$])(?=\n\t\t\t\t\t\t\t[a-zA-Z_$][a-zA-Z0-9_$]*\n\
+        \t\t\t\t\t\t\t(\\.[a-zA-Z_$][a-zA-Z0-9_$]*)+?\n\t\t\t\t\t\t\t(?=\\s*=\\s*function\\\
+        b)\n\t\t\t\t\t\t)\n\t\t\t\t\t"
+      end: (\.)(?=prototype\b)|$|(?=(\.[a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*function\b)
+      endCaptures:
+        '1':
+          name: meta.delimiter.method.period.js
+      patterns:
+      - captures:
+          '1':
+            name: meta.delimiter.method.period.js
+          '2':
+            name: support.class.js
+        match: (\.)?([a-zA-Z_$][a-zA-Z0-9_$]*)
+    - captures:
+        '1':
+          name: meta.delimiter.method.period.js
+        '2':
+          name: entity.name.function.js
+      match: (\.)?([a-zA-Z_$][a-zA-Z0-9_$]*)\s*(?==\s*function\b)
+    - begin: (Obj)(\.)(of)(?=\()
+      beginCaptures:
+        '1':
+          name: meta.support.js
+        '2':
+          name: meta.delimiter.method.period.js
+        '3':
+          name: support.function.js
+      end: (?<=\))
+      patterns:
+      - begin: \(
+        beginCaptures:
+          '0':
+            name: punctuation.parameters.begin.js
+        comment: Arguments
+        end: \)
+        endCaptures:
+          '0':
+            name: punctuation.parameters.end.js
+        name: meta.arguments
+        patterns:
+        - match: (?<=Obj\.of\()([a-zA-Z_$][a-zA-Z0-9_$]*)
+          name: entity.name.type.instance.js
+        - include: '#comma-delimiter'
+        - include: '#expressions'
+    - include: '#highlight-identifiers'
+    - match: '[a-zA-Z_$][a-zA-Z0-9_$]*'
+      name: meta.identifier
+    - include: '#member-accessor'
+  lefthandside-expressions:
+    patterns:
+    - begin: (new)\s+((?!(?:function|new)\b)\w+(?:\.\w*)?)
+      beginCaptures:
+        '1':
+          name: keyword.operator.new.js
+        '2':
+          name: entity.name.type.instance.js
+      end: (?<=[a-zA-Z0-9_$])(?!\()|(?<=[\)])|$
+      patterns:
+      - include: '#arguments'
+    - match: \b(new)\b
+      name: keyword.operator.new.js
+    - include: '#call-expression'
+  member-accessor:
+    patterns:
+    - begin: (?=\.[a-zA-Z_$])
+      end: (?<!\.)
+      name: meta.accessor.member
+      patterns:
+      - captures:
+          '1':
+            name: meta.delimiter.method.period.js
+          '2':
+            name: entity.name.function.js
+        match: (\.)?([a-zA-Z_$][a-zA-Z0-9_$]*)\s*(?==\s*function\b)
+      - include: '#highlight-identifiers'
+      - match: \.
+        name: meta.delimiter.method.period.js
+      - match: (?<=\.)[a-zA-Z_$][a-zA-Z0-9_$]*
+        name: meta.identifier
+    - match: \.(?![0-9])
+      name: meta.delimiter.method.period.js
+    - begin: \[
+      beginCaptures:
+        '0':
+          name: punctuation.array.begin.js
+      comment: Member Expressions
+      end: \]
+      endCaptures:
+        '0':
+          name: punctuation.array.begin.js
+      name: meta.accessor.member
+      patterns:
+      - include: '#expressions'
+    - include: '#arguments'
+  object-literal-expression:
+    patterns:
+    - begin: '{'
+      beginCaptures:
+        '0':
+          name: punctuation.definition.object.begin.js
+      comment: Object Literal
+      end: '}'
+      endCaptures:
+        '0':
+          name: punctuation.definition.object.end.js
+      name: meta.object.js
+      patterns:
+      - begin: (get|set)\s+([a-zA-Z_?$][\w?.$]*)\s*(\()(.*?)(\))\s*({)
+        beginCaptures:
+          '1':
+            name: storage.type.function.js
+          '2':
+            name: entity.name.property.js
+          '3':
+            name: punctuation.definition.parameters.begin.js
+          '4':
+            name: variable.parameter.function.js
+          '5':
+            name: punctuation.definition.parameters.end.js
+          '6':
+            name: punctuation.definition.statementgroup.begin.js
+        end: '}'
+        endCaptures:
+          '0':
+            name: punctuation.definition.statementgroup.end.js
+        name: meta.object.property.js
+        patterns:
+        - include: '#statements'
+      - include: '#comments'
+      - begin: (?:([0-9]+)|(?:([a-zA-Z_?$][\w?.$]*)|(("|')((?:(?!\4).|\\\4)*)(\4)))(?=\s*:\s*function\b)|(?:([a-zA-Z_?$][\w?.$]*)|(("|')(?:(?!\9).|\\\4)*(\9))))\s*(:)
+        beginCaptures:
+          '1':
+            name: constant.numeric.js
+          '10':
+            name: punctuation.definition.string.end.js
+          '11':
+            name: punctuation.definition.property.js
+          '2':
+            name: entity.name.function.js
+          '3':
+            name: string.quoted.single.js
+          '4':
+            name: punctuation.definition.string.begin.js
+          '5':
+            name: entity.name.function.js
+          '6':
+            name: punctuation.definition.string.end.js
+          '7':
+            name: entity.name.property.js
+          '8':
+            name: string.quoted.single.js
+          '9':
+            name: punctuation.definition.string.begin.js
+        end: (,)\s*|(?=})
+        endCaptures:
+          '1':
+            name: meta.delimiter.object.comma.js
+        name: meta.object.property.js
+        patterns:
+        - include: '#expressions'
+  primary-expressions:
+    patterns:
+    - match: \b((0(x|X)[0-9a-fA-F]+)|([0-9]+(\.[0-9]+)?))\b
+      name: constant.numeric.js
+    - begin: ''''
+      beginCaptures:
+        '0':
+          name: punctuation.definition.string.begin.js
+      end: ''''
+      endCaptures:
+        '0':
+          name: punctuation.definition.string.end.js
+      name: string.quoted.single.js
+      patterns:
+      - match: \\(x\h{2}|[0-2][0-7]{,2}|3[0-6][0-7]?|37[0-7]?|[4-7][0-7]?|.)
+        name: constant.character.escape.js
+    - begin: '"'
+      beginCaptures:
+        '0':
+          name: punctuation.definition.string.begin.js
+      end: '"'
+      endCaptures:
+        '0':
+          name: punctuation.definition.string.end.js
+      name: string.quoted.double.js
+      patterns:
+      - match: \\(x\h{2}|[0-2][0-7]{,2}|3[0-6][0-7]|37[0-7]?|[4-7][0-7]?|.)
+        name: constant.character.escape.js
+    - begin: (?<=[=(:\[,]|^|return|&&|\|\||!)\s*(/)(?![/*+{}?])
+      beginCaptures:
+        '1':
+          name: punctuation.definition.string.begin.js
+      end: (/)[igm]*
+      endCaptures:
+        '1':
+          name: punctuation.definition.string.end.js
+      name: string.regexp.js
+      patterns:
+      - match: \\.
+        name: constant.character.escape.js
+  statement-group:
+    begin: '{'
+    beginCaptures:
+      '0':
+        name: punctuation.definition.statementgroup.begin.js
+    end: '}'
+    endCaptures:
+      '0':
+        name: punctuation.definition.statementgroup.end.js
+    name: meta.statements
+    patterns:
+    - include: '#statements'
+  statements:
+    patterns:
+    - include: '#statement-group'
+    - include: '#var-statement'
+    - begin: for\s*(?=\()
+      beginCaptures:
+        '0':
+          name: keyword.control.js
+      end: (?<=\))
+      patterns:
+      - begin: \(
+        beginCaptures:
+          '0':
+            name: punctuation.parentheses.begin.js
+        end: \)
+        endCaptures:
+          '0':
+            name: punctuation.parentheses.end.js
+        patterns:
+        - match: \;
+          name: punctuation.terminator.statement.js
+        - include: '#var-statement'
+        - include: '#expressions'
+    - begin: return
+      beginCaptures:
+        '0':
+          name: keyword.control.js
+      end: (?=;)|$|\s*(?=})
+      patterns:
+      - include: '#expressions'
+    - begin: \b(function\b)\s*([a-zA-Z_$][a-zA-Z0-9_$]*)?\s*(\()(.*?)(\))\s*(?={)
+      beginCaptures:
+        '1':
+          name: storage.type.function.js
+        '2':
+          name: entity.name.function.js
+        '3':
+          name: punctuation.definition.parameters.begin.js
+        '4':
+          name: variable.parameter.function.js
+        '5':
+          name: punctuation.definition.parameters.end.js
+      comment: "match regular function declaration like: function myFunc(arg) { \u2026\
+        \ }"
+      end: (?<=})
+      name: meta.function.declaration.js
+      patterns:
+      - include: '#statement-group'
+    - match: \b(boolean|byte|char|class|double|enum|float|function|int|interface|long|short|var|void)\b
+      name: storage.type.js
+    - match: \b(const|export|extends|final|implements|native|private|protected|public|static|synchronized|throws|transient|volatile)\b
+      name: storage.modifier.js
+    - match: \b(break|case|catch|continue|default|do|else|finally|for|goto|if|import|package|return|switch|throw|try|while)\b
+      name: keyword.control.js
+    - match: \;
+      name: punctuation.terminator.statement.js
+    - include: '#expressions'
+    - captures:
+        '1':
+          name: support.class.js
+        '2':
+          name: support.constant.js
+        '3':
+          name: keyword.operator.js
+      comment: "match stuff like: Sound.prototype = { \u2026 } when extending an object"
+      match: ([a-zA-Z_?.$][\w?.$]*)\.(prototype)\s*(=)\s*
+      name: meta.class.js
+    - captures:
+        '1':
+          name: support.class.js
+        '2':
+          name: support.constant.js
+        '3':
+          name: entity.name.function.js
+        '4':
+          name: keyword.operator.js
+        '5':
+          name: storage.type.function.js
+        '6':
+          name: punctuation.definition.parameters.begin.js
+        '7':
+          name: variable.parameter.function.js
+        '8':
+          name: punctuation.definition.parameters.end.js
+      comment: "match stuff like: Sound.prototype.play = function() { \u2026 }"
+      match: ([a-zA-Z_?.$][\w?.$]*)\.(prototype)\.([a-zA-Z_?.$][\w?.$]*)\s*(=)\s*(function)?\s*(\()(.*?)(\))
+      name: meta.function.prototype.js
+    - captures:
+        '1':
+          name: support.class.js
+        '2':
+          name: support.constant.js
+        '3':
+          name: entity.name.function.js
+        '4':
+          name: keyword.operator.js
+      comment: 'match stuff like: Sound.prototype.play = myfunc'
+      match: ([a-zA-Z_?.$][\w?.$]*)\.(prototype)\.([a-zA-Z_?.$][\w?.$]*)\s*(=)\s*
+      name: meta.function.js
+    - captures:
+        '1':
+          name: support.class.js
+        '2':
+          name: entity.name.function.js
+        '3':
+          name: keyword.operator.js
+        '4':
+          name: storage.type.function.js
+        '5':
+          name: punctuation.definition.parameters.begin.js
+        '6':
+          name: variable.parameter.function.js
+        '7':
+          name: punctuation.definition.parameters.end.js
+      comment: "match stuff like: Sound.play = function() { \u2026 }"
+      match: ([a-zA-Z_?.$][\w?.$]*)\.([a-zA-Z_?.$][\w?.$]*)\s*(=)\s*(function)\s*(\()(.*?)(\))
+      name: meta.function.js
+    - captures:
+        '1':
+          name: entity.name.function.js
+        '2':
+          name: keyword.operator.js
+        '3':
+          name: storage.type.function.js
+        '4':
+          name: punctuation.definition.parameters.begin.js
+        '5':
+          name: variable.parameter.function.js
+        '6':
+          name: punctuation.definition.parameters.end.js
+      comment: "match stuff like: play = function() { \u2026 }"
+      match: ([a-zA-Z_?$][\w?$]*)\s*(=)\s*(function)\s*(\()(.*?)(\))
+      name: meta.function.js
+    - captures:
+        '1':
+          name: entity.name.function.js
+        '2':
+          name: storage.type.function.js
+        '3':
+          name: punctuation.definition.parameters.begin.js
+        '4':
+          name: variable.parameter.function.js
+        '5':
+          name: punctuation.definition.parameters.end.js
+      comment: "match stuff like: foobar: function() { \u2026 }"
+      match: \b([a-zA-Z_?.$][\w?.$]*)\s*:\s*\b(function)?\s*(\()(.*?)(\))
+      name: meta.function.json.js
+    - captures:
+        '1':
+          name: string.quoted.single.js
+        '10':
+          name: punctuation.definition.parameters.begin.js
+        '11':
+          name: variable.parameter.function.js
+        '12':
+          name: punctuation.definition.parameters.end.js
+        '2':
+          name: punctuation.definition.string.begin.js
+        '3':
+          name: entity.name.function.js
+        '4':
+          name: punctuation.definition.string.end.js
+        '5':
+          name: string.quoted.double.js
+        '6':
+          name: punctuation.definition.string.begin.js
+        '7':
+          name: entity.name.function.js
+        '8':
+          name: punctuation.definition.string.end.js
+        '9':
+          name: entity.name.function.js
+      comment: 'Attempt to match "foo": function'
+      match: (?:((')([^']*)('))|((")([^"]*)(")))\s*:\s*\b(function)?\s*(\()([^)]*)(\))
+      name: meta.function.json.js
+  var-statement:
+    begin: var\s+
+    beginCaptures:
+      '0':
+        name: storage.type.js
+    end: (;)|(?<!,|\*/|^)\n|(?=[\}\]\)])
+    endCaptures:
+      '1':
+        name: punctuation.terminator.statement.js
+    patterns:
+    - match: \s+
+      name: meta.whitespace.js
+    - include: '#comments'
+    - captures:
+        '1':
+          name: variable.declaration.js
+      match: ([a-zA-Z_$][a-zA-Z0-9_$]*)(?!\s*=)\s*(?:,|(?=[;\}\]\)])|(?<!,|\*/)(?=\n))
+    - begin: ([a-zA-Z_$][a-zA-Z0-9_$]*)\s*(=\s*(?=function\b))|([a-zA-Z_$][a-zA-Z0-9_$]*)\s*(=)
+      beginCaptures:
+        '1':
+          name: entity.name.function.js
+        '2':
+          name: punctuation.declaration.variable.js
+        '3':
+          name: variable.declaration.js
+        '4':
+          name: punctuation.declaration.variable.js
+      end: (,)|(?=[;\}\]\)])|(?<!,|\*/)(?=\n)
+      endCaptures:
+        '1':
+          name: meta.delimiter.comma.js
+      patterns:
+      - include: '#expressions'
+scopeName: source.js
+uuid: 93E017CC-6F27-11D9-90EB-000D93589AF6

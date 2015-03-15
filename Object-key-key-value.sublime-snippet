@@ -1,5 +1,5 @@
 <snippet>
-    <content><![CDATA[${1:key}: "${2:value}",]]></content>
+    <content><![CDATA[${1:key}: '${2:value}',]]></content>
     <tabTrigger>:,</tabTrigger>
     <scope>source.js meta.object.literal.js -meta.function.expression.js</scope>
     <description>Object key: "value",</description>
