@@ -1,0 +1,6 @@
+name: Symbol List Sub 2
+scope: source.js meta.group meta.group object.property.function
+settings:
+  showInSymbolList: '1'
+  symbolTransformation: s/^/  :/g;
+uuid: 51841DDB-C2A4-461C-A8AB-6C124AD50EAE

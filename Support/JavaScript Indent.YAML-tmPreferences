@@ -1,0 +1,17 @@
+# [PackageDev] target_format: plist, ext: tmPreferences
+
+name: JavaScript Indent
+scope: source.js
+settings:
+  bracketIndentNextLinePattern: |
+    (?x)
+    ^ \s* \b(if|while|else)\b [^;]* $|
+    ^ \s* \b(for)\b .* $
+  increaseIndentPattern: |
+    (?x)
+    ^.*\{[^\}"']*$|
+    ^.*\[[^\]"']*$|
+    ^.*\([^\)"']*$
+  decreaseIndentPattern: ^(.*\*/)?\s*[\}].*$
+  # disableIndentNextLinePattern: ^(.*\*/)?\s*[\}\]\)].*$
+uuid: BC062860-3346-4D3B-8421-C5543F83D11F

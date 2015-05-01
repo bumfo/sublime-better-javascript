@@ -1,0 +1,9 @@
+# [PackageDev] target_format: plist, ext: tmPreferences
+
+name: Symbol List Banned
+scope: source.js meta.property.function entity.name.function, entity.name.type.instance.js,
+  entity.name.type.object.js.firebug
+settings:
+  showInIndexedSymbolList: '1'
+  showInSymbolList: '0'
+uuid: 834BC727-6B31-4073-A161-4823227219EG

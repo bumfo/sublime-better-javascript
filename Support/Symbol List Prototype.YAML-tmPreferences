@@ -1,0 +1,6 @@
+name: Symbol List Function
+scope: meta.function.prototype.js
+settings:
+  showInSymbolList: '1'
+  symbolTransformation: s/([a-zA-Z_?.$][\w?.$]*)\s*=.*/\1/g
+uuid: 37FCDC90-EE7C-11E2-91E2-0800200C9A66
