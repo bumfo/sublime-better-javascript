@@ -96,7 +96,7 @@ repository:
 
   statement-group:
     name: meta.statement-group
-    begin: (?<![=(:\[,]|return|yield|yield\*|&&|\|\||!|[+\-*\/]|\s)\s*\{
+    begin: (?<![=(:\[,+\-*\/!?<>]|return|yield|void|typeof|yield\*|&&|\|\||\s)\s*\{
     beginCaptures:
       '0': {name: punctuation.definition.statementgroup.begin.js}
     end: \}
@@ -109,15 +109,16 @@ repository:
   expressions:
     patterns:
     - include: '#comments'
-    - name: meta.delimiter.object.comma.js
+    - name: keyword.operator.comma.js #meta.delimiter.object.comma.js
       match: \, #[ |\t]*
+    - include: '#property-accessor'
     - include: '#primary-expressions'
     - include: '#keywords'
     - include: '#new-expression'
     - include: '#identifier-expressions'
     - include: '#arguments-parentheses'
     - include: '#expression-group'
-    - include: '#property-accessor'
+    
     - name: meta.delimiter.method.period.js
       match: \.(?![0-9])
 
@@ -138,8 +139,10 @@ repository:
     - include: '#numeric'
     - include: '#string-expressions'
     - include: '#regular-expression'
+    - include: '#arrow-function'
     - include: '#function-declaration'
     - include: '#object-initializer'
+    - include: '#array-initializer'
 
   string-expressions:
     patterns:
@@ -166,7 +169,7 @@ repository:
 
   regular-expression:
     name: string.regexp.js
-    begin: (?<=[=(:\[,]|^|return|yield|yield\*|&&|\|\||!|[+\-*\/])\s*(/)(?![/*+{}?])
+    begin: (?<=[=(:\[,+\-*\/!?<>]|return|yield|void|typeof|yield\*|&&|\|\||^)\s*(/)(?![/*+{}?])
     beginCaptures:
       '1': {name: punctuation.definition.string.begin.js}
     end: (/)[igm]*
@@ -177,7 +180,13 @@ repository:
 
   new-expression:
     name: meta.expression.new.js
-    begin: (?<=new)(?<![a-zA-Z0-9_$]new)(?=\s+[a-zA-Z_$][a-zA-Z0-9_$]*)
+    begin: |
+      (?x)
+      (?<=new)(?<![a-zA-Z0-9_$]new)
+      (?=\s+(?!
+        (?>await|break|case|catch|class|const|continue|debugger|default|delete|do|else|enum|export|extends|false|finally|for|function|let|if|implements|import|in(?>stanceof|terface)?|new|null|private|protected|package|public|static|return|super|switch|this|throw(?>s)?|true|try|typeof|var|void|while|with|yield)
+        (?![a-zA-Z0-9_$])
+      )[a-zA-Z_$][a-zA-Z0-9_$]*)
     end: (?!(\s*\.\s*)?[a-zA-Z_$])(?<=[a-zA-Z0-9_$])(?![a-zA-Z0-9_$])
     patterns:
     - name: meta.delimiter.method.period.js
@@ -192,12 +201,27 @@ repository:
     patterns:
     - name: meta.delimiter.method.period.js
       match: \.(?![0-9])
-    - name: support.function.js
-      match: (?<=\.|)\s*(?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\()
-    - name: entity.name.function.js
-      match: (?<=\.|)\s*(?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\=\s*function(?!\$)\b)
+    - name: support.function.js # (?<=\.|)\s*
+      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\()
     - name: support.class.js
-      match: (?<=\.|)\s*(?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\=\s*class(?!\$)\b)
+      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\=\s*class(?!\$)\b)
+    - name: support.class.js
+      match: (?<![a-zA-Z0-9_$])[A-Z][a-zA-Z0-9_$]*(?=\s*\=\s*function(?!\$)\b)
+    - name: entity.name.function.js
+      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\=\s*function(?!\$)\b)
+    - name: entity.name.function.arrow.js
+      match: |
+        (?x)
+        \s*(?<![a-zA-Z0-9_$])
+        [a-zA-Z_$][a-zA-Z0-9_$]*
+        (?=
+          (?>\s*)\=(?>\s*)
+          (?>
+            ([a-zA-Z_$][a-zA-Z0-9_$]*)|
+            (\()([a-zA-Z0-9_$\s,]*)(\))
+          )
+          (?>\s*)=>
+        )
     - name: support.class.js
       match: |
         (?x)
@@ -234,7 +258,7 @@ repository:
           m(?>ap|in|ove(?>B(?>y|elow)|To(?>Absolute)?|Above)|ergeAttributes|a(?>tch|rgins|x))|
           b(?>toa|ig|o(?>ld|rderWidths)|link|ack|ind)|
           of
-        )\b
+        )\b(?=\s*\()
     - name: support.constant.js #meta.identifier.js
       match: |
         (?x)
@@ -272,10 +296,12 @@ repository:
           L(?>N(?>10|2)|OG(?>10E|2E))|
           b(?>o(?>ttom|rder(?>Width|RightWidth|BottomWidth|Style|Color|TopWidth|LeftWidth))|ufferDepth|elow|ackground(?>Color|Image))
         )\b
-    - name: entity.name.other-property #entity.name.property #support.constant.js #meta.identifier.js
-      match: (?<=\.)\s*[a-zA-Z_$][a-zA-Z0-9_$]*
     - name: support.class.js #meta.identifier.js
       match: (?<![a-zA-Z0-9_$])[A-Z][a-zA-Z0-9_$]*(?=\s*\.)
+    - name: support.class.js #null
+      match: (?<=\.)\s*(?<![a-zA-Z0-9_$])[A-Z][a-zA-Z0-9_$]*(?![a-zA-Z0-9_$])(?!\s*\=)
+    - name: entity.name.other-property #entity.name.property #support.constant.js #meta.identifier.js
+      match: (?<=\.)\s*[a-zA-Z_$][a-zA-Z0-9_$]*
     - name: meta.identifier.js #support.class.js
       match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\.)
     - name: meta.identifier.js
@@ -301,6 +327,7 @@ repository:
       begin: '{'
       end: '}'
       patterns:
+      - include: '#comments'
       - include: '#function-declaration'
       - include: '#shorthand-function'
 
@@ -342,12 +369,46 @@ repository:
       (?=\([^\)]*\)\s*{)
     beginCaptures:
       '1': {name: storage.type.js}
-      '2': {name: entity.name.function.js}
+      '2': {name: entity.name.property.function.js}
     end: (?<=})
     patterns:
     - include: '#parameter-declaration'
     - include: '#statement-group'
-  
+
+  arrow-function:
+    name: meta.function.arrow.js
+    begin: |
+      (?x)
+      (?<![a-zA-Z0-9_$])
+      (?=
+        (?>
+          [a-zA-Z_$][a-zA-Z0-9_$]*|
+          [(][a-zA-Z0-9_$\s,]*[)]
+        )
+        (?>\s*)=>
+      )
+    end: (?<=})|(?=[\)\]},;]|$)
+    patterns:
+    - include: '#arrow-parameter-declaration'
+    - name: meta.parameter.function.arrow.js
+      begin: |
+        (?x)
+        (?=
+          (?>[a-zA-Z_$][a-zA-Z0-9_$]*)
+          (?>\s*)=>
+        )
+      end: (?>\s*)(=>)
+      endCaptures:
+        '1': {name: punctuation.definition.function.js}
+      patterns:
+      - include: '#reserved-word'
+      - name: meta.parameter.function.arrow.normal.js
+        match: (?>[a-zA-Z_$][a-zA-Z0-9_$]*)
+        captures:
+          '0': {name: variable.parameter.function.arrow.js}
+    - include: '#statement-group'
+    - include: '#expressions'
+
   function-declaration:
     name: meta.function.js
     begin: |
@@ -376,7 +437,7 @@ repository:
 
   arguments-parentheses:
     name: meta.arguments.js
-    begin: (?<=[a-zA-Z0-9_$\)\]\}])\s*\(
+    begin: (?<=[a-zA-Z0-9_$\)\]\}])(?<!return|yield|void|typeof)\s*\(
     beginCaptures:
       '0': {name: punctuation.parameters.begin.js}
     end: \)
@@ -386,7 +447,7 @@ repository:
     - name: meta.delimiter.object.comma.js
       match: \,
     - include: '#expressions'
-    
+
   parameter-declaration:
     name: meta.parameter.js
     begin: \(
@@ -402,9 +463,30 @@ repository:
     - name: meta.delimiter.object.comma.js
       match: \,[ |\t]*
 
+  arrow-parameter-declaration:
+    name: meta.parameter.js
+    begin: |
+      (?x)
+      (?<![a-zA-Z0-9_$])
+      [(]
+      (?=[a-zA-Z0-9_$\s,]*[)]\s*=>)
+    
+    beginCaptures:
+      '0': {name: punctuation.definition.parameters.begin.js}
+    end: ([)])(?>\s*(=>))
+    endCaptures:
+      '1': {name: punctuation.definition.parameters.end.js}
+      '2': {name: punctuation.definition.function.js}
+    patterns:
+    - include: '#reserved-word'
+    - name: variable.parameter.function.js
+      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*
+    - name: meta.delimiter.object.comma.js
+      match: \,[ |\t]*
+
   property-accessor: 
     name: meta.accessor.property.js
-    begin: (?<=[a-zA-Z0-9_$\)\]\}])\s*\[
+    begin: (?<=[a-zA-Z0-9_$\)\]\}])(?<!return|yield|void|typeof)\s*\[
     beginCaptures:
       '0': {name: punctuation.accessor.begin.js}
     end: \]
@@ -413,11 +495,22 @@ repository:
     patterns:
     - include: '#expressions'
 
+  array-initializer:
+    name: meta.declaration.array.js
+    begin: \[
+    end: \]
+    patterns:
+    - name: meta.delimiter.object.comma.js
+      match: \,
+    - include: '#expressions'
+
+
   object-initializer:
     name: meta.declaration.object.js
     begin: \{
     end: \}
     patterns:
+    - include: '#comments'
     - name: meta.object.property.js
       begin: |
         (?x)
@@ -526,7 +619,7 @@ repository:
     - name: keyword.operator.js
       match: \b(?>delete|new|typeof|void|with)(?![a-zA-Z0-9_$])
     - name: keyword.operator.js
-      match: '!|%|&|\*|(?<![=(:\[,]|^|return|yield|yield\*|&&|\|\||!)\/|\-\-|\-|\+\+|\+|~|===|==|=|!=|!==|<=|>=|<<=|>>=|>>>=|<>|<|>|!|&&|\|\||\?|\:|\*=|(?<!\()/=|%=|\+=|\-=|&=|\^=|\b(?>in(?>stanceof)?)(?![a-zA-Z0-9_$])'
+      match: '!|%|&|\*|\/|\-\-|\-|\+\+|\+|~|===|==|=|!=|!==|<=|>=|<<=|>>=|>>>=|<>|<|>|!|&&|\|\||\?|\:|\*=|(?<!\()/=|%=|\+=|\-=|&=|\^=|\b(?>in(?>stanceof)?|of)(?![a-zA-Z0-9_$])'
     - name: storage.type.js
       match: \b(?>boolean|byte|char|class|double|enum|float|function|int(?>erface)?|long|short|var|void)(?![a-zA-Z0-9_$])
     - name: storage.modifier.js
