@@ -236,7 +236,7 @@
 				<key>2</key>
 				<dict>
 					<key>name</key>
-					<string>support.class.js</string>
+					<string>entity.name.class.js</string>
 				</dict>
 				<key>3</key>
 				<dict>
@@ -246,7 +246,7 @@
 				<key>4</key>
 				<dict>
 					<key>name</key>
-					<string>entity.other.inherited-class</string>
+					<string>entity.other.inherited-class.js</string>
 				</dict>
 			</dict>
 			<key>end</key>
@@ -608,60 +608,6 @@
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(?&lt;![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\()</string>
-					<key>name</key>
-					<string>support.function.js</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>(?&lt;![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\=\s*class(?!\$)\b)</string>
-					<key>name</key>
-					<string>support.class.js</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>(?&lt;![a-zA-Z0-9_$])[A-Z][a-zA-Z0-9_$]*(?=\s*\=\s*function(?!\$)\b)</string>
-					<key>name</key>
-					<string>support.class.js</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>(?&lt;![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\=\s*function(?!\$)\b)</string>
-					<key>name</key>
-					<string>entity.name.function.js</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>(?x)
-\s*(?&lt;![a-zA-Z0-9_$])
-[a-zA-Z_$][a-zA-Z0-9_$]*
-(?=
-  (?&gt;\s*)\=(?&gt;\s*)
-  (?&gt;
-    ([a-zA-Z_$][a-zA-Z0-9_$]*)|
-    (\()([a-zA-Z0-9_$\s,]*)(\))
-  )
-  (?&gt;\s*)=&gt;
-)
-</string>
-					<key>name</key>
-					<string>entity.name.function.arrow.js</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>(?x)
-\b(?&gt;
-  Anchor|Applet|Area|Array|Boolean|Button|Checkbox|Date|document|event|FileUpload|Form|Frame|
-  Function|Hidden|History|Image|Java(?&gt;Array|Class|Object|Package)|java|Layer|Link|Location|
-  Math|MimeType|Number|navigator|netscape|Object|Option|Packages|Password|Plugin|Promise|Radio|
-  RegExp|Reset|Select|String|Style|Submit|screen|sun|Text(?&gt;area)?|window|XMLHttpRequest
-)\b
-</string>
-					<key>name</key>
-					<string>support.class.js</string>
-				</dict>
-				<dict>
-					<key>match</key>
 					<string>(?x)
 (?&lt;=\.)\s*(?&gt;
   s(?&gt;h(?&gt;ift|ow(?&gt;Mod(?&gt;elessDialog|alDialog)|Help))|croll(?&gt;X|By(?&gt;Pages|Lines)?|Y|To)?|t(?&gt;op|rike)|i(?&gt;n|zeToContent|debar|gnText)|o(?&gt;me|rt)|u(?&gt;p|b(?&gt;str(?&gt;ing)?)?)|pli(?&gt;ce|t)|e(?&gt;nd|t(?&gt;Re(?&gt;sizable|questHeader)|M(?&gt;i(?&gt;nutes|lliseconds)|onth)|Seconds|Ho(?&gt;tKeys|urs)|Year|Cursor|Time(?&gt;out)?|Interval|ZOptions|Date|UTC(?&gt;M(?&gt;i(?&gt;nutes|lliseconds)|onth)|Seconds|Hours|Date|FullYear)|FullYear|Active)|arch)|qrt|lice|avePreferences|mall)|
@@ -694,41 +640,88 @@
 				</dict>
 				<dict>
 					<key>match</key>
+					<string>(?&lt;=\.)\s*[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\()</string>
+					<key>name</key>
+					<string>support.function.other-method.js</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>(?&lt;![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\()</string>
+					<key>name</key>
+					<string>meta.invocation.function.js</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>(?&lt;![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\=\s*class(?!\$)\b)</string>
+					<key>name</key>
+					<string>entity.name.class.js</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>(?&lt;![a-zA-Z0-9_$])[A-Z][a-zA-Z0-9_$]*(?=\s*\=\s*function(?!\$)\b)</string>
+					<key>name</key>
+					<string>entity.name.class.js</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>(?&lt;![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\=\s*function(?!\$)\b)</string>
+					<key>name</key>
+					<string>entity.name.function.js</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>(?x)
+\s*(?&lt;![a-zA-Z0-9_$])
+[a-zA-Z_$][a-zA-Z0-9_$]*
+(?=
+  (?&gt;\s*)\=(?&gt;\s*)
+  (?&gt;
+    ([a-zA-Z_$][a-zA-Z0-9_$]*)|
+    (\()([a-zA-Z0-9_$\s,]*)(\))
+  )
+  (?&gt;\s*)=&gt;
+)
+</string>
+					<key>name</key>
+					<string>entity.name.function.arrow.js</string>
+				</dict>
+				<dict>
+					<key>match</key>
 					<string>(?x)
 (?&lt;=\.)\s*(?&gt;
-  s(?&gt;ystemLanguage|cr(?&gt;ipts|ollbars|een(?&gt;X|Y|Top|Left))|t(?&gt;yle(?&gt;Sheets)?|atus(?&gt;Text|bar)?)|ibling(?&gt;Below|Above)|ource|uffixes|e(?&gt;curity(?&gt;Policy)?|l(?&gt;ection|f)))|
-  h(?&gt;istory|ost(?&gt;name)?|as(?&gt;h|Focus))|
-  y|
   X(?&gt;MLDocument|SLDocument)|
-  n(?&gt;ext|ame(?&gt;space(?&gt;s|URI)|Prop))|
   M(?&gt;IN_VALUE|AX_VALUE)|
-  c(?&gt;haracterSet|o(?&gt;n(?&gt;structor|trollers)|okieEnabled|lorDepth|mp(?&gt;onents|lete))|urrent|puClass|l(?&gt;i(?&gt;p(?&gt;boardData)?|entInformation)|osed|asses)|alle(?&gt;e|r)|rypto)|
-  t(?&gt;o(?&gt;olbar|p)|ext(?&gt;Transform|Indent|Decoration|Align)|ags)|
   SQRT(?&gt;1_2|2)|
-  i(?&gt;n(?&gt;ner(?&gt;Height|Width)|put)|ds|gnoreCase)|
-  zIndex|
-  o(?&gt;scpu|n(?&gt;readystatechange|Line)|uter(?&gt;Height|Width)|p(?&gt;sProfile|ener)|ffscreenBuffering)|
   NEGATIVE_INFINITY|
-  d(?&gt;i(?&gt;splay|alog(?&gt;Height|Top|Width|Left|Arguments)|rectories)|e(?&gt;scription|fault(?&gt;Status|Ch(?&gt;ecked|arset)|View)))|
-  u(?&gt;ser(?&gt;Profile|Language|Agent)|n(?&gt;iqueID|defined)|pdateInterval)|
-  _content|
-  p(?&gt;ixelDepth|ort|ersonalbar|kcs11|l(?&gt;ugins|atform)|a(?&gt;thname|dding(?&gt;Right|Bottom|Top|Left)|rent(?&gt;Window|Layer)?|ge(?&gt;X(?&gt;Offset)?|Y(?&gt;Offset)?))|r(?&gt;o(?&gt;to(?&gt;col|type)|duct(?&gt;Sub)?|mpter)|e(?&gt;vious|fix)))|
-  e(?&gt;n(?&gt;coding|abledPlugin)|x(?&gt;ternal|pando)|mbeds)|
-  v(?&gt;isibility|endor(?&gt;Sub)?|Linkcolor)|
   URLUnencoded|
   P(?&gt;I|OSITIVE_INFINITY)|
-  f(?&gt;ilename|o(?&gt;nt(?&gt;Size|Family|Weight)|rmName)|rame(?&gt;s|Element)|gColor)|
   E|
-  whiteSpace|
-  l(?&gt;i(?&gt;stStyleType|n(?&gt;eHeight|kColor))|o(?&gt;ca(?&gt;tion(?&gt;bar)?|lName)|wsrc)|e(?&gt;ngth|ft(?&gt;Context)?)|a(?&gt;st(?&gt;M(?&gt;odified|atch)|Index|Paren)|yer(?&gt;s|X)|nguage))|
-  a(?&gt;pp(?&gt;MinorVersion|Name|Co(?&gt;deName|re)|Version)|vail(?&gt;Height|Top|Width|Left)|ll|r(?&gt;ity|guments)|Linkcolor|bove)|
-  r(?&gt;ight(?&gt;Context)?|e(?&gt;sponse(?&gt;XML|Text)|adyState))|
-  global|
-  x|
-  m(?&gt;imeTypes|ultiline|enubar|argin(?&gt;Right|Bottom|Top|Left))|
   L(?&gt;N(?&gt;10|2)|OG(?&gt;10E|2E))|
-  b(?&gt;o(?&gt;ttom|rder(?&gt;Width|RightWidth|BottomWidth|Style|Color|TopWidth|LeftWidth))|ufferDepth|elow|ackground(?&gt;Color|Image))
 )\b
+# s(?&gt;ystemLanguage|cr(?&gt;ipts|ollbars|een(?&gt;X|Y|Top|Left))|t(?&gt;yle(?&gt;Sheets)?|atus(?&gt;Text|bar)?)|ibling(?&gt;Below|Above)|ource|uffixes|e(?&gt;curity(?&gt;Policy)?|l(?&gt;ection|f)))|
+# h(?&gt;istory|ost(?&gt;name)?|as(?&gt;h|Focus))|
+# y|
+# c(?&gt;haracterSet|o(?&gt;n(?&gt;structor|trollers)|okieEnabled|lorDepth|mp(?&gt;onents|lete))|urrent|puClass|l(?&gt;i(?&gt;p(?&gt;boardData)?|entInformation)|osed|asses)|alle(?&gt;e|r)|rypto)|
+# t(?&gt;o(?&gt;olbar|p)|ext(?&gt;Transform|Indent|Decoration|Align)|ags)|
+# n(?&gt;ext|ame(?&gt;space(?&gt;s|URI)|Prop))|
+# i(?&gt;n(?&gt;ner(?&gt;Height|Width)|put)|ds|gnoreCase)|
+# zIndex|
+# o(?&gt;scpu|n(?&gt;readystatechange|Line)|uter(?&gt;Height|Width)|p(?&gt;sProfile|ener)|ffscreenBuffering)|
+# d(?&gt;i(?&gt;splay|alog(?&gt;Height|Top|Width|Left|Arguments)|rectories)|e(?&gt;scription|fault(?&gt;Status|Ch(?&gt;ecked|arset)|View)))|
+# u(?&gt;ser(?&gt;Profile|Language|Agent)|n(?&gt;iqueID|defined)|pdateInterval)|
+# _content|
+# p(?&gt;ixelDepth|ort|ersonalbar|kcs11|l(?&gt;ugins|atform)|a(?&gt;thname|dding(?&gt;Right|Bottom|Top|Left)|rent(?&gt;Window|Layer)?|ge(?&gt;X(?&gt;Offset)?|Y(?&gt;Offset)?))|r(?&gt;o(?&gt;to(?&gt;col|type)|duct(?&gt;Sub)?|mpter)|e(?&gt;vious|fix)))|
+# f(?&gt;ilename|o(?&gt;nt(?&gt;Size|Family|Weight)|rmName)|rame(?&gt;s|Element)|gColor)|
+# e(?&gt;n(?&gt;coding|abledPlugin)|x(?&gt;ternal|pando)|mbeds)|
+# whiteSpace|
+# l(?&gt;i(?&gt;stStyleType|n(?&gt;eHeight|kColor))|o(?&gt;ca(?&gt;tion(?&gt;bar)?|lName)|wsrc)|e(?&gt;ngth|ft(?&gt;Context)?)|a(?&gt;st(?&gt;M(?&gt;odified|atch)|Index|Paren)|yer(?&gt;s|X)|nguage))|
+# a(?&gt;pp(?&gt;MinorVersion|Name|Co(?&gt;deName|re)|Version)|vail(?&gt;Height|Top|Width|Left)|ll|r(?&gt;ity|guments)|Linkcolor|bove)|
+# r(?&gt;ight(?&gt;Context)?|e(?&gt;sponse(?&gt;XML|Text)|adyState))|
+# global|
+# x|
+# m(?&gt;imeTypes|ultiline|enubar|argin(?&gt;Right|Bottom|Top|Left))|
+# v(?&gt;isibility|endor(?&gt;Sub)?|Linkcolor)|
+# b(?&gt;o(?&gt;ttom|rder(?&gt;Width|RightWidth|BottomWidth|Style|Color|TopWidth|LeftWidth))|ufferDepth|elow|ackground(?&gt;Color|Image))
 </string>
 					<key>name</key>
 					<string>support.constant.js</string>
@@ -737,13 +730,13 @@
 					<key>match</key>
 					<string>(?&lt;![a-zA-Z0-9_$])[A-Z][a-zA-Z0-9_$]*(?=\s*\.)</string>
 					<key>name</key>
-					<string>support.class.js</string>
+					<string>entity.name.class.js</string>
 				</dict>
 				<dict>
 					<key>match</key>
 					<string>(?&lt;=\.)\s*(?&lt;![a-zA-Z0-9_$])[A-Z][a-zA-Z0-9_$]*(?![a-zA-Z0-9_$])(?!\s*\=)</string>
 					<key>name</key>
-					<string>support.class.js</string>
+					<string>entity.name.class.js</string>
 				</dict>
 				<dict>
 					<key>match</key>
@@ -753,15 +746,21 @@
 				</dict>
 				<dict>
 					<key>match</key>
+					<string>\b(?&gt;console|document|window)\b</string>
+					<key>name</key>
+					<string>variable.js</string>
+				</dict>
+				<dict>
+					<key>match</key>
 					<string>(?&lt;![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\.)</string>
 					<key>name</key>
-					<string>meta.identifier.js</string>
+					<string>meta.variable.js</string>
 				</dict>
 				<dict>
 					<key>match</key>
 					<string>(?&lt;![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*</string>
 					<key>name</key>
-					<string>meta.identifier.js</string>
+					<string>meta.variable.other.js</string>
 				</dict>
 			</array>
 		</dict>
@@ -783,13 +782,13 @@
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>\b(?&gt;boolean|byte|char|class|double|enum|float|function|int(?&gt;erface)?|long|short|var|void)(?![a-zA-Z0-9_$])</string>
+					<string>\b(?&gt;class|function|var)(?![a-zA-Z0-9_$])</string>
 					<key>name</key>
 					<string>storage.type.js</string>
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>\b(?&gt;const|export|extends|final|implements|native|private|protected|public|static|synchronized|throws|transient|volatile)(?![a-zA-Z0-9_$])</string>
+					<string>\b(?&gt;export|extends)(?![a-zA-Z0-9_$])</string>
 					<key>name</key>
 					<string>storage.modifier.js</string>
 				</dict>
@@ -801,7 +800,7 @@
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>\b(?&gt;super|this|arguments|self)(?![a-zA-Z0-9_$])</string>
+					<string>\b(?&gt;super|this|arguments)(?![a-zA-Z0-9_$])</string>
 					<key>name</key>
 					<string>variable.language.js</string>
 				</dict>
@@ -875,21 +874,7 @@
 						</dict>
 					</dict>
 					<key>match</key>
-					<string>\b(?&lt;!\.)[0-9]+\.(?:[0-9]*([a-zA-Z_$][a-zA-Z0-9_$]*)?)</string>
-					<key>name</key>
-					<string>constant.numeric.js</string>
-				</dict>
-				<dict>
-					<key>captures</key>
-					<dict>
-						<key>1</key>
-						<dict>
-							<key>name</key>
-							<string>invalid.illegal</string>
-						</dict>
-					</dict>
-					<key>match</key>
-					<string>\b(?&lt;!\.)(?&gt;0(?&gt;o|O|(?![bBxX]))[0-7]*(?![0-9]+))([a-zA-Z8-9_$][a-zA-Z0-9_$]*)?</string>
+					<string>\b(?&lt;!\.)(?&gt;0(?&gt;o|O|(?![bBxX]))[0-7]+(?![0-9]+))((?:\.[0-9])|[a-zA-Z8-9_$][a-zA-Z0-9_$]*)?</string>
 					<key>name</key>
 					<string>constant.numeric.octal.js</string>
 				</dict>
@@ -906,6 +891,20 @@
 					<string>\b(?&lt;!\.)(?&gt;0(?&gt;b|B)[0-1]+)([a-zA-Z2-9_$][a-zA-Z0-9_$]*)?</string>
 					<key>name</key>
 					<string>constant.numeric.binary.js</string>
+				</dict>
+				<dict>
+					<key>captures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>invalid.illegal</string>
+						</dict>
+					</dict>
+					<key>match</key>
+					<string>\b(?&lt;!\.)[0-9]+\.(?:[0-9]*([a-zA-Z_$][a-zA-Z0-9_$]*)?)</string>
+					<key>name</key>
+					<string>constant.numeric.js</string>
 				</dict>
 				<dict>
 					<key>captures</key>

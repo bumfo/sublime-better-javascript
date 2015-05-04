@@ -201,36 +201,6 @@ repository:
     patterns:
     - name: meta.delimiter.method.period.js
       match: \.(?![0-9])
-    - name: support.function.js # (?<=\.|)\s*
-      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\()
-    - name: support.class.js
-      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\=\s*class(?!\$)\b)
-    - name: support.class.js
-      match: (?<![a-zA-Z0-9_$])[A-Z][a-zA-Z0-9_$]*(?=\s*\=\s*function(?!\$)\b)
-    - name: entity.name.function.js
-      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\=\s*function(?!\$)\b)
-    - name: entity.name.function.arrow.js
-      match: |
-        (?x)
-        \s*(?<![a-zA-Z0-9_$])
-        [a-zA-Z_$][a-zA-Z0-9_$]*
-        (?=
-          (?>\s*)\=(?>\s*)
-          (?>
-            ([a-zA-Z_$][a-zA-Z0-9_$]*)|
-            (\()([a-zA-Z0-9_$\s,]*)(\))
-          )
-          (?>\s*)=>
-        )
-    - name: support.class.js
-      match: |
-        (?x)
-        \b(?>
-          Anchor|Applet|Area|Array|Boolean|Button|Checkbox|Date|document|event|FileUpload|Form|Frame|
-          Function|Hidden|History|Image|Java(?>Array|Class|Object|Package)|java|Layer|Link|Location|
-          Math|MimeType|Number|navigator|netscape|Object|Option|Packages|Password|Plugin|Promise|Radio|
-          RegExp|Reset|Select|String|Style|Submit|screen|sun|Text(?>area)?|window|XMLHttpRequest
-        )\b
     - name: support.function.js
       match: |
         (?x)
@@ -259,52 +229,123 @@ repository:
           b(?>toa|ig|o(?>ld|rderWidths)|link|ack|ind)|
           of
         )\b(?=\s*\()
-    - name: support.constant.js #meta.identifier.js
+    - name: support.function.other-method.js # (?<=\.|)\s*
+      match: (?<=\.)\s*[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\()
+    - name: meta.invocation.function.js # (?<=\.|)\s*
+      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\()
+    - name: entity.name.class.js
+      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\=\s*class(?!\$)\b)
+    - name: entity.name.class.js
+      match: (?<![a-zA-Z0-9_$])[A-Z][a-zA-Z0-9_$]*(?=\s*\=\s*function(?!\$)\b)
+    - name: entity.name.function.js
+      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\=\s*function(?!\$)\b)
+    - name: entity.name.function.arrow.js
+      match: |
+        (?x)
+        \s*(?<![a-zA-Z0-9_$])
+        [a-zA-Z_$][a-zA-Z0-9_$]*
+        (?=
+          (?>\s*)\=(?>\s*)
+          (?>
+            ([a-zA-Z_$][a-zA-Z0-9_$]*)|
+            (\()([a-zA-Z0-9_$\s,]*)(\))
+          )
+          (?>\s*)=>
+        )
+    # - name: support.class.js
+      #   match: |
+      #     (?x)
+      #     \b(?>
+      #       Anchor|Applet|Area|Array|Boolean|Button|Checkbox|Date|document|event|FileUpload|Form|Frame|
+      #       Function|Hidden|History|Image|Java(?>Array|Class|Object|Package)|java|Layer|Link|Location|
+      #       Math|MimeType|Number|navigator|netscape|Object|Option|Packages|Password|Plugin|Promise|Radio|
+      #       RegExp|Reset|Select|String|Style|Submit|screen|sun|Text(?>area)?|window|XMLHttpRequest
+      #     )\b
+    # - name: support.constant.js #meta.identifier.js
+      # match: |
+      #   (?x)
+      #   (?<=\.)\s*(?>
+      #     s(?>ystemLanguage|cr(?>ipts|ollbars|een(?>X|Y|Top|Left))|t(?>yle(?>Sheets)?|atus(?>Text|bar)?)|ibling(?>Below|Above)|ource|uffixes|e(?>curity(?>Policy)?|l(?>ection|f)))|
+      #     h(?>istory|ost(?>name)?|as(?>h|Focus))|
+      #     y|
+      #     X(?>MLDocument|SLDocument)|
+      #     n(?>ext|ame(?>space(?>s|URI)|Prop))|
+      #     M(?>IN_VALUE|AX_VALUE)|
+      #     c(?>haracterSet|o(?>n(?>structor|trollers)|okieEnabled|lorDepth|mp(?>onents|lete))|urrent|puClass|l(?>i(?>p(?>boardData)?|entInformation)|osed|asses)|alle(?>e|r)|rypto)|
+      #     t(?>o(?>olbar|p)|ext(?>Transform|Indent|Decoration|Align)|ags)|
+      #     SQRT(?>1_2|2)|
+      #     i(?>n(?>ner(?>Height|Width)|put)|ds|gnoreCase)|
+      #     zIndex|
+      #     o(?>scpu|n(?>readystatechange|Line)|uter(?>Height|Width)|p(?>sProfile|ener)|ffscreenBuffering)|
+      #     NEGATIVE_INFINITY|
+      #     d(?>i(?>splay|alog(?>Height|Top|Width|Left|Arguments)|rectories)|e(?>scription|fault(?>Status|Ch(?>ecked|arset)|View)))|
+      #     u(?>ser(?>Profile|Language|Agent)|n(?>iqueID|defined)|pdateInterval)|
+      #     _content|
+      #     p(?>ixelDepth|ort|ersonalbar|kcs11|l(?>ugins|atform)|a(?>thname|dding(?>Right|Bottom|Top|Left)|rent(?>Window|Layer)?|ge(?>X(?>Offset)?|Y(?>Offset)?))|r(?>o(?>to(?>col|type)|duct(?>Sub)?|mpter)|e(?>vious|fix)))|
+      #     e(?>n(?>coding|abledPlugin)|x(?>ternal|pando)|mbeds)|
+      #     v(?>isibility|endor(?>Sub)?|Linkcolor)|
+      #     URLUnencoded|
+      #     P(?>I|OSITIVE_INFINITY)|
+      #     f(?>ilename|o(?>nt(?>Size|Family|Weight)|rmName)|rame(?>s|Element)|gColor)|
+      #     E|
+      #     whiteSpace|
+      #     l(?>i(?>stStyleType|n(?>eHeight|kColor))|o(?>ca(?>tion(?>bar)?|lName)|wsrc)|e(?>ngth|ft(?>Context)?)|a(?>st(?>M(?>odified|atch)|Index|Paren)|yer(?>s|X)|nguage))|
+      #     a(?>pp(?>MinorVersion|Name|Co(?>deName|re)|Version)|vail(?>Height|Top|Width|Left)|ll|r(?>ity|guments)|Linkcolor|bove)|
+      #     r(?>ight(?>Context)?|e(?>sponse(?>XML|Text)|adyState))|
+      #     global|
+      #     x|
+      #     m(?>imeTypes|ultiline|enubar|argin(?>Right|Bottom|Top|Left))|
+      #     L(?>N(?>10|2)|OG(?>10E|2E))|
+      #     b(?>o(?>ttom|rder(?>Width|RightWidth|BottomWidth|Style|Color|TopWidth|LeftWidth))|ufferDepth|elow|ackground(?>Color|Image))
+      #   )\b
+    - name: support.constant.js
       match: |
         (?x)
         (?<=\.)\s*(?>
-          s(?>ystemLanguage|cr(?>ipts|ollbars|een(?>X|Y|Top|Left))|t(?>yle(?>Sheets)?|atus(?>Text|bar)?)|ibling(?>Below|Above)|ource|uffixes|e(?>curity(?>Policy)?|l(?>ection|f)))|
-          h(?>istory|ost(?>name)?|as(?>h|Focus))|
-          y|
           X(?>MLDocument|SLDocument)|
-          n(?>ext|ame(?>space(?>s|URI)|Prop))|
           M(?>IN_VALUE|AX_VALUE)|
-          c(?>haracterSet|o(?>n(?>structor|trollers)|okieEnabled|lorDepth|mp(?>onents|lete))|urrent|puClass|l(?>i(?>p(?>boardData)?|entInformation)|osed|asses)|alle(?>e|r)|rypto)|
-          t(?>o(?>olbar|p)|ext(?>Transform|Indent|Decoration|Align)|ags)|
           SQRT(?>1_2|2)|
-          i(?>n(?>ner(?>Height|Width)|put)|ds|gnoreCase)|
-          zIndex|
-          o(?>scpu|n(?>readystatechange|Line)|uter(?>Height|Width)|p(?>sProfile|ener)|ffscreenBuffering)|
           NEGATIVE_INFINITY|
-          d(?>i(?>splay|alog(?>Height|Top|Width|Left|Arguments)|rectories)|e(?>scription|fault(?>Status|Ch(?>ecked|arset)|View)))|
-          u(?>ser(?>Profile|Language|Agent)|n(?>iqueID|defined)|pdateInterval)|
-          _content|
-          p(?>ixelDepth|ort|ersonalbar|kcs11|l(?>ugins|atform)|a(?>thname|dding(?>Right|Bottom|Top|Left)|rent(?>Window|Layer)?|ge(?>X(?>Offset)?|Y(?>Offset)?))|r(?>o(?>to(?>col|type)|duct(?>Sub)?|mpter)|e(?>vious|fix)))|
-          e(?>n(?>coding|abledPlugin)|x(?>ternal|pando)|mbeds)|
-          v(?>isibility|endor(?>Sub)?|Linkcolor)|
           URLUnencoded|
           P(?>I|OSITIVE_INFINITY)|
-          f(?>ilename|o(?>nt(?>Size|Family|Weight)|rmName)|rame(?>s|Element)|gColor)|
           E|
-          whiteSpace|
-          l(?>i(?>stStyleType|n(?>eHeight|kColor))|o(?>ca(?>tion(?>bar)?|lName)|wsrc)|e(?>ngth|ft(?>Context)?)|a(?>st(?>M(?>odified|atch)|Index|Paren)|yer(?>s|X)|nguage))|
-          a(?>pp(?>MinorVersion|Name|Co(?>deName|re)|Version)|vail(?>Height|Top|Width|Left)|ll|r(?>ity|guments)|Linkcolor|bove)|
-          r(?>ight(?>Context)?|e(?>sponse(?>XML|Text)|adyState))|
-          global|
-          x|
-          m(?>imeTypes|ultiline|enubar|argin(?>Right|Bottom|Top|Left))|
           L(?>N(?>10|2)|OG(?>10E|2E))|
-          b(?>o(?>ttom|rder(?>Width|RightWidth|BottomWidth|Style|Color|TopWidth|LeftWidth))|ufferDepth|elow|ackground(?>Color|Image))
         )\b
-    - name: support.class.js #meta.identifier.js
+        # s(?>ystemLanguage|cr(?>ipts|ollbars|een(?>X|Y|Top|Left))|t(?>yle(?>Sheets)?|atus(?>Text|bar)?)|ibling(?>Below|Above)|ource|uffixes|e(?>curity(?>Policy)?|l(?>ection|f)))|
+        # h(?>istory|ost(?>name)?|as(?>h|Focus))|
+        # y|
+        # c(?>haracterSet|o(?>n(?>structor|trollers)|okieEnabled|lorDepth|mp(?>onents|lete))|urrent|puClass|l(?>i(?>p(?>boardData)?|entInformation)|osed|asses)|alle(?>e|r)|rypto)|
+        # t(?>o(?>olbar|p)|ext(?>Transform|Indent|Decoration|Align)|ags)|
+        # n(?>ext|ame(?>space(?>s|URI)|Prop))|
+        # i(?>n(?>ner(?>Height|Width)|put)|ds|gnoreCase)|
+        # zIndex|
+        # o(?>scpu|n(?>readystatechange|Line)|uter(?>Height|Width)|p(?>sProfile|ener)|ffscreenBuffering)|
+        # d(?>i(?>splay|alog(?>Height|Top|Width|Left|Arguments)|rectories)|e(?>scription|fault(?>Status|Ch(?>ecked|arset)|View)))|
+        # u(?>ser(?>Profile|Language|Agent)|n(?>iqueID|defined)|pdateInterval)|
+        # _content|
+        # p(?>ixelDepth|ort|ersonalbar|kcs11|l(?>ugins|atform)|a(?>thname|dding(?>Right|Bottom|Top|Left)|rent(?>Window|Layer)?|ge(?>X(?>Offset)?|Y(?>Offset)?))|r(?>o(?>to(?>col|type)|duct(?>Sub)?|mpter)|e(?>vious|fix)))|
+        # f(?>ilename|o(?>nt(?>Size|Family|Weight)|rmName)|rame(?>s|Element)|gColor)|
+        # e(?>n(?>coding|abledPlugin)|x(?>ternal|pando)|mbeds)|
+        # whiteSpace|
+        # l(?>i(?>stStyleType|n(?>eHeight|kColor))|o(?>ca(?>tion(?>bar)?|lName)|wsrc)|e(?>ngth|ft(?>Context)?)|a(?>st(?>M(?>odified|atch)|Index|Paren)|yer(?>s|X)|nguage))|
+        # a(?>pp(?>MinorVersion|Name|Co(?>deName|re)|Version)|vail(?>Height|Top|Width|Left)|ll|r(?>ity|guments)|Linkcolor|bove)|
+        # r(?>ight(?>Context)?|e(?>sponse(?>XML|Text)|adyState))|
+        # global|
+        # x|
+        # m(?>imeTypes|ultiline|enubar|argin(?>Right|Bottom|Top|Left))|
+        # v(?>isibility|endor(?>Sub)?|Linkcolor)|
+        # b(?>o(?>ttom|rder(?>Width|RightWidth|BottomWidth|Style|Color|TopWidth|LeftWidth))|ufferDepth|elow|ackground(?>Color|Image))
+    - name: entity.name.class.js #support.class.js #meta.identifier.js
       match: (?<![a-zA-Z0-9_$])[A-Z][a-zA-Z0-9_$]*(?=\s*\.)
-    - name: support.class.js #null
+    - name: entity.name.class.js #support.class.js #null
       match: (?<=\.)\s*(?<![a-zA-Z0-9_$])[A-Z][a-zA-Z0-9_$]*(?![a-zA-Z0-9_$])(?!\s*\=)
     - name: entity.name.other-property #entity.name.property #support.constant.js #meta.identifier.js
       match: (?<=\.)\s*[a-zA-Z_$][a-zA-Z0-9_$]*
-    - name: meta.identifier.js #support.class.js
+    - name: variable.js
+      match: \b(?>console|document|window)\b
+    - name: meta.variable.js #meta.identifier.js #support.class.js
       match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\.)
-    - name: meta.identifier.js
+    - name: meta.variable.other.js #meta.identifier.js
       match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*
 
 # declarations
@@ -318,9 +359,9 @@ repository:
       (?={)
     beginCaptures:
       '1': {name: storage.type.class.js}
-      '2': {name: support.class.js}
+      '2': {name: entity.name.class.js} #support.class.js
       '3': {name: storage.modifier.js}
-      '4': {name: entity.other.inherited-class} #support.class.js
+      '4': {name: entity.other.inherited-class.js} #support.class.js
     end: (?<=})
     patterns:
     - name: meta.class.block.js
@@ -620,14 +661,18 @@ repository:
       match: \b(?>delete|new|typeof|void|with)(?![a-zA-Z0-9_$])
     - name: keyword.operator.js
       match: '!|%|&|\*|\/|\-\-|\-|\+\+|\+|~|===|==|=|!=|!==|<=|>=|<<=|>>=|>>>=|<>|<|>|!|&&|\|\||\?|\:|\*=|(?<!\()/=|%=|\+=|\-=|&=|\^=|\b(?>in(?>stanceof)?|of)(?![a-zA-Z0-9_$])'
+    # - name: storage.type.js
+      # match: \b(?>boolean|byte|char|class|double|enum|float|function|int(?>erface)?|long|short|var|void)(?![a-zA-Z0-9_$])
     - name: storage.type.js
-      match: \b(?>boolean|byte|char|class|double|enum|float|function|int(?>erface)?|long|short|var|void)(?![a-zA-Z0-9_$])
+      match: \b(?>class|function|var)(?![a-zA-Z0-9_$])
+    # - name: storage.modifier.js
+      # match: \b(?>const|export|extends|final|implements|native|private|protected|public|static|synchronized|throws|transient|volatile)(?![a-zA-Z0-9_$])
     - name: storage.modifier.js
-      match: \b(?>const|export|extends|final|implements|native|private|protected|public|static|synchronized|throws|transient|volatile)(?![a-zA-Z0-9_$])
+      match: \b(?>export|extends)(?![a-zA-Z0-9_$])
     - name: keyword.control.js
       match: \b(?>break|case|catch|continue|default|do|else|finally|for|goto|if|import|package|return|switch|throw|try|while|yield(?>\*)?)(?![a-zA-Z0-9_$])
     - name: variable.language.js
-      match: \b(?>super|this|arguments|self)(?![a-zA-Z0-9_$])
+      match: \b(?>super|this|arguments)(?![a-zA-Z0-9_$]) #self
     - name: constant.language.boolean.true.js
       match: \btrue(?![a-zA-Z0-9_$])
     - name: constant.language.boolean.false.js
@@ -648,19 +693,19 @@ repository:
     patterns:
     - name: constant.numeric.js # like .01
       match: (?<![a-zA-Z0-9_$])\.[0-9]+\b
+    - name: constant.numeric.octal.js # like 0o777
+      match: \b(?<!\.)(?>0(?>o|O|(?![bBxX]))[0-7]+(?![0-9]+))((?:\.[0-9])|[a-zA-Z8-9_$][a-zA-Z0-9_$]*)?
+      captures:
+        '1': {name: invalid.illegal}
+    - name: constant.numeric.binary.js # like 0b0100010
+      match: \b(?<!\.)(?>0(?>b|B)[0-1]+)([a-zA-Z2-9_$][a-zA-Z0-9_$]*)?
+      captures:
+        '1': {name: invalid.illegal}
     - name: constant.numeric.js # like 10.01px
       match: \b(?<!\.)[0-9]+\.(?:[0-9]*([a-zA-Z_$][a-zA-Z0-9_$]*)?)
       captures:
         '1': {name: invalid.illegal}
-    - name: constant.numeric.octal.js
-      match: \b(?<!\.)(?>0(?>o|O|(?![bBxX]))[0-7]*(?![0-9]+))([a-zA-Z8-9_$][a-zA-Z0-9_$]*)?
-      captures:
-        '1': {name: invalid.illegal}
-    - name: constant.numeric.binary.js
-      match: \b(?<!\.)(?>0(?>b|B)[0-1]+)([a-zA-Z2-9_$][a-zA-Z0-9_$]*)?
-      captures:
-        '1': {name: invalid.illegal}
-    - name: constant.numeric.js
+    - name: constant.numeric.js # like 0xFFF
       match: \b(?<!\.)(?>(?>0(?>x|X)[0-9a-fA-F]+)|(?>[0-9]+))([a-zA-Z_$][a-zA-Z0-9_$]*)? # (\.[0-9]+)?
       captures:
         '1': {name: invalid.illegal}
