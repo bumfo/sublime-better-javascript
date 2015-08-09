@@ -19,7 +19,7 @@ repository:
 # control sequences
   comments:
     patterns:
-    - name: comment.line.js
+    - name: comment.line.nodejs.js
       comment: node.js shebang
       match: ^#!/usr/bin/env node
     - name: comment.block.documentation.js
@@ -27,15 +27,8 @@ repository:
       end: \*/
       captures:
         '0': {name: punctuation.definition.comment.js}
-    - name: comment.block.js
-      begin: /\*
-      end: \*/
-      captures:
-        '0': {name: punctuation.definition.comment.js}
-    - name: comment.line.double-slash.js
-      match: (//).*$\n?
-      captures:
-        '1': {name: punctuation.definition.comment.js}
+    - include: '#block-comment'
+    - include: '#line-comment'
     - name: comment.line.double-slash.js
       match: ^(#!\/).*$\n?
       captures:
@@ -46,12 +39,32 @@ repository:
         '0': {name: punctuation.definition.comment.html.js}
         '2': {name: punctuation.definition.comment.html.js}
 
+  block-comment:
+    name: comment.block.js
+    begin: /\*
+    end: \*/
+    captures:
+      '0': {name: punctuation.definition.comment.js}
+
+  line-comment:
+    name: comment.line.double-slash.js
+    match: (//).*$\n?
+    captures:
+      '1': {name: punctuation.definition.comment.js}
+
+  line-comment-without-line-end:
+    name: comment.line.double-slash.js
+    match: (//).*$ #\n?
+    captures:
+      '1': {name: punctuation.definition.comment.js}
+
 # statements
   statements:
     patterns:
     - include: '#comments'
     - include: '#class-declaration'
     - include: '#for-statement'
+    - include: '#var-statement'
     - include: '#parentheses-statement'
     - include: '#statement-group'
     - include: '#expressions'
@@ -80,6 +93,49 @@ repository:
       - name: punctuation.terminator.statement.js
         match: \;
     - include: '#statements'
+
+  var-statement:
+    name: meta.statement.var.js
+    begin: \bvar\s+
+    beginCaptures:
+      '0': {name: storage.type.js}
+    end: (;)|(?<!,|^|\s)\s*\n|(?=[\}\]\)])
+    endCaptures:
+      '1': {name: punctuation.terminator.statement.js}
+    patterns:
+    - name: meta.var.comma-and-comment.js
+      begin: (,)\s*(?=\/\*|\/\/)
+      beginCaptures:
+        '1': {name: meta.delimiter.var.comma.js}
+      end: (?<=\*\/)\s*(?!\s|\/\*|\/\/)|(?<=\n)
+      patterns:
+      - include: '#line-comment'
+      - include: '#block-comment'
+    - name: meta.delimiter.var.comma.js
+      match: ','
+    - name: meta.var.comment-line.js
+      begin: ^\s*(?=\/\*|\/\/)
+      end: (?<=\*\/)\s*(?!\s|\/\*|\/\/)|(?<=\n)
+      patterns:
+      - include: '#line-comment'
+      - include: '#block-comment'
+    - include: '#line-comment-without-line-end'
+    - include: '#comments'
+    - name: meta.var.identifier.js
+      begin: (?=[a-zA-Z_$][a-zA-Z0-9_$]*)
+      end: (?=,|)
+      patterns:
+      - include: '#reserved-word'
+      - include: '#special-assignment'
+      - name: variable.declaration.js
+        match: ([a-zA-Z_$][a-zA-Z0-9_$]*)
+    - name: meta.var.assignment.js
+      begin: (=)
+      beginCaptures:
+        '1': {name: punctuation.declaration.variable.js}
+      end: (?=[,;\}\]\)])|(?<!,|^|\s|[&|<>\+\-\*\/=\.])(?=\s*\n)
+      patterns:
+      - include: '#expressions'
 
   parentheses-statement: 
     name: meta.statement.parentheses.js
@@ -194,45 +250,8 @@ repository:
     - name: support.class.js
       match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*
 
-  identifier-expressions:
-    name: meta.expression.identifier.js
-    begin: (?=(\.)?(?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*)
-    end: (?!(\s*\.\s*)?[a-zA-Z_$])(?<=[a-zA-Z0-9_$])(?![a-zA-Z0-9_$])
+  special-assignment:
     patterns:
-    - name: meta.delimiter.method.period.js
-      match: \.(?![0-9])
-    - name: support.function.js
-      match: |
-        (?x)
-        (?<=\.)\s*(?>
-          s(?>h(?>ift|ow(?>Mod(?>elessDialog|alDialog)|Help))|croll(?>X|By(?>Pages|Lines)?|Y|To)?|t(?>op|rike)|i(?>n|zeToContent|debar|gnText)|o(?>me|rt)|u(?>p|b(?>str(?>ing)?)?)|pli(?>ce|t)|e(?>nd|t(?>Re(?>sizable|questHeader)|M(?>i(?>nutes|lliseconds)|onth)|Seconds|Ho(?>tKeys|urs)|Year|Cursor|Time(?>out)?|Interval|ZOptions|Date|UTC(?>M(?>i(?>nutes|lliseconds)|onth)|Seconds|Hours|Date|FullYear)|FullYear|Active)|arch)|qrt|lice|avePreferences|mall)|
-          h(?>ome|andleEvent)|
-          navigate|
-          c(?>har(?>CodeAt|At)|o(?>s|n(?>cat|t(?>ains|extual)|firm)|mpile)|eil|l(?>one|ear(?>Timeout|Interval)?)|a(?>ptureEvents|ll)|reate(?>StyleSheet|Popup|EventObject))|
-          t(?>o(?>GMTString|S(?>tring|ource)|U(?>TCString|pperCase)|Lo(?>caleString|werCase))|est|a(?>n|int(?>Enabled)?))|
-          i(?>s(?>NaN|Finite|Array)|n(?>herit(?>s)?|dexOf)|talics)|
-          d(?>i(?>r|sableExternalCapture)|ump|etachEvent)|
-          u(?>n(?>shift|taint|escape|watch)|pdateCommands)|
-          j(?>oin|avaEnabled)|
-          p(?>o(?>p|w)|ush|lugins.refresh|a(?>ddings|rse(?>Int|Float)?)|r(?>int|ompt|eference))|
-          e(?>scape|nableExternalCapture|v(?>al|ery)|lementFromPoint|x(?>p|ec(?>Script|Command)?|tend))|
-          valueOf|
-          UTC|
-          queryCommand(?>State|Indeterm|Enabled|Value)|
-          f(?>i(?>nd(?>Index)?|l(?>ter|e(?>ModifiedDate|Size|CreatedDate|UpdatedDate))|xed)|o(?>nt(?>size|color)|r(?>ward|Each))|loor|rom(?>CharCode)?)|
-          watch|
-          l(?>ink|o(?>ad|g)|astIndexOf)|
-          a(?>sin|nchor|cos|t(?>tachEvent|ob|an(?>2)?)|pply|lert|b(?>s|ort))|
-          r(?>ou(?>nd|teEvents)|e(?>duce(?>Right)?|size(?>By|To)|calc|turnValue|place|verse|l(?>oad|ease(?>Capture|Events)))|andom)|
-          g(?>o|et(?>ResponseHeader|M(?>i(?>nutes|lliseconds)|onth)|Se(?>conds|lection)|Hours|Year|Time(?>zoneOffset)?|Da(?>y|te)|UTC(?>M(?>i(?>nutes|lliseconds)|onth)|Seconds|Hours|Da(?>y|te)|FullYear)|FullYear|A(?>ttention|llResponseHeaders)))|
-          m(?>ap|in|ove(?>B(?>y|elow)|To(?>Absolute)?|Above)|ergeAttributes|a(?>tch|rgins|x))|
-          b(?>toa|ig|o(?>ld|rderWidths)|link|ack|ind)|
-          of
-        )\b(?=\s*\()
-    - name: support.function.other-method.js # (?<=\.|)\s*
-      match: (?<=\.)\s*[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\()
-    - name: meta.invocation.function.js # (?<=\.|)\s*
-      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\()
     - name: entity.name.class.js
       match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\=\s*class(?!\$)\b)
     - name: entity.name.class.js
@@ -252,30 +271,50 @@ repository:
           )
           (?>\s*)=>
         )
+
+  identifier-expressions:
+    name: meta.expression.identifier.js
+    begin: (?=(\.)?(?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*)
+    end: (?!(\s*\.\s*)?[a-zA-Z_$])(?<=[a-zA-Z0-9_$])(?![a-zA-Z0-9_$])
+    patterns:
+    - name: meta.delimiter.method.period.js
+      match: \.(?![0-9])
+    - include: '#support-functions'
+    - name: support.function.any-method.js #entity.identifier.function.other-method.js # (?<=\.|)\s*
+      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\()
+    - name: meta.invocation.function.js # (?<=\.|)\s*
+      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\()
+    - include: '#special-assignment'
     - name: support.constant.js
+      # X(?>MLDocument|SLDocument)|
       match: |
         (?x)
         (?<=\.)\s*(?>
-          X(?>MLDocument|SLDocument)|
           M(?>IN_VALUE|AX_VALUE)|
           SQRT(?>1_2|2)|
           NEGATIVE_INFINITY|
           URLUnencoded|
           P(?>I|OSITIVE_INFINITY)|
           E|
-          L(?>N(?>10|2)|OG(?>10E|2E))|
-        )\b
-    - name: entity.name.class.js #support.class.js #meta.identifier.js
-      match: (?<![a-zA-Z0-9_$])[A-Z][a-zA-Z0-9_$]*(?=\s*\.)
-    - name: entity.name.class.js #support.class.js #null
-      match: (?<=\.)\s*(?<![a-zA-Z0-9_$])[A-Z][a-zA-Z0-9_$]*(?![a-zA-Z0-9_$])(?!\s*\=)
-    - name: entity.name.other-property #entity.name.property #support.constant.js #meta.identifier.js
+          L(?>N(?>10|2)|OG(?>10E|2E))
+        )(?![a-zA-Z0-9_$])
+    - name: support.class.language.js
+      match: |
+        (?x)
+        (?<![a-zA-Z0-9_$])(?>
+          Math|Number
+        )(?![a-zA-Z0-9_$])
+    - name: support.class.js #entity.name.class.js #support.class.js #meta.identifier.js
+      match: (?<![a-zA-Z0-9_$])[_]*[A-Z](?![A-Z_]+(?>\s|\.))[a-zA-Z0-9_$]*(?=\s*\.) # ()
+    # - name: support.class.js #entity.name.class.js #support.class.js #null # (?<![a-zA-Z0-9_$])
+      # match: (?<=\.)\s*[A-Z](?![A-Z_]+(?>\s|\.))[a-zA-Z0-9_$]*(?![a-zA-Z0-9_$])(?!\s*\=)
+    - name: support.other.property-name.js #entity.name.other-property #entity.name.property #support.constant.js #meta.identifier.js
       match: (?<=\.)\s*[a-zA-Z_$][a-zA-Z0-9_$]*
-    - name: variable.js
-      match: \b(?>console|document|window)\b
-    - name: meta.variable.js #meta.identifier.js #support.class.js
+    - name: support.variable.js
+      match: \b(?>console|document|window|self|undefined|NaN|that)\b
+    - name: variable.other.js #meta.identifier.js #support.class.js
       match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\.)
-    - name: meta.variable.other.js #meta.identifier.js
+    - name: variable.other.js #meta.identifier.js
       match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*
 
 # declarations
@@ -380,18 +419,39 @@ repository:
     - include: '#statement-group'
     - include: '#expressions'
 
-  function-declaration:
+  # function-declaration:
+  #   name: meta.function.js
+  #   begin: |
+  #     (?x)
+  #     (?<![a-zA-Z0-9_$])(function\b(?!\$)(\*)?)\s*
+  #     ((?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*\s*)?
+  #     (?=\([^\)]*\)\s*{)
+  #   beginCaptures:
+  #     '1': {name: storage.type.function.js}
+  #     '3': {name: entity.name.function.js}
+  #   end: (?<=})
+  #   patterns:
+  #   - include: '#parameter-declaration'
+  #   - include: '#statement-group'
+
+  function-declaration: # also function expression
     name: meta.function.js
     begin: |
       (?x)
-      (?<![a-zA-Z0-9_$])(function\b(?!\$)(\*)?)\s*
-      ((?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*\s*)?
-      (?=\([^\)]*\)\s*{)
+      \b(function)(?=(?>\s+(?>\w|\$)+)?\s*\([^)]*\)\s*\{)
     beginCaptures:
       '1': {name: storage.type.function.js}
-      '3': {name: entity.name.function.js}
     end: (?<=})
     patterns:
+    - name: meta.name.function.js
+      begin: (?<=function)\s+(?=(?>\w|\$)+\s*\()
+      end: \s*(?=\()
+      patterns:
+      - include: '#reserved-word'
+      # - name: support.class.js
+      #   match: (?>[A-Z])(?>\w|\$)*
+      - name: entity.name.function.js
+        match: (?>\w|\$)+
     - include: '#parameter-declaration'
     - include: '#statement-group'
 
@@ -415,7 +475,7 @@ repository:
     endCaptures:
       '0': {name: punctuation.parameters.end.js}
     patterns:
-    - name: meta.delimiter.object.comma.js
+    - name: meta.delimiter.parameter.comma.js
       match: \,
     - include: '#expressions'
 
@@ -431,7 +491,7 @@ repository:
     - include: '#reserved-word'
     - name: variable.parameter.function.js
       match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*
-    - name: meta.delimiter.object.comma.js
+    - name: meta.delimiter.parameter.comma.js
       match: \,[ |\t]*
 
   arrow-parameter-declaration:
@@ -452,7 +512,7 @@ repository:
     - include: '#reserved-word'
     - name: variable.parameter.function.js
       match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*
-    - name: meta.delimiter.object.comma.js
+    - name: meta.delimiter.parameter.comma.js
       match: \,[ |\t]*
 
   property-accessor: 
@@ -474,7 +534,6 @@ repository:
     - name: meta.delimiter.object.comma.js
       match: \,
     - include: '#expressions'
-
 
   object-initializer:
     name: meta.declaration.object.js
@@ -584,7 +643,7 @@ repository:
     - name: meta.regexp.other.js
       match: .
 
-# keywords: 
+# keywords 
   keywords:
     patterns:
     - name: keyword.operator.js
@@ -594,7 +653,7 @@ repository:
     # - name: storage.type.js
       # match: \b(?>boolean|byte|char|class|double|enum|float|function|int(?>erface)?|long|short|var|void)(?![a-zA-Z0-9_$])
     - name: storage.type.js
-      match: \b(?>class|function|var)(?![a-zA-Z0-9_$])
+      match: \b(?>class|function|var|let)(?![a-zA-Z0-9_$]) #let
     # - name: storage.modifier.js
       # match: \b(?>const|export|extends|final|implements|native|private|protected|public|static|synchronized|throws|transient|volatile)(?![a-zA-Z0-9_$])
     - name: storage.modifier.js
@@ -639,5 +698,65 @@ repository:
       match: \b(?<!\.)(?>(?>0(?>x|X)[0-9a-fA-F]+)|(?>[0-9]+))([a-zA-Z_$][a-zA-Z0-9_$]*)? # (\.[0-9]+)?
       captures:
         '1': {name: invalid.illegal}
+
+  support-functions:
+    patterns:
+    - name: support.function.prototype.object.js
+      match: |
+        (?x)
+        (?<=\.)\s*(?>
+          __define(?>Getter|Setter)__|__lookup(?>Getter|Setter)__|hasOwnProperty|isPrototypeOf|propertyIsEnumerable|to(?>LocaleString|Source|String)|unwatch|valueOf|watch
+        )\b(?=\s*\()
+    - name: support.function.prototype.number.js
+      match: |
+        (?x)
+        (?<=\.)\s*(?>
+          to(?>Exponential|Fixed|Precision)
+        )\b(?=\s*\()
+    - name: support.function.prototype.string.js
+      match: |
+        (?x)
+        (?<=\.)\s*(?>
+          anchor|big|blink|bold|char(?>At|CodeAt)|codePointAt|concat|endsWith|fixed|font(?>color|size)|includes|indexOf|italics|lastIndexOf|link|localeCompare|match|normalize|quote|repeat|replace|search|slice|small|split|startsWith|strike|sub(?>str|string)?|sup|to(?>Locale(?>LowerCase|UpperCase)|LowerCase|UpperCase)|trim(?>Left|Right)?
+        )\b(?=\s*\()
+    - name: support.function.prototype.array.js
+      match: |
+        (?x)
+        (?<=\.)\s*(?>
+          concat|copyWithin|entries|every|fill|filter|find(?>Index)?|forEach|includes|indexOf|join|keys|lastIndexOf|map|pop|push|reduce(?>Right)?|reverse|shift|slice|some|sort|splice|unshift|values
+        )\b(?=\s*\()
+    - name: support.function.prototype.function.js
+      match: |
+        (?x)
+        (?<=\.)\s*(?>
+          apply|bind|call|isGenerator
+        )\b(?=\s*\()
+    # match: |
+    #   (?x)
+    #   (?<=\.)\s*(?>
+    #     s(?>h(?>ift|ow(?>Mod(?>elessDialog|alDialog)|Help))|croll(?>X|By(?>Pages|Lines)?|Y|To)?|t(?>op|rike)|i(?>n|zeToContent|debar|gnText)|o(?>me|rt)|u(?>p|b(?>str(?>ing)?)?)|pli(?>ce|t)|e(?>nd|t(?>Re(?>sizable|questHeader)|M(?>i(?>nutes|lliseconds)|onth)|Seconds|Ho(?>tKeys|urs)|Year|Cursor|Time(?>out)?|Interval|ZOptions|Date|UTC(?>M(?>i(?>nutes|lliseconds)|onth)|Seconds|Hours|Date|FullYear)|FullYear|Active)|arch)|qrt|lice|avePreferences|mall)|
+    #     h(?>ome|andleEvent)|
+    #     navigate|
+    #     c(?>har(?>CodeAt|At)|o(?>s|n(?>cat|t(?>ains|extual)|firm)|mpile)|eil|l(?>one|ear(?>Timeout|Interval)?)|a(?>ptureEvents|ll)|reate(?>StyleSheet|Popup|EventObject))|
+    #     t(?>o(?>GMTString|S(?>tring|ource)|U(?>TCString|pperCase)|Lo(?>caleString|werCase))|est|a(?>n|int(?>Enabled)?))|
+    #     i(?>s(?>NaN|Finite|Array)|n(?>herit(?>s)?|dexOf)|talics)|
+    #     d(?>i(?>r|sableExternalCapture)|ump|etachEvent)|
+    #     u(?>n(?>shift|taint|escape|watch)|pdateCommands)|
+    #     j(?>oin|avaEnabled)|
+    #     p(?>o(?>p|w)|ush|lugins.refresh|a(?>ddings|rse(?>Int|Float)?)|r(?>int|ompt|eference))|
+    #     e(?>scape|nableExternalCapture|v(?>al|ery)|lementFromPoint|x(?>p|ec(?>Script|Command)?|tend))|
+    #     valueOf|
+    #     UTC|
+    #     queryCommand(?>State|Indeterm|Enabled|Value)|
+    #     f(?>i(?>nd(?>Index)?|l(?>ter|e(?>ModifiedDate|Size|CreatedDate|UpdatedDate))|xed)|o(?>nt(?>size|color)|r(?>ward|Each))|loor|rom(?>CharCode)?)|
+    #     watch|
+    #     l(?>ink|o(?>ad|g)|astIndexOf)|
+    #     a(?>sin|nchor|cos|t(?>tachEvent|ob|an(?>2)?)|pply|lert|b(?>s|ort))|
+    #     r(?>ou(?>nd|teEvents)|e(?>duce(?>Right)?|size(?>By|To)|calc|turnValue|place|verse|l(?>oad|ease(?>Capture|Events)))|andom)|
+    #     g(?>o|et(?>ResponseHeader|M(?>i(?>nutes|lliseconds)|onth)|Se(?>conds|lection)|Hours|Year|Time(?>zoneOffset)?|Da(?>y|te)|UTC(?>M(?>i(?>nutes|lliseconds)|onth)|Seconds|Hours|Da(?>y|te)|FullYear)|FullYear|A(?>ttention|llResponseHeaders)))|
+    #     m(?>ap|in|ove(?>B(?>y|elow)|To(?>Absolute)?|Above)|ergeAttributes|a(?>tch|rgins|x))|
+    #     b(?>toa|ig|o(?>ld|rderWidths)|link|ack|ind)|
+    #     of
+    #   )\b(?=\s*\()
 
 ...
