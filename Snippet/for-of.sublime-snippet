@@ -1,0 +1,8 @@
+<snippet>
+    <content><![CDATA[for (let ${1:i} of ${2:things}) {
+	$0
+}]]></content>
+    <tabTrigger>forof</tabTrigger>
+    <scope>source.js</scope>
+    <description>for (… of …) {}</description>
+</snippet>
