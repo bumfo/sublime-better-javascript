@@ -32,7 +32,7 @@
 		<key>arguments-parentheses</key>
 		<dict>
 			<key>begin</key>
-			<string>(?&lt;=[a-zA-Z0-9_$\)\]\}])(?&lt;!return|yield|void|typeof)\s*\(</string>
+			<string>(?&lt;=[a-zA-Z0-9_$\)\]\}])((?&lt;!return|void|typeof|yield)|(?&lt;=[a-zA-Z0-9_$]return|[a-zA-Z0-9_$]void|[a-zA-Z0-9_$]typeof|[a-zA-Z0-9_$]yield))\s*\(</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>0</key>
@@ -240,8 +240,10 @@
 			<string>(?x)
 \b(class)\b\s*
 ([a-zA-Z_$][a-zA-Z0-9_$]*)?\s*
-(?:(extends)\s*([a-zA-Z_$][a-zA-Z0-9_$]*)?\s*)?
+(?=
+(?:(e(?&gt;x(?&gt;t(?&gt;e(?&gt;n(?&gt;ds?)?)?)?)?)?)(?![a-zA-Z0-9_$])\s*([a-zA-Z_$][a-zA-Z0-9_$\.]*)?\s*)?
 (?={)
+)
 </string>
 			<key>beginCaptures</key>
 			<dict>
@@ -255,16 +257,6 @@
 					<key>name</key>
 					<string>entity.name.class.js</string>
 				</dict>
-				<key>3</key>
-				<dict>
-					<key>name</key>
-					<string>storage.modifier.js</string>
-				</dict>
-				<key>4</key>
-				<dict>
-					<key>name</key>
-					<string>entity.other.inherited-class.js</string>
-				</dict>
 			</dict>
 			<key>end</key>
 			<string>(?&lt;=})</string>
@@ -272,6 +264,43 @@
 			<string>meta.class.js</string>
 			<key>patterns</key>
 			<array>
+				<dict>
+					<key>begin</key>
+					<string>(?&lt;![a-zA-Z0-9_$])(extends)\s+(?=[a-zA-Z_$])</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>storage.modifier.js</string>
+						</dict>
+					</dict>
+					<key>end</key>
+					<string>(?={)</string>
+					<key>name</key>
+					<string>meta.extends.js</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>match</key>
+							<string>\.(?![0-9])</string>
+							<key>name</key>
+							<string>meta.delimiter.method.period.js</string>
+						</dict>
+						<dict>
+							<key>match</key>
+							<string>(?&lt;![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*</string>
+							<key>name</key>
+							<string>entity.other.inherited-class.js</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>(?&lt;![a-zA-Z0-9_$])extends(?![a-zA-Z0-9_$])</string>
+					<key>name</key>
+					<string>storage.modifier.js</string>
+				</dict>
 				<dict>
 					<key>begin</key>
 					<string>{</string>
@@ -287,11 +316,23 @@
 						</dict>
 						<dict>
 							<key>include</key>
-							<string>#function-declaration</string>
+							<string>#property-function</string>
 						</dict>
 						<dict>
 							<key>include</key>
 							<string>#shorthand-function</string>
+						</dict>
+						<dict>
+							<key>match</key>
+							<string>(?&lt;![a-zA-Z0-9_$])(?&gt;get|set)(?![a-zA-Z0-9_$])</string>
+							<key>name</key>
+							<string>storage.type.js</string>
+						</dict>
+						<dict>
+							<key>match</key>
+							<string>(?&lt;![a-zA-Z0-9_$])(?&gt;static)(?![a-zA-Z0-9_$])</string>
+							<key>name</key>
+							<string>storage.modifier.js</string>
 						</dict>
 					</array>
 				</dict>
@@ -655,7 +696,7 @@
 					<key>match</key>
 					<string>(?x)
 (?&lt;![a-zA-Z0-9_$])(?&gt;
-  Math|Number
+  Math|Number|Object|Array|Map|Set|WeakMap|WeakSet
 )(?![a-zA-Z0-9_$])
 </string>
 					<key>name</key>
@@ -663,15 +704,15 @@
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>(?&lt;![a-zA-Z0-9_$])[_]*[A-Z](?![A-Z_]+(?&gt;\s|\.))[a-zA-Z0-9_$]*(?=\s*\.)</string>
+					<string>(?&lt;=\.)\s*[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*[+\-*/]?=(?!=))</string>
 					<key>name</key>
-					<string>support.class.js</string>
+					<string>support.other.property-name.js</string>
 				</dict>
 				<dict>
 					<key>match</key>
 					<string>(?&lt;=\.)\s*[a-zA-Z_$][a-zA-Z0-9_$]*</string>
 					<key>name</key>
-					<string>support.other.property-name.js</string>
+					<string>meta.other.property-name.js</string>
 				</dict>
 				<dict>
 					<key>match</key>
@@ -711,7 +752,7 @@
 				</dict>
 				<dict>
 					<key>match</key>
-					<string>\b(?&gt;class|function|var|let)(?![a-zA-Z0-9_$])</string>
+					<string>\b(?&gt;class|function|var|let|const)(?![a-zA-Z0-9_$])</string>
 					<key>name</key>
 					<string>storage.type.js</string>
 				</dict>
@@ -809,7 +850,7 @@
 					<key>match</key>
 					<string>(?&lt;![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*</string>
 					<key>name</key>
-					<string>support.class.js</string>
+					<string>storage.other.js</string>
 				</dict>
 			</array>
 		</dict>
@@ -1128,7 +1169,7 @@
 		<key>property-accessor</key>
 		<dict>
 			<key>begin</key>
-			<string>(?&lt;=[a-zA-Z0-9_$\)\]\}])(?&lt;!return|yield|void|typeof)\s*\[</string>
+			<string>(?&lt;=[a-zA-Z0-9_$\)\]\}])((?&lt;!return|void|typeof|yield)|(?&lt;=[a-zA-Z0-9_$]return|[a-zA-Z0-9_$]void|[a-zA-Z0-9_$]typeof|[a-zA-Z0-9_$]yield))\s*\[</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>0</key>
@@ -1374,7 +1415,7 @@
 		<key>regular-expression</key>
 		<dict>
 			<key>begin</key>
-			<string>(?&lt;=[=(:\[,+\-*\/!?&lt;&gt;]|return|yield|void|typeof|yield\*|&amp;&amp;|\|\||^)\s*(/)(?![/*+{}?])</string>
+			<string>(?&lt;=[=(:\[,+\-*\/!?&lt;&gt;]|return|yield|void|typeof|&amp;&amp;|\|\||^)\s*(/)(?![/*+{}?])</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
@@ -1532,7 +1573,7 @@
 		<key>statement-group</key>
 		<dict>
 			<key>begin</key>
-			<string>(?&lt;![=(:\[,+\-*\/!?&lt;&gt;]|return|yield|void|typeof|yield\*|&amp;&amp;|\|\||\s)\s*\{</string>
+			<string>(?&gt;(?&lt;![=(:\[,+\-*\/!?&lt;&gt;]|return|yield|void|typeof|&amp;&amp;|\|\||\s)|(?&lt;==&gt;))\s*\{</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>0</key>
@@ -1576,10 +1617,6 @@
 				<dict>
 					<key>include</key>
 					<string>#for-statement</string>
-				</dict>
-				<dict>
-					<key>include</key>
-					<string>#var-statement</string>
 				</dict>
 				<dict>
 					<key>include</key>
@@ -1682,7 +1719,7 @@
 					<string>(?x)
 (?&lt;=\.)\s*(?&gt;
   __define(?&gt;Getter|Setter)__|__lookup(?&gt;Getter|Setter)__|hasOwnProperty|isPrototypeOf|propertyIsEnumerable|to(?&gt;LocaleString|Source|String)|unwatch|valueOf|watch
-)\b(?=\s*\()
+)(?=\s*\()
 </string>
 					<key>name</key>
 					<string>support.function.prototype.object.js</string>
@@ -1692,7 +1729,7 @@
 					<string>(?x)
 (?&lt;=\.)\s*(?&gt;
   to(?&gt;Exponential|Fixed|Precision)
-)\b(?=\s*\()
+)(?=\s*\()
 </string>
 					<key>name</key>
 					<string>support.function.prototype.number.js</string>
@@ -1702,7 +1739,7 @@
 					<string>(?x)
 (?&lt;=\.)\s*(?&gt;
   anchor|big|blink|bold|char(?&gt;At|CodeAt)|codePointAt|concat|endsWith|fixed|font(?&gt;color|size)|includes|indexOf|italics|lastIndexOf|link|localeCompare|match|normalize|quote|repeat|replace|search|slice|small|split|startsWith|strike|sub(?&gt;str|string)?|sup|to(?&gt;Locale(?&gt;LowerCase|UpperCase)|LowerCase|UpperCase)|trim(?&gt;Left|Right)?
-)\b(?=\s*\()
+)(?=\s*\()
 </string>
 					<key>name</key>
 					<string>support.function.prototype.string.js</string>
@@ -1712,7 +1749,7 @@
 					<string>(?x)
 (?&lt;=\.)\s*(?&gt;
   concat|copyWithin|entries|every|fill|filter|find(?&gt;Index)?|forEach|includes|indexOf|join|keys|lastIndexOf|map|pop|push|reduce(?&gt;Right)?|reverse|shift|slice|some|sort|splice|unshift|values
-)\b(?=\s*\()
+)(?=\s*\()
 </string>
 					<key>name</key>
 					<string>support.function.prototype.array.js</string>
@@ -1722,10 +1759,94 @@
 					<string>(?x)
 (?&lt;=\.)\s*(?&gt;
   apply|bind|call|isGenerator
-)\b(?=\s*\()
+)(?=\s*\()
 </string>
 					<key>name</key>
 					<string>support.function.prototype.function.js</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>(?x)
+(?&lt;=\.)\s*(?&gt;
+  a(?&gt;bs|cos(?&gt;h)?|sin(?&gt;h)?|tan(?&gt;2|h)?)|cbrt|ceil|clz32|cos(?&gt;h)?|exp(?&gt;m1)?|floor|fround|hypot|imul|log(?&gt;10|1p|2)?|max|min|pow|random|round|sign|sin(?&gt;h)?|sqrt|tan(?&gt;h)?|trunc
+)(?=\s*\()
+</string>
+					<key>name</key>
+					<string>support.function.prototype.math.js</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>(?x)
+(?&lt;=\.)\s*(?&gt;
+  appendChild|
+  cloneNode|
+  compareDocumentPosition|
+  contains|
+  hasChildNodes|
+  insertBefore|
+  is(?&gt;DefaultNamespace|EqualNode)|
+  lookup(?&gt;NamespaceURI|Prefix)|
+  normalize|
+  removeChild|
+  replaceChild|
+
+  closest|
+  get(?&gt;Attribute(?&gt;Node|NodeNS|NS)?|BoundingClientRect|ClientRects|ElementsBy(?&gt;ClassName|TagName|TagNameNS))|
+  has(?&gt;Attribute(?&gt;NS|s)?)|
+  insertAdjacentHTML|
+  matches|
+  query(?&gt;Selector(?&gt;All)?)|
+  remove(?&gt;Attribute(?&gt;Node|NS)?)?|
+  request(?&gt;Fullscreen|PointerLock)|
+  scroll(?&gt;IntoView(?&gt;IntoViewIfNeeded)?)|
+  set(?&gt;Attribute(?&gt;Node|NodeNS|NS)?|Capture)|
+
+  addEventListener|
+  detachEvent|
+  dispatchEvent|
+  fireEvent|
+  removeEventListener|
+
+  blur|
+  click|
+  focus(?&gt;SpellCheck)?|
+
+  createEvent|
+  preventDefault|
+  stopImmediatePropagation|
+  stopPropagation
+)(?=\s*\()
+</string>
+					<key>name</key>
+					<string>support.function.prototype.dom.js</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>(?x)
+(?&lt;=\.)\s*(?&gt;
+  adoptNode|
+  caret(?&gt;PositionFromPoint|RangeFromPoint)|
+  clear|
+  close|
+  create(?&gt;Attribute|CDATASection|Comment|DocumentFragment|Element(?&gt;NS)?|EntityReference|Event|Expression|NodeIterator|NSResolver|ProcessingInstruction|Range|TextNode|TouchList|TreeWalker)|
+  elementFromPoint|
+  enableStyleSheetsForSet|
+  evaluate|
+  execCommand|
+  exitPointerLock|
+  get(?&gt;BoxObjectFor|Element(?&gt;ById|sBy(?&gt;ClassName|Name|TagName(?&gt;NS)?))|Selection)|
+  hasFocus|
+  importNode|
+  loadOverlay|
+  open|
+  query(?&gt;CommandSupported|Selector(?&gt;All)?)|
+  registerElement|
+  releaseCapture|
+  write(?&gt;ln)?
+)(?=\s*\()
+</string>
+					<key>name</key>
+					<string>support.function.prototype.document.js</string>
 				</dict>
 			</array>
 		</dict>

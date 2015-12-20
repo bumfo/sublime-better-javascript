@@ -64,7 +64,7 @@ repository:
     - include: '#comments'
     - include: '#class-declaration'
     - include: '#for-statement'
-    - include: '#var-statement'
+    # - include: '#var-statement'
     - include: '#parentheses-statement'
     - include: '#statement-group'
     - include: '#expressions'
@@ -152,7 +152,7 @@ repository:
 
   statement-group:
     name: meta.statement-group
-    begin: (?<![=(:\[,+\-*\/!?<>]|return|yield|void|typeof|yield\*|&&|\|\||\s)\s*\{
+    begin: (?>(?<![=(:\[,+\-*\/!?<>]|return|yield|void|typeof|&&|\|\||\s)|(?<==>))\s*\{
     beginCaptures:
       '0': {name: punctuation.definition.statementgroup.begin.js}
     end: \}
@@ -225,7 +225,7 @@ repository:
 
   regular-expression:
     name: string.regexp.js
-    begin: (?<=[=(:\[,+\-*\/!?<>]|return|yield|void|typeof|yield\*|&&|\|\||^)\s*(/)(?![/*+{}?])
+    begin: (?<=[=(:\[,+\-*\/!?<>]|return|yield|void|typeof|&&|\|\||^)\s*(/)(?![/*+{}?])
     beginCaptures:
       '1': {name: punctuation.definition.string.begin.js}
     end: (/)[igm]*
@@ -247,7 +247,7 @@ repository:
     patterns:
     - name: meta.delimiter.method.period.js
       match: \.(?![0-9])
-    - name: support.class.js
+    - name: storage.other.js #keyword.storage.js #support.class.js
       match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*
 
   special-assignment:
@@ -302,13 +302,15 @@ repository:
       match: |
         (?x)
         (?<![a-zA-Z0-9_$])(?>
-          Math|Number
+          Math|Number|Object|Array|Map|Set|WeakMap|WeakSet
         )(?![a-zA-Z0-9_$])
-    - name: support.class.js #entity.name.class.js #support.class.js #meta.identifier.js
-      match: (?<![a-zA-Z0-9_$])[_]*[A-Z](?![A-Z_]+(?>\s|\.))[a-zA-Z0-9_$]*(?=\s*\.) # ()
+    # - name: support.class.js #entity.name.class.js #support.class.js #meta.identifier.js
+      # match: (?<![a-zA-Z0-9_$])[_]*[A-Z](?![A-Z_]+(?>\s|\.))[a-zA-Z0-9_$]*(?=\s*\.) # ()
     # - name: support.class.js #entity.name.class.js #support.class.js #null # (?<![a-zA-Z0-9_$])
       # match: (?<=\.)\s*[A-Z](?![A-Z_]+(?>\s|\.))[a-zA-Z0-9_$]*(?![a-zA-Z0-9_$])(?!\s*\=)
-    - name: support.other.property-name.js #entity.name.other-property #entity.name.property #support.constant.js #meta.identifier.js
+    - name: support.other.property-name.js # entity.name.property.js
+      match: (?<=\.)\s*[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*[+\-*/]?=(?!=))
+    - name: meta.other.property-name.js #support.other.property-name.js #entity.name.other-property #entity.name.property #support.constant.js #meta.identifier.js
       match: (?<=\.)\s*[a-zA-Z_$][a-zA-Z0-9_$]*
     - name: support.variable.js
       match: \b(?>console|document|window|self|undefined|NaN|that)\b
@@ -324,22 +326,67 @@ repository:
       (?x)
       \b(class)\b\s*
       ([a-zA-Z_$][a-zA-Z0-9_$]*)?\s*
-      (?:(extends)\s*([a-zA-Z_$][a-zA-Z0-9_$]*)?\s*)?
+      (?=
+      (?:(e(?>x(?>t(?>e(?>n(?>ds?)?)?)?)?)?)(?![a-zA-Z0-9_$])\s*([a-zA-Z_$][a-zA-Z0-9_$\.]*)?\s*)?
       (?={)
+      )
     beginCaptures:
       '1': {name: storage.type.class.js}
       '2': {name: entity.name.class.js} #support.class.js
-      '3': {name: storage.modifier.js}
-      '4': {name: entity.other.inherited-class.js} #support.class.js
+      # '3': {name: storage.modifier.js}
+      # '4': {name: entity.other.inherited-class.js} #support.class.js
     end: (?<=})
     patterns:
+    - name: meta.extends.js
+      begin: (?<![a-zA-Z0-9_$])(extends)\s+(?=[a-zA-Z_$])
+      beginCaptures:
+        '1': {name: storage.modifier.js}
+      end: (?={)
+      patterns:
+      - name: meta.delimiter.method.period.js
+        match: \.(?![0-9])
+      - name: entity.other.inherited-class.js
+        match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*
+    - name: storage.modifier.js
+      match: (?<![a-zA-Z0-9_$])extends(?![a-zA-Z0-9_$])
     - name: meta.class.block.js
       begin: '{'
       end: '}'
       patterns:
       - include: '#comments'
-      - include: '#function-declaration'
+      # - include: '#function-declaration'
+      - include: '#property-function'
       - include: '#shorthand-function'
+      - name: storage.type.js
+        match: (?<![a-zA-Z0-9_$])(?>get|set)(?![a-zA-Z0-9_$])
+      - name: storage.modifier.js
+        match: (?<![a-zA-Z0-9_$])(?>static)(?![a-zA-Z0-9_$])
+
+  # class-declaration:
+  #   name: meta.class.js
+  #   begin: |
+  #     (?x)
+  #     \b(class)\b\s*
+  #     ([a-zA-Z_$][a-zA-Z0-9_$]*)?\s*
+  #     (?:(extends)\s*([a-zA-Z_$][a-zA-Z0-9_$]*)?\s*)?
+  #     (?={)
+  #   beginCaptures:
+  #     '1': {name: storage.type.class.js}
+  #     '2': {name: entity.name.class.js} #support.class.js
+  #     '3': {name: storage.modifier.js}
+  #     '4': {name: entity.other.inherited-class.js} #support.class.js
+  #   end: (?<=})
+  #   patterns:
+  #   - name: meta.class.block.js
+  #     begin: '{'
+  #     end: '}'
+  #     patterns:
+  #     - include: '#comments'
+  #     # - include: '#function-declaration'
+  #     - name: storage.modifier.js
+  #       match: (?<![a-zA-Z0-9_$])(?>static)(?![a-zA-Z0-9_$])
+  #     - include: '#property-function'
+  #     - include: '#shorthand-function'
 
   shorthand-function: 
     name: meta.class.methods.js
@@ -468,7 +515,7 @@ repository:
 
   arguments-parentheses:
     name: meta.arguments.js
-    begin: (?<=[a-zA-Z0-9_$\)\]\}])(?<!return|yield|void|typeof)\s*\(
+    begin: (?<=[a-zA-Z0-9_$\)\]\}])((?<!return|void|typeof|yield)|(?<=[a-zA-Z0-9_$]return|[a-zA-Z0-9_$]void|[a-zA-Z0-9_$]typeof|[a-zA-Z0-9_$]yield))\s*\(
     beginCaptures:
       '0': {name: punctuation.parameters.begin.js}
     end: \)
@@ -517,7 +564,7 @@ repository:
 
   property-accessor: 
     name: meta.accessor.property.js
-    begin: (?<=[a-zA-Z0-9_$\)\]\}])(?<!return|yield|void|typeof)\s*\[
+    begin: (?<=[a-zA-Z0-9_$\)\]\}])((?<!return|void|typeof|yield)|(?<=[a-zA-Z0-9_$]return|[a-zA-Z0-9_$]void|[a-zA-Z0-9_$]typeof|[a-zA-Z0-9_$]yield))\s*\[
     beginCaptures:
       '0': {name: punctuation.accessor.begin.js}
     end: \]
@@ -653,7 +700,7 @@ repository:
     # - name: storage.type.js
       # match: \b(?>boolean|byte|char|class|double|enum|float|function|int(?>erface)?|long|short|var|void)(?![a-zA-Z0-9_$])
     - name: storage.type.js
-      match: \b(?>class|function|var|let)(?![a-zA-Z0-9_$]) #let
+      match: \b(?>class|function|var|let|const)(?![a-zA-Z0-9_$])
     # - name: storage.modifier.js
       # match: \b(?>const|export|extends|final|implements|native|private|protected|public|static|synchronized|throws|transient|volatile)(?![a-zA-Z0-9_$])
     - name: storage.modifier.js
@@ -706,31 +753,104 @@ repository:
         (?x)
         (?<=\.)\s*(?>
           __define(?>Getter|Setter)__|__lookup(?>Getter|Setter)__|hasOwnProperty|isPrototypeOf|propertyIsEnumerable|to(?>LocaleString|Source|String)|unwatch|valueOf|watch
-        )\b(?=\s*\()
+        )(?=\s*\()
     - name: support.function.prototype.number.js
       match: |
         (?x)
         (?<=\.)\s*(?>
           to(?>Exponential|Fixed|Precision)
-        )\b(?=\s*\()
+        )(?=\s*\()
     - name: support.function.prototype.string.js
       match: |
         (?x)
         (?<=\.)\s*(?>
           anchor|big|blink|bold|char(?>At|CodeAt)|codePointAt|concat|endsWith|fixed|font(?>color|size)|includes|indexOf|italics|lastIndexOf|link|localeCompare|match|normalize|quote|repeat|replace|search|slice|small|split|startsWith|strike|sub(?>str|string)?|sup|to(?>Locale(?>LowerCase|UpperCase)|LowerCase|UpperCase)|trim(?>Left|Right)?
-        )\b(?=\s*\()
+        )(?=\s*\()
     - name: support.function.prototype.array.js
       match: |
         (?x)
         (?<=\.)\s*(?>
           concat|copyWithin|entries|every|fill|filter|find(?>Index)?|forEach|includes|indexOf|join|keys|lastIndexOf|map|pop|push|reduce(?>Right)?|reverse|shift|slice|some|sort|splice|unshift|values
-        )\b(?=\s*\()
+        )(?=\s*\()
     - name: support.function.prototype.function.js
       match: |
         (?x)
         (?<=\.)\s*(?>
           apply|bind|call|isGenerator
-        )\b(?=\s*\()
+        )(?=\s*\()
+    - name: support.function.prototype.math.js
+      match: |
+        (?x)
+        (?<=\.)\s*(?>
+          a(?>bs|cos(?>h)?|sin(?>h)?|tan(?>2|h)?)|cbrt|ceil|clz32|cos(?>h)?|exp(?>m1)?|floor|fround|hypot|imul|log(?>10|1p|2)?|max|min|pow|random|round|sign|sin(?>h)?|sqrt|tan(?>h)?|trunc
+        )(?=\s*\()
+    - name: support.function.prototype.dom.js
+      match: |
+        (?x)
+        (?<=\.)\s*(?>
+          appendChild|
+          cloneNode|
+          compareDocumentPosition|
+          contains|
+          hasChildNodes|
+          insertBefore|
+          is(?>DefaultNamespace|EqualNode)|
+          lookup(?>NamespaceURI|Prefix)|
+          normalize|
+          removeChild|
+          replaceChild|
+
+          closest|
+          get(?>Attribute(?>Node|NodeNS|NS)?|BoundingClientRect|ClientRects|ElementsBy(?>ClassName|TagName|TagNameNS))|
+          has(?>Attribute(?>NS|s)?)|
+          insertAdjacentHTML|
+          matches|
+          query(?>Selector(?>All)?)|
+          remove(?>Attribute(?>Node|NS)?)?|
+          request(?>Fullscreen|PointerLock)|
+          scroll(?>IntoView(?>IntoViewIfNeeded)?)|
+          set(?>Attribute(?>Node|NodeNS|NS)?|Capture)|
+
+          addEventListener|
+          detachEvent|
+          dispatchEvent|
+          fireEvent|
+          removeEventListener|
+
+          blur|
+          click|
+          focus(?>SpellCheck)?|
+
+          createEvent|
+          preventDefault|
+          stopImmediatePropagation|
+          stopPropagation
+        )(?=\s*\()
+    - name: support.function.prototype.document.js
+      match: |
+        (?x)
+        (?<=\.)\s*(?>
+          adoptNode|
+          caret(?>PositionFromPoint|RangeFromPoint)|
+          clear|
+          close|
+          create(?>Attribute|CDATASection|Comment|DocumentFragment|Element(?>NS)?|EntityReference|Event|Expression|NodeIterator|NSResolver|ProcessingInstruction|Range|TextNode|TouchList|TreeWalker)|
+          elementFromPoint|
+          enableStyleSheetsForSet|
+          evaluate|
+          execCommand|
+          exitPointerLock|
+          get(?>BoxObjectFor|Element(?>ById|sBy(?>ClassName|Name|TagName(?>NS)?))|Selection)|
+          hasFocus|
+          importNode|
+          loadOverlay|
+          open|
+          query(?>CommandSupported|Selector(?>All)?)|
+          registerElement|
+          releaseCapture|
+          write(?>ln)?
+        )(?=\s*\()
+
     # match: |
     #   (?x)
     #   (?<=\.)\s*(?>

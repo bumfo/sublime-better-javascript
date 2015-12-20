@@ -1,0 +1,8 @@
+<snippet>
+    <content><![CDATA[class ${1:A} {
+	${0:$TM_SELECTED_TEXT}
+}]]></content>
+    <tabTrigger>class</tabTrigger>
+    <scope>source.js</scope>
+    <description>class … {…}</description>
+</snippet>

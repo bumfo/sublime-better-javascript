@@ -1,5 +1,5 @@
 <snippet>
-	<content><![CDATA[console.dir(${0});
+	<content><![CDATA[console.dir(${0:$TM_SELECTED_TEXT});
 ]]></content>
 	<tabTrigger>dir</tabTrigger>
 	<scope>source.js</scope>
