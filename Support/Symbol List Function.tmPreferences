@@ -5,7 +5,7 @@
 	<key>name</key>
 	<string>Symbol List Function</string>
 	<key>scope</key>
-	<string>source.js entity.name.function.js</string>
+	<string>source.js entity.name.function</string>
 	<key>settings</key>
 	<dict>
 		<key>showInSymbolList</key>

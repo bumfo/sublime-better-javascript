@@ -64,9 +64,10 @@ repository:
     - include: '#comments'
     - include: '#class-declaration'
     - include: '#for-statement'
-    # - include: '#var-statement'
+    - include: '#var-statement'
     - include: '#parentheses-statement'
     - include: '#statement-group'
+    - include: '#labeled-statement-group'
     - include: '#expressions'
     - name: punctuation.terminator.statement.js
       match: \;
@@ -79,7 +80,7 @@ repository:
       (?=\(.*?\)\s*\{?)
     beginCaptures:
       '1': {name: keyword.control.for.js}
-    end: (?<=})|(?<=[)])(?!\s*\{)
+    end: (?<=})|(?<=\))(?!\s*\{)
     patterns:
     - name: meta.parentheses.js
       begin: \(
@@ -89,6 +90,7 @@ repository:
       endCaptures:
         '0': {name: punctuation.parentheses.end.js}
       patterns:
+      - include: '#var-statement'
       - include: '#expressions'
       - name: punctuation.terminator.statement.js
         match: \;
@@ -96,7 +98,7 @@ repository:
 
   var-statement:
     name: meta.statement.var.js
-    begin: \bvar\s+
+    begin: \b(?>var|let|const)\s+
     beginCaptures:
       '0': {name: storage.type.js}
     end: (;)|(?<!,|^|\s)\s*\n|(?=[\}\]\)])
@@ -121,18 +123,26 @@ repository:
       - include: '#block-comment'
     - include: '#line-comment-without-line-end'
     - include: '#comments'
+    - name: variable.declaration.destructuring.js
+      begin: |
+        (?x)
+        (?=(?:\[|{))
+      end: (?==)
+      patterns:
+      - include: '#destructuring-pattern'
     - name: meta.var.identifier.js
-      begin: (?=[a-zA-Z_$][a-zA-Z0-9_$]*)
+      begin: (?=[a-zA-Z_$][\w$]*)
       end: (?=,|)
       patterns:
       - include: '#reserved-word'
       - include: '#special-assignment'
       - name: variable.declaration.js
-        match: ([a-zA-Z_$][a-zA-Z0-9_$]*)
+        match: ([a-zA-Z_$][\w$]*)
     - name: meta.var.assignment.js
       begin: (=)
       beginCaptures:
-        '1': {name: punctuation.declaration.variable.js}
+        '1': {name: keyword.operator.assignment.js}
+        #'1': {name: punctuation.declaration.variable.js}
       end: (?=[,;\}\]\)])|(?<!,|^|\s|[&|<>\+\-\*\/=\.])(?=\s*\n)
       patterns:
       - include: '#expressions'
@@ -145,14 +155,14 @@ repository:
       (?=\(.*?\)\s*\{?)
     beginCaptures:
       '1': {name: keyword.control.for.js}
-    end: (?<=})|(?<=[)])(?!\s*\{)
+    end: (?<=})|(?<=\))(?!\s*\{)
     patterns:
     - include: '#expression-parentheses'
     - include: '#statements'
 
   statement-group:
-    name: meta.statement-group
-    begin: (?>(?<![=(:\[,+\-*\/!?<>]|return|yield|void|typeof|&&|\|\||\s)|(?<==>))\s*\{
+    name: meta.statement-group.js
+    begin: (?>(?<![=(:\[,+\-*\/!?<>]|return|yield|void|typeof|&&|\|\||\s)|(?<==>|\*/))\s*\{
     beginCaptures:
       '0': {name: punctuation.definition.statementgroup.begin.js}
     end: \}
@@ -161,6 +171,30 @@ repository:
     patterns:
     - include: '#statements'
 
+  raw-statement-group:
+    name: meta.statement-group.js
+    begin: \{
+    beginCaptures:
+      '0': {name: punctuation.definition.statementgroup.begin.js}
+    end: \}
+    endCaptures:
+      '0': {name: punctuation.definition.statementgroup.end.js}
+    patterns:
+    - include: '#statements'
+
+  labeled-statement-group:
+    name: meta.labeled-statement-group.js
+    begin: ([a-zA-Z_$][\w$]*)\s*(\:)\s*(\{)
+    beginCaptures:
+      '2': {name: keyword}
+      '3': {name: punctuation.definition.statementgroup.begin.js}
+    end: \}
+    endCaptures:
+      '0': {name: punctuation.definition.statementgroup.end.js}
+    patterns:
+    - include: '#statements'
+
+
 # expressions
   expressions:
     patterns:
@@ -168,6 +202,7 @@ repository:
     - name: keyword.operator.comma.js #meta.delimiter.object.comma.js
       match: \, #[ |\t]*
     - include: '#property-accessor'
+    - include: '#destructuring-assignment'
     - include: '#primary-expressions'
     - include: '#keywords'
     - include: '#new-expression'
@@ -176,7 +211,7 @@ repository:
     - include: '#expression-group'
     
     - name: meta.delimiter.method.period.js
-      match: \.(?![0-9])
+      match: \.(?!\d)
 
   expression-group:
     name: meta.brace.round.js
@@ -238,86 +273,146 @@ repository:
     name: meta.expression.new.js
     begin: |
       (?x)
-      (?<=new)(?<![a-zA-Z0-9_$]new)
+      (?<=new)(?<![\w$]new)
       (?=\s+(?!
         (?>await|break|case|catch|class|const|continue|debugger|default|delete|do|else|enum|export|extends|false|finally|for|function|let|if|implements|import|in(?>stanceof|terface)?|new|null|private|protected|package|public|static|return|super|switch|this|throw(?>s)?|true|try|typeof|var|void|while|with|yield)
-        (?![a-zA-Z0-9_$])
-      )[a-zA-Z_$][a-zA-Z0-9_$]*)
-    end: (?!(\s*\.\s*)?[a-zA-Z_$])(?<=[a-zA-Z0-9_$])(?![a-zA-Z0-9_$])
+        (?![\w$])
+      )[a-zA-Z_$][\w$]*)
+    end: (?!(\s*\.\s*)?[a-zA-Z_$])(?<=[\w$])(?![\w$])
     patterns:
     - name: meta.delimiter.method.period.js
-      match: \.(?![0-9])
+      match: \.(?!\d)
     - name: storage.other.js #keyword.storage.js #support.class.js
-      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*
+      match: (?<![\w$])[a-zA-Z_$][\w$]*
 
   special-assignment:
     patterns:
     - name: entity.name.class.js
-      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\=\s*class(?!\$)\b)
+      match: (?<![\w$])[a-zA-Z_$][\w$]*(?=\s*\=\s*class(?!\$)\b)
     - name: entity.name.class.js
-      match: (?<![a-zA-Z0-9_$])[A-Z][a-zA-Z0-9_$]*(?=\s*\=\s*function(?!\$)\b)
+      match: (?<![\w$])[A-Z][\w$]*(?=\s*\=\s*function(?!\$)\b)
     - name: entity.name.function.js
-      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\=\s*function(?!\$)\b)
+      match: (?<![\w$])[a-zA-Z_$][\w$]*(?=\s*\=\s*function(?!\$)\b)
     - name: entity.name.function.arrow.js
       match: |
         (?x)
-        \s*(?<![a-zA-Z0-9_$])
-        [a-zA-Z_$][a-zA-Z0-9_$]*
+        \s*(?<![\w$])
+        [a-zA-Z_$][\w$]*
         (?=
           (?>\s*)\=(?>\s*)
           (?>
-            ([a-zA-Z_$][a-zA-Z0-9_$]*)|
-            (\()([a-zA-Z0-9_$\s,]*)(\))
+            [a-zA-Z_$][\w$]*|
+            \([\w$\s,={}\[\]\.:]*\)
           )
           (?>\s*)=>
         )
+      # match: |
+      #   (?x)
+      #   \s*(?<![\w$])
+      #   [a-zA-Z_$][\w$]*
+      #   (?=
+      #     (?>\s*)\=(?>\s*)
+      #     (?>
+      #       ([a-zA-Z_$][\w$]*)|
+      #       (\()([\w$\s,]*)(\))
+      #     )
+      #     (?>\s*)=>
+      #   )
 
   identifier-expressions:
     name: meta.expression.identifier.js
-    begin: (?=(\.)?(?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*)
-    end: (?!(\s*\.\s*)?[a-zA-Z_$])(?<=[a-zA-Z0-9_$])(?![a-zA-Z0-9_$])
+    begin: (?=(\.)?(?<![\w$])[a-zA-Z_$][\w$]*)
+    end: (?!(\s*\.\s*)?[a-zA-Z_$])(?<=[\w$])(?![\w$])
     patterns:
     - name: meta.delimiter.method.period.js
-      match: \.(?![0-9])
+      match: \.(?!\d)
     - include: '#support-functions'
     - name: support.function.any-method.js #entity.identifier.function.other-method.js # (?<=\.|)\s*
-      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\()
+      match: (?<![\w$])[a-zA-Z_$][\w$]*(?=\s*\()
     - name: meta.invocation.function.js # (?<=\.|)\s*
-      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\()
+      match: (?<![\w$])[a-zA-Z_$][\w$]*(?=\s*\()
     - include: '#special-assignment'
     - name: support.constant.js
       # X(?>MLDocument|SLDocument)|
       match: |
         (?x)
         (?<=\.)\s*(?>
+          E(?>PSILON)?|
           M(?>IN_VALUE|AX_VALUE)|
           SQRT(?>1_2|2)|
           NEGATIVE_INFINITY|
           URLUnencoded|
           P(?>I|OSITIVE_INFINITY)|
-          E|
           L(?>N(?>10|2)|OG(?>10E|2E))
-        )(?![a-zA-Z0-9_$])
+        )(?![\w$])
     - name: support.class.language.js
       match: |
         (?x)
-        (?<![a-zA-Z0-9_$])(?>
+        (?<![\w$])(?>
           Math|Number|Object|Array|Map|Set|WeakMap|WeakSet
-        )(?![a-zA-Z0-9_$])
+        )(?![\w$])
     # - name: support.class.js #entity.name.class.js #support.class.js #meta.identifier.js
-      # match: (?<![a-zA-Z0-9_$])[_]*[A-Z](?![A-Z_]+(?>\s|\.))[a-zA-Z0-9_$]*(?=\s*\.) # ()
-    # - name: support.class.js #entity.name.class.js #support.class.js #null # (?<![a-zA-Z0-9_$])
-      # match: (?<=\.)\s*[A-Z](?![A-Z_]+(?>\s|\.))[a-zA-Z0-9_$]*(?![a-zA-Z0-9_$])(?!\s*\=)
-    - name: support.other.property-name.js # entity.name.property.js
-      match: (?<=\.)\s*[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*[+\-*/]?=(?!=))
+      # match: (?<![\w$])[_]*[A-Z](?![A-Z_]+(?>\s|\.))[\w$]*(?=\s*\.) # ()
+    # - name: support.class.js #entity.name.class.js #support.class.js #null # (?<![\w$])
+      # match: (?<=\.)\s*[A-Z](?![A-Z_]+(?>\s|\.))[\w$]*(?![\w$])(?!\s*\=)
+    # - name: support.other.property-name.js # entity.name.property.js
+    #   match: (?<=\.)\s*[a-zA-Z_$][\w$]*(?=\s*(?:(?:[+\-*/%&\^|]|\*\*|<<|>>|>>>)?=(?!=)|\+\+|\-\-))
     - name: meta.other.property-name.js #support.other.property-name.js #entity.name.other-property #entity.name.property #support.constant.js #meta.identifier.js
-      match: (?<=\.)\s*[a-zA-Z_$][a-zA-Z0-9_$]*
+      match: (?<=\.)\s*[a-zA-Z_$][\w$]*
     - name: support.variable.js
       match: \b(?>console|document|window|self|undefined|NaN|that)\b
     - name: variable.other.js #meta.identifier.js #support.class.js
-      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*(?=\s*\.)
+      match: (?<![\w$])[a-zA-Z_$][\w$]*(?=\s*\.)
     - name: variable.other.js #meta.identifier.js
-      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*
+      match: (?<![\w$])[a-zA-Z_$][\w$]*
+
+
+  destructuring-assignment:
+    name: meta.destructuring.js
+    begin: |
+      (?x)
+      (?=(?:\[[\s\w$,:\.\[\]\{\}]*\]|{[\s\w$,:\.\[\]\{\}]*})\s*=)
+    end: (?==)
+    patterns:
+    - include: '#destructuring-pattern'
+
+  destructuring-pattern:
+    name: meta.destructuring.pattern.js
+    patterns:
+    - name: meta.destructuring.pattern.object.js
+      begin: \{
+      beginCaptures:
+        '0': {name: punctuation.destructuring.begin.js}
+      end: \}
+      endCaptures:
+        '0': {name: punctuation.destructuring.end.js}
+      patterns:
+      - name: meta.normal.js # variable.other.js # hack
+        match: \s+
+      - name: meta.delimiter.parameter.comma.js
+        match: \,
+      - name: entity.name.property.destructuring.js
+        match: '[a-zA-Z_$][\w$]*\s*(?=:)'
+      - name: punctuation.definition.property.js
+        match: ':'
+      - name: punctuation.rest-parameter.js
+        match: \.{3}
+      - include: '#destructuring-pattern'
+    - name: meta.destructuring.pattern.array.js
+      begin: \[
+      beginCaptures:
+        '0': {name: punctuation.destructuring.begin.js}
+      end: \]
+      endCaptures:
+        '0': {name: punctuation.destructuring.end.js}
+      patterns:
+      - name: meta.normal.js # variable.other.js # hack
+        match: \s+
+      - name: meta.delimiter.parameter.comma.js
+        match: \,
+      - name: punctuation.rest-parameter.js
+        match: \.{3}
+      - include: '#destructuring-pattern'
 
 # declarations
   class-declaration:
@@ -325,9 +420,9 @@ repository:
     begin: |
       (?x)
       \b(class)\b\s*
-      ([a-zA-Z_$][a-zA-Z0-9_$]*)?\s*
+      ([a-zA-Z_$][\w$]*)?\s*
       (?=
-      (?:(e(?>x(?>t(?>e(?>n(?>ds?)?)?)?)?)?)(?![a-zA-Z0-9_$])\s*([a-zA-Z_$][a-zA-Z0-9_$\.]*)?\s*)?
+      (?:(e(?>x(?>t(?>e(?>n(?>ds?)?)?)?)?)?)(?![\w$])\s*([a-zA-Z_$][\w$\.]*)?\s*)?
       (?={)
       )
     beginCaptures:
@@ -338,37 +433,42 @@ repository:
     end: (?<=})
     patterns:
     - name: meta.extends.js
-      begin: (?<![a-zA-Z0-9_$])(extends)\s+(?=[a-zA-Z_$])
+      begin: (?<![\w$])(extends)\s+(?=[a-zA-Z_$])
       beginCaptures:
         '1': {name: storage.modifier.js}
       end: (?={)
       patterns:
       - name: meta.delimiter.method.period.js
-        match: \.(?![0-9])
+        match: \.(?!\d)
       - name: entity.other.inherited-class.js
-        match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*
+        match: (?<![\w$])[a-zA-Z_$][\w$]*
     - name: storage.modifier.js
-      match: (?<![a-zA-Z0-9_$])extends(?![a-zA-Z0-9_$])
+      match: (?<![\w$])extends(?![\w$])
     - name: meta.class.block.js
       begin: '{'
+      beginCaptures:
+        '0': {name: punctuation.definition.class.js}
       end: '}'
+      endCaptures:
+        '0': {name: punctuation.definition.class.js}
       patterns:
       - include: '#comments'
       # - include: '#function-declaration'
       - include: '#property-function'
+      - include: '#shorthand-generator-function'
       - include: '#shorthand-function'
       - name: storage.type.js
-        match: (?<![a-zA-Z0-9_$])(?>get|set)(?![a-zA-Z0-9_$])
+        match: (?<![\w$])(?>get|set)(?![\w$])
       - name: storage.modifier.js
-        match: (?<![a-zA-Z0-9_$])(?>static)(?![a-zA-Z0-9_$])
+        match: (?<![\w$])(?>static)(?![\w$])
 
   # class-declaration:
   #   name: meta.class.js
   #   begin: |
   #     (?x)
   #     \b(class)\b\s*
-  #     ([a-zA-Z_$][a-zA-Z0-9_$]*)?\s*
-  #     (?:(extends)\s*([a-zA-Z_$][a-zA-Z0-9_$]*)?\s*)?
+  #     ([a-zA-Z_$][\w$]*)?\s*
+  #     (?:(extends)\s*([a-zA-Z_$][\w$]*)?\s*)?
   #     (?={)
   #   beginCaptures:
   #     '1': {name: storage.type.class.js}
@@ -384,19 +484,23 @@ repository:
   #     - include: '#comments'
   #     # - include: '#function-declaration'
   #     - name: storage.modifier.js
-  #       match: (?<![a-zA-Z0-9_$])(?>static)(?![a-zA-Z0-9_$])
+  #       match: (?<![\w$])(?>static)(?![\w$])
   #     - include: '#property-function'
   #     - include: '#shorthand-function'
 
   shorthand-function: 
     name: meta.class.methods.js
+    #[^\)]*\)\s*{)
     begin: |
       (?x)
-      (?<![a-zA-Z0-9_$])(?:(constructor)|([a-zA-Z_$][a-zA-Z0-9_$]*))\s*
-      (?=\([^\)]*\)\s*{)
+      (?<![\w$])(?:(constructor)|([a-zA-Z_$][\w$]*)|("|')((?:(?!\3).|(?:\\\3))*)(\3))\s*
+      (?=\()
     beginCaptures:
       '1': {name: storage.type.constructor.js}
       '2': {name: entity.name.function.js}
+      '3': {name: punctuation.definition.string.begin.js}
+      '4': {name: entity.name.function.js}
+      '5': {name: punctuation.definition.string.end.js}
     end: (?<=})
     patterns:
     - include: '#parameter-declaration'
@@ -407,7 +511,7 @@ repository:
     begin: |
       (?x)
       (\*)\s*
-      ((?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*\s*)?
+      ((?<![\w$])[a-zA-Z_$][\w$]*\s*)?
       (?=\([^\)]*\)\s*{)
     beginCaptures:
       '1': {name: storage.type.function.js}
@@ -421,8 +525,8 @@ repository:
     name: meta.methods.property.js
     begin: |
       (?x)
-      (?<![a-zA-Z0-9_$])(get|set)\s+
-      (?<![a-zA-Z0-9_$])(?>([a-zA-Z_$][a-zA-Z0-9_$]*))\s*
+      (?<![\w$])(get|set)\s+
+      (?<![\w$])(?>([a-zA-Z_$][\w$]*))\s*
       (?=\([^\)]*\)\s*{)
     beginCaptures:
       '1': {name: storage.type.js}
@@ -434,13 +538,14 @@ repository:
 
   arrow-function:
     name: meta.function.arrow.js
+    # \(.*\)
     begin: |
       (?x)
-      (?<![a-zA-Z0-9_$])
+      (?<![\w$])
       (?=
         (?>
-          [a-zA-Z_$][a-zA-Z0-9_$]*|
-          [(][a-zA-Z0-9_$\s,]*[)]
+          [a-zA-Z_$][\w$]*|
+          \([\w$\s,={}\[\]\.:]*\)
         )
         (?>\s*)=>
       )
@@ -451,7 +556,7 @@ repository:
       begin: |
         (?x)
         (?=
-          (?>[a-zA-Z_$][a-zA-Z0-9_$]*)
+          (?>[a-zA-Z_$][\w$]*)
           (?>\s*)=>
         )
       end: (?>\s*)(=>)
@@ -460,7 +565,7 @@ repository:
       patterns:
       - include: '#reserved-word'
       - name: meta.parameter.function.arrow.normal.js
-        match: (?>[a-zA-Z_$][a-zA-Z0-9_$]*)
+        match: (?>[a-zA-Z_$][\w$]*)
         captures:
           '0': {name: variable.parameter.function.arrow.js}
     - include: '#statement-group'
@@ -470,8 +575,8 @@ repository:
   #   name: meta.function.js
   #   begin: |
   #     (?x)
-  #     (?<![a-zA-Z0-9_$])(function\b(?!\$)(\*)?)\s*
-  #     ((?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*\s*)?
+  #     (?<![\w$])(function\b(?!\$)(\*)?)\s*
+  #     ((?<![\w$])[a-zA-Z_$][\w$]*\s*)?
   #     (?=\([^\)]*\)\s*{)
   #   beginCaptures:
   #     '1': {name: storage.type.function.js}
@@ -483,22 +588,27 @@ repository:
 
   function-declaration: # also function expression
     name: meta.function.js
+    #(?=(?>\s+[\w$]+)?\s*\([^)]*\)\s*\{)
+    #(?=(?>\s+[\w$]+)?\s*\([^)]*\))
     begin: |
       (?x)
-      \b(function)(?=(?>\s+(?>\w|\$)+)?\s*\([^)]*\)\s*\{)
+      \b(function((\s*\*)|\s+|(?=[(/])))
     beginCaptures:
       '1': {name: storage.type.function.js}
-    end: (?<=})
+    end: (?<=}|;)
     patterns:
+    - include: '#comments'
+    - name: invalid.illegal.js
+      match: (?<=[\w$])\s+[\w$]+
     - name: meta.name.function.js
-      begin: (?<=function)\s+(?=(?>\w|\$)+\s*\()
-      end: \s*(?=\()
+      begin: (?=[\w$]+)
+      end: ''
       patterns:
       - include: '#reserved-word'
       # - name: support.class.js
       #   match: (?>[A-Z])(?>\w|\$)*
       - name: entity.name.function.js
-        match: (?>\w|\$)+
+        match: '[\w$]+'
     - include: '#parameter-declaration'
     - include: '#statement-group'
 
@@ -515,7 +625,7 @@ repository:
 
   arguments-parentheses:
     name: meta.arguments.js
-    begin: (?<=[a-zA-Z0-9_$\)\]\}])((?<!return|void|typeof|yield)|(?<=[a-zA-Z0-9_$]return|[a-zA-Z0-9_$]void|[a-zA-Z0-9_$]typeof|[a-zA-Z0-9_$]yield))\s*\(
+    begin: (?<=[\w$\)\]\}])((?<!return|void|typeof|yield)|(?<=[\w$]return|[\w$]void|[\w$]typeof|[\w$]yield))\s*\(
     beginCaptures:
       '0': {name: punctuation.parameters.begin.js}
     end: \)
@@ -535,36 +645,68 @@ repository:
     endCaptures:
       '0': {name: punctuation.definition.parameters.end.js}
     patterns:
+    - include: '#comments'
+    - name: punctuation.rest-parameter.js
+      match: \.{3}
     - include: '#reserved-word'
     - name: variable.parameter.function.js
-      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*
+      match: (?<![\w$])[a-zA-Z_$][\w$]*
     - name: meta.delimiter.parameter.comma.js
       match: \,[ |\t]*
+    - name: variable.parameter.destructuring.js
+      begin: |
+        (?x)
+        (?=(?:\[|{))
+      end: (?==|,|\))
+      patterns:
+      - include: '#destructuring-pattern'
+    - name: meta.default-parameters.js
+      begin: (=)
+      beginCaptures:
+        '1': {name: punctuation.declaration.default-parameters.js}
+      end: (?=[,;\}\]\)])|(?<!,|^|\s|[&|<>\+\-\*\/=\.])(?=\s*\n)
+      patterns:
+      - include: '#expressions'
 
   arrow-parameter-declaration:
     name: meta.parameter.js
     begin: |
       (?x)
-      (?<![a-zA-Z0-9_$])
-      [(]
-      (?=[a-zA-Z0-9_$\s,]*[)]\s*=>)
-    
-    beginCaptures:
-      '0': {name: punctuation.definition.parameters.begin.js}
-    end: ([)])(?>\s*(=>))
+      (?<![\w$])
+      (?=\(.*\)\s*=>)
+    end: (?<=\))(?>\s*(=>))
     endCaptures:
-      '1': {name: punctuation.definition.parameters.end.js}
-      '2': {name: punctuation.definition.function.js}
+      '1': {name: punctuation.definition.function.js}
     patterns:
-    - include: '#reserved-word'
-    - name: variable.parameter.function.js
-      match: (?<![a-zA-Z0-9_$])[a-zA-Z_$][a-zA-Z0-9_$]*
-    - name: meta.delimiter.parameter.comma.js
-      match: \,[ |\t]*
+    - include: '#parameter-declaration'
+
+  # arrow-parameter-declaration:
+  #   name: meta.parameter.js
+  #   begin: |
+  #     (?x)
+  #     (?<![\w$])
+  #     \(
+  #     (?=[\w$\s,.]*\)\s*=>)
+    
+  #   beginCaptures:
+  #     '0': {name: punctuation.definition.parameters.begin.js}
+  #   end: (\))(?>\s*(=>))
+  #   endCaptures:
+  #     '1': {name: punctuation.definition.parameters.end.js}
+  #     '2': {name: punctuation.definition.function.js}
+  #   patterns:
+  #   - include: '#comments'
+  #   - name: punctuation.rest-parameter.js
+  #     match: \.{3}
+  #   - include: '#reserved-word'
+  #   - name: variable.parameter.function.js
+  #     match: (?<![\w$])[a-zA-Z_$][\w$]*
+  #   - name: meta.delimiter.parameter.comma.js
+  #     match: \,[ |\t]*
 
   property-accessor: 
     name: meta.accessor.property.js
-    begin: (?<=[a-zA-Z0-9_$\)\]\}])((?<!return|void|typeof|yield)|(?<=[a-zA-Z0-9_$]return|[a-zA-Z0-9_$]void|[a-zA-Z0-9_$]typeof|[a-zA-Z0-9_$]yield))\s*\[
+    begin: (?<=[\w$\)\]\}])((?<!return|void|typeof|yield)|(?<=[\w$]return|[\w$]void|[\w$]typeof|[\w$]yield))\s*\[
     beginCaptures:
       '0': {name: punctuation.accessor.begin.js}
     end: \]
@@ -576,7 +718,11 @@ repository:
   array-initializer:
     name: meta.declaration.array.js
     begin: \[
+    beginCaptures:
+      '0': {name: punctuation.definition.array.js}
     end: \]
+    endCaptures:
+      '0': {name: punctuation.definition.array.js}
     patterns:
     - name: meta.delimiter.object.comma.js
       match: \,
@@ -585,15 +731,19 @@ repository:
   object-initializer:
     name: meta.declaration.object.js
     begin: \{
+    beginCaptures:
+      '0': {name: punctuation.definition.object.js}
     end: \}
+    endCaptures:
+      '0': {name: punctuation.definition.object.js}
     patterns:
     - include: '#comments'
     - name: meta.object.property.js
       begin: |
         (?x)
         (?:
-          ([0-9]+)|
-          (?:([a-zA-Z_?$][\w?.$]*)|(("|')((?:(?!\4).|(\\\4))*)(\4)))(?=\s*:\s*function(?![a-zA-Z0-9_$]))|
+          (\d+)|
+          (?:([a-zA-Z_?$][\w?.$]*)|(("|')((?:(?!\4).|(\\\4))*)(\4)))(?=\s*:\s*function(?![\w$]))|
           (?:([a-zA-Z_?$][\w?.$]*)|(("|')(?:(?!\10).|(\\\10))*(\10)))
         )\s*(:)
       beginCaptures:
@@ -641,7 +791,7 @@ repository:
         match: .-[^\]]
       - name: keyword.operator.intersection.regexp.js
         match: (?<!\[)&&(?!\])
-    - name: meta.regexp.group
+    - name: meta.regexp.group.js
       begin: |
         (?x) ((?#1)\()
         ((?#2)\?
@@ -693,56 +843,63 @@ repository:
 # keywords 
   keywords:
     patterns:
-    - name: keyword.operator.js
-      match: \b(?>delete|new|typeof|void|with)(?![a-zA-Z0-9_$])
-    - name: keyword.operator.js
-      match: '!|%|&|\*|\/|\-\-|\-|\+\+|\+|~|===|==|=|!=|!==|<=|>=|<<=|>>=|>>>=|<>|<|>|!|&&|\|\||\?|\:|\*=|(?<!\()/=|%=|\+=|\-=|&=|\^=|\b(?>in(?>stanceof)?|of)(?![a-zA-Z0-9_$])'
-    # - name: storage.type.js
-      # match: \b(?>boolean|byte|char|class|double|enum|float|function|int(?>erface)?|long|short|var|void)(?![a-zA-Z0-9_$])
+    - include: '#operators'
+      # - name: storage.type.js
+      # match: \b(?>boolean|byte|char|class|double|enum|float|function|int(?>erface)?|long|short|var|void)(?![\w$])
     - name: storage.type.js
-      match: \b(?>class|function|var|let|const)(?![a-zA-Z0-9_$])
+      match: \b(?>class|var|let|const)(?![\w$]) #function
     # - name: storage.modifier.js
-      # match: \b(?>const|export|extends|final|implements|native|private|protected|public|static|synchronized|throws|transient|volatile)(?![a-zA-Z0-9_$])
+      # match: \b(?>const|export|extends|final|implements|native|private|protected|public|static|synchronized|throws|transient|volatile)(?![\w$])
     - name: storage.modifier.js
-      match: \b(?>export|extends)(?![a-zA-Z0-9_$])
+      match: \b(?>export|extends)(?![\w$])
     - name: keyword.control.js
-      match: \b(?>break|case|catch|continue|default|do|else|finally|for|goto|if|import|package|return|switch|throw|try|while|yield(?>\*)?)(?![a-zA-Z0-9_$])
+      match: \b(?>break|case|catch|continue|default|do|else|finally|for|goto|if|import|package|return|switch|throw|try|while|yield(?>\*)?)(?![\w$])
     - name: variable.language.js
-      match: \b(?>super|this|arguments)(?![a-zA-Z0-9_$]) #self
+      match: \b(?>super|this|arguments)(?![\w$]) #self
     - name: constant.language.boolean.true.js
-      match: \btrue(?![a-zA-Z0-9_$])
+      match: \btrue(?![\w$])
     - name: constant.language.boolean.false.js
-      match: \bfalse(?![a-zA-Z0-9_$])
+      match: \bfalse(?![\w$])
     - name: constant.language.null.js
-      match: \bnull(?![a-zA-Z0-9_$])
+      match: \bnull(?![\w$])
+
+  operators:
+    patterns:
+    - name: keyword.operator.js
+      match: \b(?>delete|new|typeof|void|with)(?![\w$])
+    - name: keyword.operator.js
+      match: '!|%|&|\*|\/|\-\-|\-|\+\+|\+|~|===|==|=|!=|!==|<=|>=|<<=|>>=|>>>=|<>|<|>|!|&&|\|\||\?|\:|\*=|(?<!\()/=|%=|\+=|\-=|&=|\^=|\b(?>in(?>stanceof)?|of)(?![\w$])'
+    - name: keyword.operator.spread.js
+      match: \.{3}
+
 
   reserved-word:
-    name: meta.invalid #invalid.illegal
+    name: meta.invalid.js #invalid.illegal
     match: |
       (?x)
       \b(?>
         await|break|case|catch|class|const|continue|debugger|default|delete|do|else|enum|export|extends|false|finally|for|function|let|if|implements|import|in(?>stanceof|terface)?|new|null|private|protected|package|public|static|
         return|super|switch|this|throw(?>s)?|true|try|typeof|var|void|while|with|yield(?>\*)?
-      )(?![a-zA-Z0-9_$]) # abstract|boolean|byte|char|double|final|float|goto|int|long|native|short|synchronized|transient|volatile|
+      )(?![\w$]) # abstract|boolean|byte|char|double|final|float|goto|int|long|native|short|synchronized|transient|volatile|
 
   numeric:
     patterns:
     - name: constant.numeric.js # like .01
-      match: (?<![a-zA-Z0-9_$])\.[0-9]+\b
+      match: (?<![\w$])\.\d+\b
     - name: constant.numeric.octal.js # like 0o777
-      match: \b(?<!\.)(?>0(?>o|O|(?![bBxX]))[0-7]+(?![0-9]+))((?:\.[0-9])|[a-zA-Z8-9_$][a-zA-Z0-9_$]*)?
+      match: \b(?<!\.)(?>0(?>o|O|(?![bBxX]))[0-7]+(?!\d+))((?:\.\d)|[a-zA-Z8-9_$][\w$]*)?
       captures:
         '1': {name: invalid.illegal}
     - name: constant.numeric.binary.js # like 0b0100010
-      match: \b(?<!\.)(?>0(?>b|B)[0-1]+)([a-zA-Z2-9_$][a-zA-Z0-9_$]*)?
+      match: \b(?<!\.)(?>0(?>b|B)[0-1]+)([a-zA-Z2-9_$][\w$]*)?
       captures:
         '1': {name: invalid.illegal}
     - name: constant.numeric.js # like 10.01px
-      match: \b(?<!\.)[0-9]+\.(?:[0-9]*([a-zA-Z_$][a-zA-Z0-9_$]*)?)
+      match: \b(?<!\.)\d+\.(?:\d*([a-zA-Z_$][\w$]*)?)
       captures:
         '1': {name: invalid.illegal}
     - name: constant.numeric.js # like 0xFFF
-      match: \b(?<!\.)(?>(?>0(?>x|X)[0-9a-fA-F]+)|(?>[0-9]+))([a-zA-Z_$][a-zA-Z0-9_$]*)? # (\.[0-9]+)?
+      match: \b(?<!\.)(?>(?>0(?>x|X)[\da-fA-F]+)|(?>\d+))([a-zA-Z_$][\w$]*)? # (\.\d+)?
       captures:
         '1': {name: invalid.illegal}
 
@@ -880,3 +1037,6 @@ repository:
     #   )\b(?=\s*\()
 
 ...
+
+
+
