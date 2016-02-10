@@ -2,7 +2,7 @@
 
 Real syntax highlighting rather than "keyword" highlighting. 
 
-![Object key & Arrow function](http://bumfo.github.io/sublime-real-javascript/s/screenshot-object-key-arrow.png)
+![Object key & Arrow function](http://bumfo.github.io/sublime-real-javascript/s/human.png)
 
 ----------
 
