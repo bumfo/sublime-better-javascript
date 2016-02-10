@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <title>Sublime Real Javascript</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, minimal-ui">
 
 <style>
 	html {
@@ -15,14 +15,16 @@
 
 	body {
 		position: relative;
-		max-width: 32em;
+		/*max-width: 32em;*/
+		/*max-width: 48em;*/
 		margin: 0 auto;
 		min-height: 100%;
 	}
 
 	main {
-		margin: 0 1rem;
-		padding: 72px 0 4.5rem;
+		/*margin: 0 1rem;*/
+		margin: 0 4rem;
+		padding: 3rem 0 3rem;
 	}
 
 	main>*:first-child {
@@ -50,7 +52,7 @@
 
 		line-height: 1rem;
 
-		margin: 0 1rem;
+		margin: 0 4rem;
 
 		font-size: 0.6em;
 		color: #777;
@@ -77,11 +79,32 @@
 		color: #777;
 	}
 
-	@media (max-width: 1024px) {
+	
+
+	@media (max-width: 768px) {
 		html {
 			font-size: 22px;
 		}
+
+		img {
+			max-width: 100%;
+		}
 	}
+
+	@media (max-width: 450px) {
+		html {
+			font-size: 14px;
+		}
+
+		main {
+			padding-top: 48px;
+		}
+
+		img {
+			max-width: 100%;
+		}
+	}
+
 
 	@font-face {
 		font-family: 'open sans';
@@ -104,10 +127,10 @@
 	<h1>Sublime <strong>Real Javascript</strong></h1>
 
 	<p>Real syntax highlighting rather than "keyword" highlighting.</p>
-	<p><img src="s/screenshot-object-key-arrow.png" alt="Object key &amp; Arrow function" width="558"></p>
+	<p><img src="s/human.png" alt="Human" width="588" height="662"></p>
 </main>
 
 <footer>
 	<p class="view"><a href="https://github.com/bumfo/sublime-real-javascript">View the Project on GitHub <small>bumfo/sublime-real-javascript</small></a></p>
-	<p>Hosted on GitHub Pages</p>
+	<!-- <p>Hosted on GitHub Pages</p> -->
 </footer>
