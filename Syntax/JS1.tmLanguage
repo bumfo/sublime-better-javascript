@@ -892,6 +892,36 @@
 				</dict>
 			</array>
 		</dict>
+		<key>import-statement</key>
+		<dict>
+			<key>begin</key>
+			<string>\b(import)\b</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>keyword.import.js</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>(?=;|$)</string>
+			<key>name</key>
+			<string>meta.statement.import.js</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>match</key>
+					<string>\b(from)\b</string>
+					<key>name</key>
+					<string>keyword.import.from.js</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#string-expressions</string>
+				</dict>
+			</array>
+		</dict>
 		<key>keywords</key>
 		<dict>
 			<key>patterns</key>
@@ -1937,6 +1967,10 @@
 				<dict>
 					<key>include</key>
 					<string>#class-declaration</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#import-statement</string>
 				</dict>
 				<dict>
 					<key>include</key>

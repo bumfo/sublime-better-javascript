@@ -63,6 +63,7 @@ repository:
     patterns:
     - include: '#comments'
     - include: '#class-declaration'
+    - include: '#import-statement'
     - include: '#for-statement'
     - include: '#var-statement'
     - include: '#parentheses-statement'
@@ -71,6 +72,17 @@ repository:
     - include: '#expressions'
     - name: punctuation.terminator.statement.js
       match: \;
+
+  import-statement:
+    name: meta.statement.import.js
+    begin: \b(import)\b
+    beginCaptures:
+      '1': {name: keyword.import.js}
+    end: (?=;|$)
+    patterns:
+    - name: keyword.import.from.js
+      match: \b(from)\b
+    - include: '#string-expressions'
 
   for-statement: 
     name: meta.statement.for.js
