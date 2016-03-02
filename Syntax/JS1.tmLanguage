@@ -723,6 +723,10 @@
 					<array>
 						<dict>
 							<key>include</key>
+							<string>#var-in-statement</string>
+						</dict>
+						<dict>
+							<key>include</key>
 							<string>#var-statement</string>
 						</dict>
 						<dict>
@@ -2216,6 +2220,31 @@
 				</dict>
 			</array>
 		</dict>
+		<key>var-in-statement</key>
+		<dict>
+			<key>captures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>storage.type.js</string>
+				</dict>
+				<key>2</key>
+				<dict>
+					<key>name</key>
+					<string>variable.declaration.js</string>
+				</dict>
+				<key>3</key>
+				<dict>
+					<key>name</key>
+					<string>keyword.in.js</string>
+				</dict>
+			</dict>
+			<key>match</key>
+			<string>\b(var|let)\b\s+([a-zA-Z_$][\w$]*)\s+(in|of)</string>
+			<key>name</key>
+			<string>meta.statement.var-in.js</string>
+		</dict>
 		<key>var-statement</key>
 		<dict>
 			<key>begin</key>
@@ -2229,7 +2258,7 @@
 				</dict>
 			</dict>
 			<key>end</key>
-			<string>(;)|(?&lt;!,|^|\s)\s*\n|(?=[\}\]\)])</string>
+			<string>(?=;)|(?&lt;!,|^|\s)\s*\n|(?=[\}\]\)])</string>
 			<key>endCaptures</key>
 			<dict>
 				<key>1</key>

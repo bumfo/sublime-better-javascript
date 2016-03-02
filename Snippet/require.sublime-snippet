@@ -1,5 +1,5 @@
 <snippet>
-	<content><![CDATA[const ${1:Module} = require('./${2:${1/(.*)/(?1:\L$1)/}}.js');
+	<content><![CDATA[const ${1:Module} = require('./${2:${1/(^[A-Z]|[A-Z](?=[A-Z]|$))|([A-Z])/(?1:\L$1)(?2:_\L$2)/g}}.js');
 ]]></content>
 	<tabTrigger>require</tabTrigger>
 	<scope>source.js</scope>

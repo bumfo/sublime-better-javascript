@@ -102,6 +102,7 @@ repository:
       endCaptures:
         '0': {name: punctuation.parentheses.end.js}
       patterns:
+      - include: '#var-in-statement'
       - include: '#var-statement'
       - include: '#expressions'
       - name: punctuation.terminator.statement.js
@@ -113,7 +114,7 @@ repository:
     begin: \b(?>var|let|const)\s+
     beginCaptures:
       '0': {name: storage.type.js}
-    end: (;)|(?<!,|^|\s)\s*\n|(?=[\}\]\)])
+    end: (?=;)|(?<!,|^|\s)\s*\n|(?=[\}\]\)])
     endCaptures:
       '1': {name: punctuation.terminator.statement.js}
     patterns:
@@ -158,6 +159,14 @@ repository:
       end: (?=[,;\}\]\)])|(?<!,|^|\s|[&|<>\+\-\*\/=\.])(?=\s*\n)
       patterns:
       - include: '#expressions'
+
+  var-in-statement: 
+    name: meta.statement.var-in.js
+    match: \b(var|let)\b\s+([a-zA-Z_$][\w$]*)\s+(in|of)
+    captures:
+      '1': {name: storage.type.js}
+      '2': {name: variable.declaration.js}
+      '3': {name: keyword.in.js}
 
   parentheses-statement: 
     name: meta.statement.parentheses.js
@@ -205,7 +214,6 @@ repository:
       '0': {name: punctuation.definition.statementgroup.end.js}
     patterns:
     - include: '#statements'
-
 
 # expressions
   expressions:
