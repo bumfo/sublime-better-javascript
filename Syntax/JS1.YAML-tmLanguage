@@ -1,5 +1,5 @@
 # [PackageDev] target_format: plist, ext: tmLanguage
----
+# ---
 name: JavaScript1
 comment: 'JavaScript Syntax: version 0.1'
 fileTypes: [js, htc, jsx]
@@ -103,7 +103,7 @@ repository:
         '0': {name: punctuation.parentheses.end.js}
       patterns:
       - include: '#var-in-statement'
-      - include: '#var-statement'
+      # - include: '#var-statement'
       - include: '#expressions'
       - name: punctuation.terminator.statement.js
         match: \;
@@ -160,13 +160,65 @@ repository:
       patterns:
       - include: '#expressions'
 
+  # var-in-statement: 
+  #   name: meta.statement.var-in.js
+  #   match: \b(var|let)\b\s+([a-zA-Z_$][\w$]*)\s+(in|of)
+  #   captures:
+  #     '1': {name: storage.type.js}
+  #     '2': {name: variable.declaration.js}
+  #     '3': {name: keyword.in.js}
+
   var-in-statement: 
-    name: meta.statement.var-in.js
-    match: \b(var|let)\b\s+([a-zA-Z_$][\w$]*)\s+(in|of)
-    captures:
-      '1': {name: storage.type.js}
-      '2': {name: variable.declaration.js}
-      '3': {name: keyword.in.js}
+    name: meta.statement.var.js
+    begin: \b(?>var|let|const)\s+
+    beginCaptures:
+      '0': {name: storage.type.js}
+    end: (?=;)|(?<!,|^|\s)\s*\n|(?=[\}\]\)])
+    endCaptures:
+      '1': {name: punctuation.terminator.statement.js}
+    patterns:
+    - name: meta.var.comma-and-comment.js
+      begin: (,)\s*(?=\/\*|\/\/)
+      beginCaptures:
+        '1': {name: meta.delimiter.var.comma.js}
+      end: (?<=\*\/)\s*(?!\s|\/\*|\/\/)|(?<=\n)
+      patterns:
+      - include: '#line-comment'
+      - include: '#block-comment'
+    - name: meta.delimiter.var.comma.js
+      match: ','
+    - name: meta.var.comment-line.js
+      begin: ^\s*(?=\/\*|\/\/)
+      end: (?<=\*\/)\s*(?!\s|\/\*|\/\/)|(?<=\n)
+      patterns:
+      - include: '#line-comment'
+      - include: '#block-comment'
+    - include: '#line-comment-without-line-end'
+    - include: '#comments'
+    - name: variable.declaration.destructuring.js
+      begin: |
+        (?x)
+        (?=(?:\[|{))
+      end: (?==|\s*(?>in|of))
+      patterns:
+      - include: '#destructuring-pattern'
+    - name: meta.var.identifier.js
+      begin: (?=[a-zA-Z_$][\w$]*)
+      end: (?=,|)
+      patterns:
+      - include: '#reserved-word'
+      - include: '#special-assignment'
+      - name: variable.declaration.js
+        match: (?!in|of)(\b[a-zA-Z_$][\w$]*)
+    - name: meta.var.assignment.js
+      begin: (=)|(\s*(?>in|of))
+      beginCaptures:
+        '1': {name: keyword.operator.assignment.js}
+        '2': {name: keyword.in.js}
+        #'1': {name: punctuation.declaration.variable.js}
+      end: (?=[,;\}\]\)])|(?<!,|^|\s|[&|<>\+\-\*\/=\.])(?=\s*\n)
+      patterns:
+      - include: '#expressions'
 
   parentheses-statement: 
     name: meta.statement.parentheses.js
@@ -280,7 +332,7 @@ repository:
 
   regular-expression:
     name: string.regexp.js
-    begin: (?<=[=(:\[,+\-*\/!?<>]|return|yield|void|typeof|&&|\|\||^)\s*(/)(?![/*+{}?])
+    begin: (?<!\+\+|\-\-)(?<=[=(:\[,+\-*\/!?<>]|return|yield|void|typeof|&&|\|\||^)\s*(/)(?![/*+{}?])
     beginCaptures:
       '1': {name: punctuation.definition.string.begin.js}
     end: (/)[igm]*
@@ -947,7 +999,7 @@ repository:
       match: |
         (?x)
         (?<=\.)\s*(?>
-          concat|copyWithin|entries|every|fill|filter|find(?>Index)?|forEach|includes|indexOf|join|keys|lastIndexOf|map|pop|push|reduce(?>Right)?|reverse|shift|slice|some|sort|splice|unshift|values
+          add|concat|copyWithin|delete|entries|every|fill|filter|find(?>Index)?|forEach|from|get|has|includes|indexOf|join|keys|lastIndexOf|map|next|pop|push|reduce(?>Right)?|reverse|set|shift|slice|some|sort|splice|unshift|values
         )(?=\s*\()
     - name: support.function.prototype.function.js
       match: |
@@ -1056,7 +1108,7 @@ repository:
     #     of
     #   )\b(?=\s*\()
 
-...
+# ...
 
 
 

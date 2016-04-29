@@ -727,10 +727,6 @@
 						</dict>
 						<dict>
 							<key>include</key>
-							<string>#var-statement</string>
-						</dict>
-						<dict>
-							<key>include</key>
 							<string>#expressions</string>
 						</dict>
 						<dict>
@@ -1758,7 +1754,7 @@
 		<key>regular-expression</key>
 		<dict>
 			<key>begin</key>
-			<string>(?&lt;=[=(:\[,+\-*\/!?&lt;&gt;]|return|yield|void|typeof|&amp;&amp;|\|\||^)\s*(/)(?![/*+{}?])</string>
+			<string>(?&lt;!\+\+|\-\-)(?&lt;=[=(:\[,+\-*\/!?&lt;&gt;]|return|yield|void|typeof|&amp;&amp;|\|\||^)\s*(/)(?![/*+{}?])</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
@@ -2118,7 +2114,7 @@
 					<key>match</key>
 					<string>(?x)
 (?&lt;=\.)\s*(?&gt;
-  concat|copyWithin|entries|every|fill|filter|find(?&gt;Index)?|forEach|includes|indexOf|join|keys|lastIndexOf|map|pop|push|reduce(?&gt;Right)?|reverse|shift|slice|some|sort|splice|unshift|values
+  add|concat|copyWithin|delete|entries|every|fill|filter|find(?&gt;Index)?|forEach|from|get|has|includes|indexOf|join|keys|lastIndexOf|map|next|pop|push|reduce(?&gt;Right)?|reverse|set|shift|slice|some|sort|splice|unshift|values
 )(?=\s*\()
 </string>
 					<key>name</key>
@@ -2222,28 +2218,161 @@
 		</dict>
 		<key>var-in-statement</key>
 		<dict>
-			<key>captures</key>
+			<key>begin</key>
+			<string>\b(?&gt;var|let|const)\s+</string>
+			<key>beginCaptures</key>
 			<dict>
-				<key>1</key>
+				<key>0</key>
 				<dict>
 					<key>name</key>
 					<string>storage.type.js</string>
 				</dict>
-				<key>2</key>
+			</dict>
+			<key>end</key>
+			<string>(?=;)|(?&lt;!,|^|\s)\s*\n|(?=[\}\]\)])</string>
+			<key>endCaptures</key>
+			<dict>
+				<key>1</key>
 				<dict>
 					<key>name</key>
-					<string>variable.declaration.js</string>
-				</dict>
-				<key>3</key>
-				<dict>
-					<key>name</key>
-					<string>keyword.in.js</string>
+					<string>punctuation.terminator.statement.js</string>
 				</dict>
 			</dict>
-			<key>match</key>
-			<string>\b(var|let)\b\s+([a-zA-Z_$][\w$]*)\s+(in|of)</string>
 			<key>name</key>
-			<string>meta.statement.var-in.js</string>
+			<string>meta.statement.var.js</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>begin</key>
+					<string>(,)\s*(?=\/\*|\/\/)</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>meta.delimiter.var.comma.js</string>
+						</dict>
+					</dict>
+					<key>end</key>
+					<string>(?&lt;=\*\/)\s*(?!\s|\/\*|\/\/)|(?&lt;=\n)</string>
+					<key>name</key>
+					<string>meta.var.comma-and-comment.js</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#line-comment</string>
+						</dict>
+						<dict>
+							<key>include</key>
+							<string>#block-comment</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>,</string>
+					<key>name</key>
+					<string>meta.delimiter.var.comma.js</string>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>^\s*(?=\/\*|\/\/)</string>
+					<key>end</key>
+					<string>(?&lt;=\*\/)\s*(?!\s|\/\*|\/\/)|(?&lt;=\n)</string>
+					<key>name</key>
+					<string>meta.var.comment-line.js</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#line-comment</string>
+						</dict>
+						<dict>
+							<key>include</key>
+							<string>#block-comment</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#line-comment-without-line-end</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#comments</string>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>(?x)
+(?=(?:\[|{))
+</string>
+					<key>end</key>
+					<string>(?==|\s*(?&gt;in|of))</string>
+					<key>name</key>
+					<string>variable.declaration.destructuring.js</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#destructuring-pattern</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>(?=[a-zA-Z_$][\w$]*)</string>
+					<key>end</key>
+					<string>(?=,|)</string>
+					<key>name</key>
+					<string>meta.var.identifier.js</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#reserved-word</string>
+						</dict>
+						<dict>
+							<key>include</key>
+							<string>#special-assignment</string>
+						</dict>
+						<dict>
+							<key>match</key>
+							<string>(?!in|of)(\b[a-zA-Z_$][\w$]*)</string>
+							<key>name</key>
+							<string>variable.declaration.js</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>(=)|(\s*(?&gt;in|of))</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>keyword.operator.assignment.js</string>
+						</dict>
+						<key>2</key>
+						<dict>
+							<key>name</key>
+							<string>keyword.in.js</string>
+						</dict>
+					</dict>
+					<key>end</key>
+					<string>(?=[,;\}\]\)])|(?&lt;!,|^|\s|[&amp;|&lt;&gt;\+\-\*\/=\.])(?=\s*\n)</string>
+					<key>name</key>
+					<string>meta.var.assignment.js</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#expressions</string>
+						</dict>
+					</array>
+				</dict>
+			</array>
 		</dict>
 		<key>var-statement</key>
 		<dict>

@@ -1,0 +1,6 @@
+<snippet>
+	<content><![CDATA[constructor]]></content>
+	<tabTrigger>constructor</tabTrigger>
+	<scope>source.js meta.class.methods.js</scope>
+	<description><![CDATA[ ]]></description>
+</snippet>
