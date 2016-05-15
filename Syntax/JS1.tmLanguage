@@ -437,6 +437,30 @@
 				</dict>
 			</array>
 		</dict>
+		<key>destructuring-default</key>
+		<dict>
+			<key>begin</key>
+			<string>(=)</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.declaration.default-parameters.js</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>(?=[,}\]])</string>
+			<key>name</key>
+			<string>meta.normal.default-parameters.js</string>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#expressions</string>
+				</dict>
+			</array>
+		</dict>
 		<key>destructuring-pattern</key>
 		<dict>
 			<key>name</key>
@@ -468,6 +492,10 @@
 					<string>meta.destructuring.pattern.object.js</string>
 					<key>patterns</key>
 					<array>
+						<dict>
+							<key>include</key>
+							<string>#destructuring-default</string>
+						</dict>
 						<dict>
 							<key>match</key>
 							<string>\s+</string>
@@ -529,6 +557,10 @@
 					<string>meta.destructuring.pattern.array.js</string>
 					<key>patterns</key>
 					<array>
+						<dict>
+							<key>include</key>
+							<string>#destructuring-default</string>
+						</dict>
 						<dict>
 							<key>match</key>
 							<string>\s+</string>

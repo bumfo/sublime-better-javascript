@@ -448,6 +448,15 @@ repository:
     patterns:
     - include: '#destructuring-pattern'
 
+  destructuring-default:
+    name: meta.normal.default-parameters.js
+    begin: (=)
+    beginCaptures:
+      '1': {name: punctuation.declaration.default-parameters.js}
+    end: (?=[,}\]])
+    patterns:
+    - include: '#expressions'
+
   destructuring-pattern:
     name: meta.destructuring.pattern.js
     patterns:
@@ -459,6 +468,7 @@ repository:
       endCaptures:
         '0': {name: punctuation.destructuring.end.js}
       patterns:
+      - include: '#destructuring-default'
       - name: meta.normal.js # variable.other.js # hack
         match: \s+
       - name: meta.delimiter.parameter.comma.js
@@ -470,6 +480,7 @@ repository:
       - name: punctuation.rest-parameter.js
         match: \.{3}
       - include: '#destructuring-pattern'
+
     - name: meta.destructuring.pattern.array.js
       begin: \[
       beginCaptures:
@@ -478,6 +489,7 @@ repository:
       endCaptures:
         '0': {name: punctuation.destructuring.end.js}
       patterns:
+      - include: '#destructuring-default'
       - name: meta.normal.js # variable.other.js # hack
         match: \s+
       - name: meta.delimiter.parameter.comma.js
