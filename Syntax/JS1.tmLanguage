@@ -943,10 +943,106 @@
 			<key>patterns</key>
 			<array>
 				<dict>
+					<key>begin</key>
+					<string>(?x)
+(?=(?:\[|{))
+</string>
+					<key>end</key>
+					<string>(?=)</string>
+					<key>name</key>
+					<string>variable.declaration.destructuring.js</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#destructuring-pattern</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>\b(as)\b</string>
+					<key>name</key>
+					<string>keyword.import.as.js</string>
+				</dict>
+				<dict>
 					<key>match</key>
 					<string>\b(from)\b</string>
 					<key>name</key>
 					<string>keyword.import.from.js</string>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>(?=[a-zA-Z_$][\w$]*\.)</string>
+					<key>end</key>
+					<string>(?=,|)(?!\.)</string>
+					<key>name</key>
+					<string>meta.namespace.js</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>match</key>
+							<string>\.</string>
+							<key>name</key>
+							<string>meta.delimiter.method.period.js</string>
+						</dict>
+						<dict>
+							<key>match</key>
+							<string>([a-zA-Z_$][\w$]*)</string>
+							<key>name</key>
+							<string>meta.namespace.js</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>(?=[a-zA-Z_$][\w$]*\s+as)</string>
+					<key>end</key>
+					<string>(?=,|)</string>
+					<key>name</key>
+					<string>meta.nonvar.unused-identifier.js</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#reserved-word</string>
+						</dict>
+						<dict>
+							<key>include</key>
+							<string>#special-assignment</string>
+						</dict>
+						<dict>
+							<key>match</key>
+							<string>([a-zA-Z_$][\w$]*)</string>
+							<key>name</key>
+							<string>meta.unused-declaration.js</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>(?=[a-zA-Z_$][\w$]*)</string>
+					<key>end</key>
+					<string>(?=,|)</string>
+					<key>name</key>
+					<string>meta.var.identifier.js</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#reserved-word</string>
+						</dict>
+						<dict>
+							<key>include</key>
+							<string>#special-assignment</string>
+						</dict>
+						<dict>
+							<key>match</key>
+							<string>([a-zA-Z_$][\w$]*)</string>
+							<key>name</key>
+							<string>variable.declaration.js</string>
+						</dict>
+					</array>
 				</dict>
 				<dict>
 					<key>include</key>

@@ -1,0 +1,7 @@
+<snippet>
+	<content><![CDATA[const ${1:Module} = include('${2:${1/./$0/g}}');
+]]></content>
+	<tabTrigger>include</tabTrigger>
+	<scope>source.js</scope>
+	<description>include...</description>
+</snippet>

@@ -80,8 +80,41 @@ repository:
       '1': {name: keyword.import.js}
     end: (?=;|$)
     patterns:
+    - name: variable.declaration.destructuring.js
+      begin: |
+        (?x)
+        (?=(?:\[|{))
+      end: (?=)
+      patterns:
+      - include: '#destructuring-pattern'
+    - name: keyword.import.as.js
+      match: \b(as)\b
     - name: keyword.import.from.js
       match: \b(from)\b
+    - name: meta.namespace.js
+      begin: (?=[a-zA-Z_$][\w$]*\.)
+      end: (?=,|)(?!\.)
+      patterns:
+      - name: meta.delimiter.method.period.js
+        match: \.
+      - name: meta.namespace.js
+        match: ([a-zA-Z_$][\w$]*)
+    - name: meta.nonvar.unused-identifier.js
+      begin: (?=[a-zA-Z_$][\w$]*\s+as)
+      end: (?=,|)
+      patterns:
+      - include: '#reserved-word'
+      - include: '#special-assignment'
+      - name: meta.unused-declaration.js
+        match: ([a-zA-Z_$][\w$]*)
+    - name: meta.var.identifier.js
+      begin: (?=[a-zA-Z_$][\w$]*)
+      end: (?=,|)
+      patterns:
+      - include: '#reserved-word'
+      - include: '#special-assignment'
+      - name: variable.declaration.js
+        match: ([a-zA-Z_$][\w$]*)
     - include: '#string-expressions'
 
   for-statement: 
