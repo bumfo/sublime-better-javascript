@@ -32,7 +32,7 @@
 		<key>arguments-parentheses</key>
 		<dict>
 			<key>begin</key>
-			<string>(?&lt;=[\w$\)\]\}])((?&lt;!return|void|typeof|yield)|(?&lt;=[\w$]return|[\w$]void|[\w$]typeof|[\w$]yield))\s*\(</string>
+			<string>(?&lt;=[\w$\)\]\}])((?&lt;!return|void|typeof|yield|default|export)|(?&lt;=[\w$]return|[\w$]void|[\w$]typeof|[\w$]yield|[\w$]default|[\w$]export))\s*\(</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>0</key>
@@ -1604,7 +1604,7 @@
 		<key>property-accessor</key>
 		<dict>
 			<key>begin</key>
-			<string>(?&lt;=[\w$\)\]\}])((?&lt;!return|void|typeof|yield)|(?&lt;=[\w$]return|[\w$]void|[\w$]typeof|[\w$]yield))\s*\[</string>
+			<string>(?&lt;=[\w$\)\]\}])((?&lt;!return|void|typeof|yield|default|export)|(?&lt;=[\w$]return|[\w$]void|[\w$]typeof|[\w$]yield|[\w$]default|[\w$]export))\s*\[</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>0</key>
@@ -2055,7 +2055,7 @@
 		<key>statement-group</key>
 		<dict>
 			<key>begin</key>
-			<string>(?&gt;(?&lt;![=(:\[,+\-*\/!?&lt;&gt;]|return|yield|void|typeof|&amp;&amp;|\|\||\s)|(?&lt;==&gt;|\*/))\s*\{</string>
+			<string>(?&gt;(?&lt;![=(:\[,+\-*\/!?&lt;&gt;]|return|void|typeof|yield|default|export|&amp;&amp;|\|\||\s)|(?&lt;==&gt;|\*/))\s*\{</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>0</key>

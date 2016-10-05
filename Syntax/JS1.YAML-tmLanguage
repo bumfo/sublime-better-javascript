@@ -268,7 +268,7 @@ repository:
 
   statement-group:
     name: meta.statement-group.js
-    begin: (?>(?<![=(:\[,+\-*\/!?<>]|return|yield|void|typeof|&&|\|\||\s)|(?<==>|\*/))\s*\{
+    begin: (?>(?<![=(:\[,+\-*\/!?<>]|return|void|typeof|yield|default|export|&&|\|\||\s)|(?<==>|\*/))\s*\{
     beginCaptures:
       '0': {name: punctuation.definition.statementgroup.begin.js}
     end: \}
@@ -742,7 +742,7 @@ repository:
 
   arguments-parentheses:
     name: meta.arguments.js
-    begin: (?<=[\w$\)\]\}])((?<!return|void|typeof|yield)|(?<=[\w$]return|[\w$]void|[\w$]typeof|[\w$]yield))\s*\(
+    begin: (?<=[\w$\)\]\}])((?<!return|void|typeof|yield|default|export)|(?<=[\w$]return|[\w$]void|[\w$]typeof|[\w$]yield|[\w$]default|[\w$]export))\s*\(
     beginCaptures:
       '0': {name: punctuation.parameters.begin.js}
     end: \)
@@ -823,7 +823,7 @@ repository:
 
   property-accessor: 
     name: meta.accessor.property.js
-    begin: (?<=[\w$\)\]\}])((?<!return|void|typeof|yield)|(?<=[\w$]return|[\w$]void|[\w$]typeof|[\w$]yield))\s*\[
+    begin: (?<=[\w$\)\]\}])((?<!return|void|typeof|yield|default|export)|(?<=[\w$]return|[\w$]void|[\w$]typeof|[\w$]yield|[\w$]default|[\w$]export))\s*\[
     beginCaptures:
       '0': {name: punctuation.accessor.begin.js}
     end: \]
