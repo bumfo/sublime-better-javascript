@@ -1299,6 +1299,68 @@
 				</dict>
 				<dict>
 					<key>begin</key>
+					<string>(\[)</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>punctuation.calculated-property.js</string>
+						</dict>
+					</dict>
+					<key>end</key>
+					<string>(\])\s*(?=:)</string>
+					<key>endCaptures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>punctuation.calculated-property.js</string>
+						</dict>
+					</dict>
+					<key>name</key>
+					<string>meta.object.calculated-property.js</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#expressions</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>(:)\s*</string>
+					<key>beginCaptures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>punctuation.definition.property.js</string>
+						</dict>
+					</dict>
+					<key>end</key>
+					<string>(,)\s*|(?=})</string>
+					<key>endCaptures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>meta.delimiter.object.comma.js</string>
+						</dict>
+					</dict>
+					<key>name</key>
+					<string>meta.object.value.calculated-property.js</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#expressions</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>begin</key>
 					<string>(?x)
 (?:
   (\d+)|

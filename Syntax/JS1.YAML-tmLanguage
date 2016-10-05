@@ -855,6 +855,25 @@ repository:
       '0': {name: punctuation.definition.object.js}
     patterns:
     - include: '#comments'
+    - name: meta.object.calculated-property.js
+      begin: (\[)
+      beginCaptures:
+        '1': {name: punctuation.calculated-property.js}
+      end: '(\])\s*(?=:)'
+      endCaptures:
+        '1': {name: punctuation.calculated-property.js}
+      patterns:
+      - include: '#expressions'
+    - name: meta.object.other-property.js
+      name: meta.object.value.calculated-property.js
+      begin: '(:)\s*'
+      beginCaptures:
+        '1': {name: punctuation.definition.property.js}
+      end: (,)\s*|(?=})
+      endCaptures:
+        '1': {name: meta.delimiter.object.comma.js}
+      patterns:
+      - include: '#expressions'
     - name: meta.object.property.js
       begin: |
         (?x)
