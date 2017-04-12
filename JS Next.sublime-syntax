@@ -147,6 +147,31 @@ contexts:
     - match: ''
       set: [after-call-expression, call-expression]
 
+  unary-operator-after:
+    - scope: keyword.operator.unary.after
+      match: '{{unary_operators_after}}'
+      set: after-eol-after-lhs-expression
+
+  binary-operators:
+    - scope: keyword.operator.binary
+      match: '{{binary_operators}}'
+      set: unary-expression
+
+  after-eol-after-lhs-expression:
+    # - meta_content_scope: meta.after-eol-after-lhs-expression
+    - include: binary-operators
+    - match: '(?=\S)'
+      pop: true
+
+  after-lhs-expression:
+    # - meta_content_scope: meta.after-lhs-expression
+    - include: unary-operator-after
+    - include: binary-operators
+    - match: '(?=\n)'
+      set: after-eol-after-lhs-expression
+    - match: '(?=\S)'
+      pop: true
+
   after-call-expression:
     - include: after-member-expression
     - match: '(?=\S)'
@@ -221,6 +246,45 @@ contexts:
           set: [new-arguments, after-member-expression, member-expression]
     - match: ''
       set: primary-expression
+
+  primary-expression:
+    - meta_scope: meta.lhs-expression
+    - include: regexp-complete
+    - include: literal-string
+    - include: literal-string-template
+    - include: literal-number
+    - include: constant
+    - include: function-expression
+    - include: class-expression
+    - scope: variable.function.js
+      match: '{{identifier}}(?=\s*\()'
+      pop: true
+    - scope: variable.other.identifier
+      match: '{{identifier}}'
+      pop: true
+    - scope: punctuation.section.group.begin.js
+      match: '\('
+      set:
+        - scope: punctuation.section.group.end.js
+          match: '\)'
+          pop: true
+        - include: expressions
+    - scope: punctuation.definition.literal.array.begin.js
+      match: '\['
+      set:
+        - scope: punctuation.definition.literal.array.end.js
+          match: '\]'
+          pop: true
+        - include: expressions
+    - scope: punctuation.definition.literal.object.begin.js
+      match: '\{'
+      set:
+        - scope: punctuation.definition.literal.object.end.js
+          match: '\}'
+          pop: true
+        - include: expressions
+    - match: ''
+      pop: true
 
   function-expression:
     - scope: storage.type.function
@@ -321,10 +385,7 @@ contexts:
   binding-initializer:
     - scope: punctuation.definition.initializer
       match: '='
-      set:
-        - include: assignment-expressions
-        - match: '(?=\S)'
-          pop: true
+      set: assignment-expression
     - match: '(?=\S)'
       pop: true
 
@@ -335,68 +396,58 @@ contexts:
     - match: '(?=\S)'
       pop: true
 
-  primary-expression:
-    - meta_scope: meta.lhs-expression
-    - include: regexp-complete
-    - include: literal-string
-    - include: literal-string-template
-    - include: literal-number
-    - include: constant
-    - include: function-expression
-    - scope: variable.function.js
-      match: '{{identifier}}(?=\s*\()'
-      pop: true
-    - scope: variable.other.identifier
-      match: '{{identifier}}'
-      pop: true
-    - scope: punctuation.section.group.begin.js
-      match: '\('
+  class-expression:
+    - scope: storage.type.class
+      match: '\b(?:class)\b'
       set:
-        - scope: punctuation.section.group.end.js
-          match: '\)'
-          pop: true
-        - include: expressions
-    - scope: punctuation.definition.literal.array.begin.js
-      match: '\['
-      set:
-        - scope: punctuation.definition.literal.array.end.js
-          match: '\]'
-          pop: true
-        - include: expressions
-    - scope: punctuation.definition.literal.object.begin.js
+        - scope: entity.name.type.class.js
+          match: '{{identifier}}'
+          set: class-tail
+        - match: '(?=\S)'
+          set: class-tail
+
+  class-tail:
+    - scope: storage.modifier.extends.js
+      match: '\b(?:extends)\b'
+      set: 
+        - scope: entity.other.inherited-class.js
+          match: '{{identifier}}'
+          set: class-body
+        - match: '(?=\S)'
+          set: class-body
+    - match: '(?=\S)'
+      set: class-body
+
+  class-body:
+    - scope: punctuation.definition.block.begin.js
       match: '\{'
-      set:
-        - scope: punctuation.definition.literal.object.end.js
+      push:
+        - match: '(?={{identifier}})'
+          push:
+            - scope: entity.name.function.class.js
+              match: '{{identifier}}(?=\s*\()'
+              set: formal-parameters
+            - scope: meta.identifier
+              match: '{{identifier}}'
+              set:
+                - match: '(?=[=])'
+                  set: binding-initializer
+                - match: '(?=\S)'
+                  pop: true
+        - match: '(?=\{)'
+          push:
+            - include: statements
+            - match: ''
+              pop: true
+        - scope: punctuation.definition.block.end.js
           match: '\}'
           pop: true
-        - include: expressions
+    - match: '(?=\S)'
+      pop: true
+
+  assignment-expression:
     - match: ''
-      pop: true
-
-  unary-operator-after:
-    - scope: keyword.operator.unary.after
-      match: '{{unary_operators_after}}'
-      set: after-eol-after-lhs-expression
-
-  binary-operators:
-    - scope: keyword.operator.binary
-      match: '{{binary_operators}}'
       set: unary-expression
-
-  after-eol-after-lhs-expression:
-    # - meta_content_scope: meta.after-eol-after-lhs-expression
-    - include: binary-operators
-    - match: '(?=\S)'
-      pop: true
-
-  after-lhs-expression:
-    # - meta_content_scope: meta.after-lhs-expression
-    - include: unary-operator-after
-    - include: binary-operators
-    - match: '(?=\n)'
-      set: after-eol-after-lhs-expression
-    - match: '(?=\S)'
-      pop: true
 
   assignment-expressions:
     - include: unary-expressions
