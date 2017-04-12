@@ -16,7 +16,8 @@ variables:
   identifier: '[_$[:alpha:]][_$[:alnum:]]*'
   constant_identifier: '[[:upper:]][_$[:digit:][:upper:]]*\b'
   func_lookahead: '\s*\b(async\s+)?function\b'
-  arrow_func_lookahead: '\s*(\basync\s*)?([_$[:alpha:]][_$[:alnum:]]*|\([^\(]*?\))\s*=>'
+  # arrow_func_lookahead: '\s*(\basync\s*)?([_$[:alpha:]][_$[:alnum:]]*|\([^\(]*?\))\s*=>'
+  arrow_func_lookahead: '(?:[_$[:alpha:]][_$[:alnum:]]*|\([^\(]*?\))\s*=>'
   keyword_lookahead: '{{declar_var}}|{{control_keywords}}'
   lexp_lookahead: '(?<![[:alnum:]_$])(?!\b(?:{{keyword_lookahead}})\b)[\{\(\[''"`/[:alnum:]_$]|[\.][[:digit:]]'
 
@@ -112,6 +113,12 @@ contexts:
       match: '\b(?:{{control_keywords}})\b'
     - scope: storage.type.declar.js
       match: '\b(?:{{declar_var}})\b'
+    - include: statement-groups
+    - scope: punctuation.terminator
+      match: ';'
+    - include: expressions
+
+  statement-groups:
     - scope: punctuation.section.block.begin
       match: '\{'
       push:
@@ -119,9 +126,15 @@ contexts:
           match: '\}'
           pop: true
         - include: statements
-    - scope: punctuation.terminator
-      match: ';'
-    - include: expressions
+
+  statement-group:
+    - scope: punctuation.section.block.begin
+      match: '\{'
+      set:
+        - scope: punctuation.section.block.end
+          match: '\}'
+          pop: true
+        - include: statements
 
   unary-expressions:
     - scope: keyword.operator.unary.word
@@ -180,7 +193,11 @@ contexts:
 
   call-expression:
     - match: ''
-      set: [call-arguments, after-member-expression, member-expression]
+      set: [cover-call-arguments-and-arrow-function, after-member-expression, member-expression]
+
+  cover-call-arguments-and-arrow-function:
+    - include: arrow-function
+    - include: call-arguments
 
   call-arguments:
     - scope: punctuation.section.parens.begin
@@ -288,9 +305,35 @@ contexts:
       pop: true
 
   function-expression:
+    - scope: storage.type.async.js
+      match: '\b(?:async)\b'
+      set:
+        - scope: storage.type.function
+          match: '\b(?:function)\b'
+          set:
+            - match: '(?=\b(?:{{keyword_lookahead}})\b)'
+              pop: true
+            - scope: entity.name.function.async.js
+              match: '{{identifier}}'
+              set: formal-parameters
+            - match: '(?=\S)'
+              set: formal-parameters
+        - include: arrow-function
+        - match: '(?=\S)'
+          pop: true
     - scope: storage.type.function
       match: '\b(?:function)\b'
       set:
+        - scope: keyword.generator.asterisk.js
+          match: '\*'
+          set:
+            - match: '(?=\b(?:{{keyword_lookahead}})\b)'
+              pop: true
+            - scope: entity.name.function.generator.js
+              match: '{{identifier}}'
+              set: formal-parameters
+            - match: '(?=\S)'
+              set: formal-parameters
         - match: '(?=\b(?:{{keyword_lookahead}})\b)'
           pop: true
         - scope: entity.name.function.js
@@ -298,6 +341,29 @@ contexts:
           set: formal-parameters
         - match: '(?=\S)'
           set: formal-parameters
+    - include: arrow-function
+
+  arrow-function:
+    - match: '(?={{arrow_func_lookahead}})'
+      set: 
+        - match: '(?=\()'
+          set: [arrow-function-tail, formal-parameters]
+        - scope: variable.parameter.function.arrow.js
+          match: '{{identifier}}'
+          set: [arrow-function-tail, formal-parameters]
+        - match: ''
+          pop: true
+
+  arrow-function-tail:
+    - scope: storage.type.function.arrow.js
+      match: '=>'
+      set:
+        - match: '(?=\{)'
+          set: statement-group
+        - match: '(?=\S)'
+          set: unary-expression
+    - match: '(?=\S)'
+      pop: true
 
   parameter-binding-element-list-continue:
     - scope: punctuation.delimiter
@@ -454,6 +520,14 @@ contexts:
               set: formal-parameters
             - match: '(?=\S)'
               pop: true
+        - scope: storage.type.async.js
+          match: '\b(?:async)\b'
+          set:
+            - scope: entity.name.function.async.js
+              match: '{{identifier}}'
+              set: formal-parameters
+            - match: '(?=\S)'
+              pop: true
         - scope: meta.identifier
           match: '{{identifier}}'
           set:
@@ -463,11 +537,15 @@ contexts:
               pop: true
     - match: (?={{property_name_lookahead}}\s*\()
       push: [formal-parameters, object-property-name]
-    - match: '(?=\{)'
+    - scope: keyword.generator.asterisk.js
+      match: '\*'
       push:
-        - include: statements
-        - match: ''
+        - scope: entity.name.function.generator.js
+          match: '{{identifier}}'
+          set: formal-parameters
+        - match: '(?=\S)'
           pop: true
+    - include: statement-groups
     - scope: punctuation.definition.block.end.js
       match: '\}'
       pop: true
