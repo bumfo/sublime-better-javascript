@@ -234,70 +234,67 @@ contexts:
         - match: '(?=\S)'
           pop: true
 
-  formal-parameters:
-    - scope: punctuation.definition.parameters.begin.js
-      match: '\('
-      push:
-        - include: parameter-binding-elements
-        - scope: punctuation.delimiter
-          match: ','
-        - scope: punctuation.definition.parameters.end.js
-          match: '\)'
-          pop: true
+  parameter-binding-element-list-continue:
+    - scope: punctuation.delimiter
+      match: ','
+      set: [parameter-binding-element-list-continue, parameter-binding-element]
     - match: '(?=\S)'
       pop: true
 
-  parameter-single-name-bindings:
-    - scope: variable.parameter
-      match: '{{identifier}}'
-      push: binding-initializer
+  formal-parameters-end:
+    - scope: punctuation.definition.parameters.end.js
+      match: '\)'
+      pop: true
+    - match: '(?=\S)'
+      pop: true
 
-  parameter-binding-elements:
-    - include: parameter-single-name-bindings
+  formal-parameters:
+    - scope: punctuation.definition.parameters.begin.js
+      match: '\('
+      set: [formal-parameters-end, parameter-binding-element-list-continue, parameter-binding-element]
+    - match: '(?=\S)'
+      pop: true
+
+  binding-array-end:
+    - scope: punctuation.definition.binding-array.end.js
+      match: '\]'
+      set: binding-initializer
+    - match: '(?=\S)'
+      pop: true
+
+  parameter-binding-element:
     - scope: punctuation.delimiter.elision
       match: ','
     - scope: punctuation.definition.binding-array.begin.js
       match: '\['
-      push: 
-        - include: parameter-binding-elements
-        - scope: punctuation.delimiter
-          match: ','
-        - scope: punctuation.definition.binding-array.end.js
-          match: '\]'
-          set: binding-initializer
+      set: [binding-array-end, parameter-binding-element-list-continue, parameter-binding-element]
     - scope: punctuation.definition.binding-object.begin.js
       match: '\{'
-      push:
+      set:
         - meta_scope: meta.binding.object
         - match: '(?=[\["'']|{{identifier}}\s*:)'
           push: [parameter-binding-after-property-name, object-property-name]
-        - include: parameter-single-name-bindings
+        - match: '(?={{identifier}})'
+          push: parameter-single-name-binding
         - scope: punctuation.delimiter
           match: ','
         - scope: punctuation.definition.binding-object.end.js
           match: '\}'
           set: binding-initializer
+        - match: '(?=\S)'
+          pop: true
+    - match: '(?={{identifier}})'
+      set: parameter-single-name-binding
+    - match: '(?=\S)'
+      pop: true
 
   parameter-binding-after-property-name:
     - scope: punctuation.separator
       match: ':'
-      set: 
-        - include: parameter-binding-elements
-        - match: ''
-          pop: true
+      set: parameter-binding-element
     - match: '(?=\S)'
       pop: true
 
-  binding-initializer:
-    - scope: punctuation.definition.initializer
-      match: '='
-      set:
-        - include: assignment-expressions
-        - match: '(?=\S)'
-          pop: true
-    - match: '(?=\S)'
-      pop: true
-  
   object-property-name:
     - scope: entity.name.property
       match: '{{identifier}}'
@@ -313,6 +310,23 @@ contexts:
           pop: true
         - match: '(?=\S)'
           pop: true
+    - match: '(?=\S)'
+      pop: true
+
+  binding-initializer:
+    - scope: punctuation.definition.initializer
+      match: '='
+      set:
+        - include: assignment-expressions
+        - match: '(?=\S)'
+          pop: true
+    - match: '(?=\S)'
+      pop: true
+
+  parameter-single-name-binding:
+    - scope: variable.parameter
+      match: '{{identifier}}'
+      set: binding-initializer
     - match: '(?=\S)'
       pop: true
 
