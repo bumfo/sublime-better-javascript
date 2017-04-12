@@ -250,17 +250,17 @@ contexts:
         - match: '(?=\b(?:let)\b)'
           push: [for-expression-start, let-or-const-statement]
         - match: (?=\S)
-          push: [for-expression-start, assignment-expression]
+          push: [for-expression-start, expression]
     - match: '(?=\S)'
       pop: true
 
   for-expression-start:
     - scope: keyword.operator.in
       match: '\b(?:in)\b'
-      set: for-expression-after-in-or-of
+      set: for-expression-after-in
     - scope: keyword.operator.of
       match: '\b(?:of)\b'
-      set: for-expression-after-in-or-of
+      set: for-expression-after-of
     - scope: punctuation.terminator.for.js
       match: ';'
       set: for-expression-after-one-semicolon
@@ -280,8 +280,15 @@ contexts:
     - match: '(?=\S)'
       pop: true
 
-  for-expression-after-in-or-of:
+  for-expression-after-in:
     - include: expressions
+    - match: '(?=\S)'
+      pop: true
+
+  for-expression-after-of:
+    - scope: invalid.illegal.js
+      match: ','
+    - include: assignment-expressions
     - match: '(?=\S)'
       pop: true
 
@@ -733,6 +740,11 @@ contexts:
 
   assignment-expressions:
     - include: unary-expressions
+
+  expression:
+    - scope: punctuation.delimiter
+      match: ','
+    - include: assignment-expression
 
   expressions:
     - scope: punctuation.delimiter
