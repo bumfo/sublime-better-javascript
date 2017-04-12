@@ -106,6 +106,8 @@ contexts:
     - include: import
     - scope: keyword.control
       match: '\b(?:{{control_keywords}})\b'
+    - scope: storage.type.declar.js
+      match: '\b(?:{{declar_var}})\b'
     - scope: punctuation.section.block.begin
       match: '\{'
       push:
@@ -113,6 +115,8 @@ contexts:
           match: '\}'
           pop: true
         - include: statements
+    - scope: punctuation.terminator
+      match: ';'
     - include: expressions
 
   unary-expressions:
@@ -122,6 +126,8 @@ contexts:
     - scope: keyword.operator.unary
       match: '{{unary_operators}}'
       push: unary-expression
+    - match: '(?={{lexp_lookahead}})'
+      push: [after-lhs-expression, lhs-expression]
 
   unary-expression:
     - meta_content_scope: meta.unary-expression
@@ -135,24 +141,94 @@ contexts:
       pop: true
 
   lhs-expression:
+    - match: ''
+      set: [after-call-expression, call-expression]
+
+  after-call-expression:
+    - include: after-member-expression
+    - match: '(?=\S)'
+      pop: true
+
+  call-expression:
+    - match: ''
+      set: [call-arguments, after-member-expression, member-expression]
+
+  call-arguments:
+    - scope: punctuation.section.parens.begin
+      match: '\('
+      push:
+        - scope: punctuation.section.parens.end
+          match: '\)'
+          pop: true
+        - include: expressions
+    - match: '(?=\S)'
+      pop: true
+
+  new-arguments:
+    - scope: punctuation.section.parens.new.begin
+      match: '\('
+      push:
+        - scope: punctuation.section.parens.new.end
+          match: '\)'
+          pop: true
+        - include: expressions
+    - match: '(?=\S)'
+      pop: true
+
+  after-member-expression:
+    - scope: punctuation.section.brackets.begin
+      match: '\['
+      push:
+        - scope: punctuation.section.brackets.end
+          match: '\]'
+          pop: true
+        - include: expressions
+    - scope: punctuation.accessor.js
+      match: '\.'
+      set:
+        - scope: variable.function.property.js
+          match: '{{identifier}}(?=\s*\()'
+          set: after-member-expression
+        - scope: meta.property.js
+          match: '{{identifier}}'
+          set: after-member-expression
+        - match: '(?=\S)'
+          pop: true
+    - match: '(?=\S)'
+      pop: true
+
+  member-expression:
+    - scope: keyword.operator.new.js
+      match: '\b(?:new)\b'
+      set:
+        - match: '(?={{identifier}}(?:\s*\.\s*{{identifier}})*\s*(?:$|[^\[\.\w$\s]))'
+          set:
+            - scope: punctuation
+              match: '\.'
+            - scope: variable.type.js
+              match: '{{identifier}}(?=\s*(?:$|[^\[\.\w$\s]))'
+              set:
+                - match: '(?=\S)'
+                  set: new-arguments
+            - scope: variable.other.js
+              match: '{{identifier}}'
+            - match: (?=\S)
+              pop: true
+        - match: '(?=\S)'
+          set: [new-arguments, after-member-expression, member-expression]
+    - match: ''
+      set: primary-expression
+
+  primary-expression:
     - meta_scope: meta.lhs-expression
     - include: regexp-complete
     - include: literal-string
     - include: literal-string-template
     - include: literal-number
     - include: constant
-    - scope: keyword.operator.new.js
-      match: '\b(?:new)\b'
-      set:
-        - scope: variable.type.js
-          match: '{{identifier}}'
-          set:
-            - match: '(?=\S)'
-              pop: true
-        - match: '(?=\S)'
-          pop: true
     - scope: variable.function.js
       match: '{{identifier}}(?=\s*\()'
+      pop: true
     - scope: variable.other.identifier
       match: '{{identifier}}'
       pop: true
@@ -191,13 +267,13 @@ contexts:
       set: unary-expression
 
   after-eol-after-lhs-expression:
-    - meta_content_scope: meta.after-eol-after-lhs-expression
+    # - meta_content_scope: meta.after-eol-after-lhs-expression
     - include: binary-operators
     - match: '(?=\S)'
       pop: true
 
   after-lhs-expression:
-    - meta_content_scope: meta.after-lhs-expression
+    # - meta_content_scope: meta.after-lhs-expression
     - include: unary-operator-after
     - include: binary-operators
     - match: '(?=\n)'
@@ -205,20 +281,21 @@ contexts:
     - match: '(?=\S)'
       pop: true
 
+  assignment-expressions:
+    - include: unary-expressions
+
   expressions:
-    - scope: storage.type.js
-      match: '\b(?:{{declar_var}})\b'
+    - scope: punctuation.delimiter
+      match: ','
+    - include: assignment-expressions
+    # - scope: storage.type
+    #   match: '\b(?:{{storage_classes}})\b'
+    # - scope: keyword
+    #   match: '\b(?:{{es17_keywords}})\b'
+    # - scope: punctuation
+    #   match: '(?:{{punctuators}})'
     # - scope: keyword.operator
     #   match: '{{operators}}'
-    - include: unary-expressions
-    - match: '(?={{lexp_lookahead}})'
-      push: [after-lhs-expression, lhs-expression]
-    - scope: storage.type
-      match: '\b(?:{{storage_classes}})\b'
-    - scope: keyword
-      match: '\b(?:{{es17_keywords}})\b'
-    - scope: punctuation
-      match: '(?:{{punctuators}})'
   
   comments:
     - match: /\*\*(?!/)
