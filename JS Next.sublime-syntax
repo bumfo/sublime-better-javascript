@@ -17,7 +17,8 @@ variables:
   constant_identifier: '[[:upper:]][_$[:digit:][:upper:]]*\b'
   func_lookahead: '\s*\b(async\s+)?function\b'
   arrow_func_lookahead: '\s*(\basync\s*)?([_$[:alpha:]][_$[:alnum:]]*|\([^\(]*?\))\s*=>'
-  lexp_lookahead: '(?!\b(?:{{declar_var}}|{{control_keywords}})\b)[\{\(\[''"`/[:alnum:]_$]|[\.][[:digit:]]'
+  keyword_lookahead: '{{declar_var}}|{{control_keywords}}'
+  lexp_lookahead: '(?<![[:alnum:]_$])(?!\b(?:{{keyword_lookahead}})\b)[\{\(\[''"`/[:alnum:]_$]|[\.][[:digit:]]'
 
   control_keywords: 'break|do|case|else|catch|export|return|while|finally|with|continue|for|switch|yield|debugger|default|if|throw|import|try'
 
@@ -219,6 +220,116 @@ contexts:
     - match: ''
       set: primary-expression
 
+  function-expression:
+    - scope: storage.type.function
+      match: '\b(?:function)\b'
+      set:
+        - match: '(?=\b(?:{{keyword_lookahead}})\b)'
+          pop: true
+        - scope: entity.name.function.js
+          match: '{{identifier}}'
+          set: formal-parameters
+        - match: '(?=\S)'
+          set: formal-parameters
+        - match: '(?=\S)'
+          pop: true
+
+  parameter-binding-element-list-continue:
+    - scope: punctuation.delimiter
+      match: ','
+      set: [parameter-binding-element-list-continue, parameter-binding-element]
+    - match: '(?=\S)'
+      pop: true
+
+  formal-parameters-end:
+    - scope: punctuation.definition.parameters.end.js
+      match: '\)'
+      pop: true
+    - match: '(?=\S)'
+      pop: true
+
+  formal-parameters:
+    - scope: punctuation.definition.parameters.begin.js
+      match: '\('
+      set: [formal-parameters-end, parameter-binding-element-list-continue, parameter-binding-element]
+    - match: '(?=\S)'
+      pop: true
+
+  binding-array-end:
+    - scope: punctuation.definition.binding-array.end.js
+      match: '\]'
+      set: binding-initializer
+    - match: '(?=\S)'
+      pop: true
+
+  parameter-binding-element:
+    - scope: punctuation.delimiter.elision
+      match: ','
+    - scope: punctuation.definition.binding-array.begin.js
+      match: '\['
+      set: [binding-array-end, parameter-binding-element-list-continue, parameter-binding-element]
+    - scope: punctuation.definition.binding-object.begin.js
+      match: '\{'
+      set:
+        - meta_scope: meta.binding.object
+        - match: '(?=[\["'']|{{identifier}}\s*:)'
+          push: [parameter-binding-after-property-name, object-property-name]
+        - match: '(?={{identifier}})'
+          push: parameter-single-name-binding
+        - scope: punctuation.delimiter
+          match: ','
+        - scope: punctuation.definition.binding-object.end.js
+          match: '\}'
+          set: binding-initializer
+        - match: '(?=\S)'
+          pop: true
+    - match: '(?={{identifier}})'
+      set: parameter-single-name-binding
+    - match: '(?=\S)'
+      pop: true
+
+  parameter-binding-after-property-name:
+    - scope: punctuation.separator
+      match: ':'
+      set: parameter-binding-element
+    - match: '(?=\S)'
+      pop: true
+
+  object-property-name:
+    - scope: entity.name.property
+      match: '{{identifier}}'
+      pop: true
+    - include: literal-string
+    - include: literal-number
+    - scope: punctuation.section.computed.begin.js
+      match: '\['
+      set:
+        - include: assignment-expressions
+        - scope: punctuation.section.computed.end.js
+          match: '\]'
+          pop: true
+        - match: '(?=\S)'
+          pop: true
+    - match: '(?=\S)'
+      pop: true
+
+  binding-initializer:
+    - scope: punctuation.definition.initializer
+      match: '='
+      set:
+        - include: assignment-expressions
+        - match: '(?=\S)'
+          pop: true
+    - match: '(?=\S)'
+      pop: true
+
+  parameter-single-name-binding:
+    - scope: variable.parameter
+      match: '{{identifier}}'
+      set: binding-initializer
+    - match: '(?=\S)'
+      pop: true
+
   primary-expression:
     - meta_scope: meta.lhs-expression
     - include: regexp-complete
@@ -229,6 +340,7 @@ contexts:
     - scope: variable.function.js
       match: '{{identifier}}(?=\s*\()'
       pop: true
+    - include: function-expression
     - scope: variable.other.identifier
       match: '{{identifier}}'
       pop: true
