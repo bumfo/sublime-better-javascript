@@ -1,7 +1,7 @@
 # [PackageDev] target_format: plist, ext: tmPreferences
 
 name: JavaScript Indent
-scope: source.js
+scope: source.js, source.mjs
 settings:
   bracketIndentNextLinePattern: |
     (?x)

@@ -3,6 +3,6 @@
 	${0:$TM_SELECTED_TEXT}
 }]]></content>
     <tabTrigger>fun</tabTrigger>
-    <scope>source.js</scope>
+    <scope>source.js, source.mjs</scope>
     <description>Function</description>
 </snippet>

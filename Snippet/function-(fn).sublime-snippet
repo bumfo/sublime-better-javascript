@@ -3,6 +3,6 @@
     ${0:$TM_SELECTED_TEXT}
 },]]></content>
     <tabTrigger>fn</tabTrigger>
-    <scope>source.js meta.declaration.object.js</scope>
+    <scope>source.js meta.declaration.object.js, source.mjs meta.declaration.object.js</scope>
     <description>Object Function</description>
 </snippet>

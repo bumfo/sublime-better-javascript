@@ -1,5 +1,5 @@
 <snippet>
-	<content><![CDATA[module.exports = ${0:$TM_SELECTED_TEXT};
+	<content><![CDATA[module.exports = ${0:$TM_SELECTED_TEXT}
 ]]></content>
 	<tabTrigger>exports</tabTrigger>
 	<scope>source.js</scope>

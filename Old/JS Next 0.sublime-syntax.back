@@ -1,0 +1,175 @@
+%YAML 1.2
+---
+# http://www.sublimetext.com/docs/3/syntax.html
+name: JS Next
+# file_extensions:
+#   - js
+#   - htc
+# first_line_match: ^#!/.*\b(node|js)$\n?
+scope: source.js2
+
+variables:
+  es17_keywords: 'break|do|in|typeof|case|else|instanceof|var|catch|export|new|void|class|extends|return|while|const|finally|super|with|continue|for|switch|yield|debugger|function|this|default|if|throw|delete|import|try|await'
+  es17_punctuators: '\{|\(|\)|\[|\]|\.|\.\.\.|;|,|<|>|<=|>=|==|!=|===|!==|\+|\-|\*|%|\+\+|\-\-|<<|>>|>>>|&|\||\^|!|~|&&|\|\||?|:|=|\+=|\-=|\*=|%=|<<=|>>=|>>>=|&=|\|=|\^=|=>|\*\*|\*\*=|\/|\/=|\}'
+  storage_classes: 'var|let|const|class|function|async'
+  operators: '\.\.\.|<|>|<=|>=|==|!=|===|!==|\+|\-|\*|%|\+\+|\-\-|<<|>>|>>>|&|\||\^|!|~|&&|\|\||?|:|=|\+=|\-=|\*=|%=|<<=|>>=|>>>=|&=|\|=|\^=|\*\*|\*\*=|\/|\/='
+  punctuators: '\{|\(|\)|\[|\]|\.|;|,|=>|\}'
+  identifier: '[_$[:alpha:]][_$[:alnum:]]*'
+  constant_identifier: '[[:upper:]][_$[:digit:][:upper:]]*\b'
+  func_lookahead: '\s*\b(async\s+)?function\b'
+  arrow_func_lookahead: '\s*(\basync\s*)?([_$[:alpha:]][_$[:alnum:]]*|\([^\(]*?\))\s*=>'
+
+
+contexts:
+
+# prototypes
+
+  prototype:
+    - include: comments
+
+  main:
+    - include: global
+
+  global:
+    - include: statements
+
+  statements:
+    - include: expressions
+
+  expressions:
+    - include: regexp-complete
+    - include: literal-string
+    - include: literal-number
+    - include: constants
+    - scope: keyword.operator
+      match: '{{operators}}'
+    - scope: storage.type
+      match: '\b(?:{{storage_classes}})\b'
+    - scope: keyword
+      match: '\b(?:{{es17_keywords}})\b'
+    - scope: punctuation
+      match: '(?:{{punctuators}})'
+  
+  comments:
+    - match: /\*\*(?!/)
+      scope: punctuation.definition.comment.js
+      push:
+        - meta_scope: comment.block.documentation.js
+        - match: \*/
+          scope: punctuation.definition.comment.js
+          pop: true
+    - match: /\*
+      scope: punctuation.definition.comment.js
+      push:
+        - meta_scope: comment.block.js
+        - match: \*/
+          scope: punctuation.definition.comment.js
+          pop: true
+    - match: //
+      scope: punctuation.definition.comment.js
+      push:
+        - meta_scope: comment.line.double-slash.js
+        - match: \n
+          pop: true
+  
+  literal-string:
+    - match: "'"
+      scope: punctuation.definition.string.begin.js
+      push:
+        - meta_scope: string.quoted.single.js
+        - match: (')|(\n)
+          captures:
+            1: punctuation.definition.string.end.js
+            2: invalid.illegal.newline.js
+          pop: true
+        - include: string-content
+    - match: '"'
+      captures:
+        0: punctuation.definition.string.begin.js
+      push:
+        - meta_scope: string.quoted.double.js
+        - match: (")|(\n)
+          captures:
+            1: punctuation.definition.string.end.js
+            2: invalid.illegal.newline.js
+          pop: true
+        - include: string-content
+
+  literal-string-template:
+    - match: '({{identifier}})?(`)'
+      captures:
+        1: variable.function.tagged-template.js
+        2: punctuation.definition.string.template.begin.js
+      push:
+        - meta_scope: string.template.js
+        - match: "`"
+          scope: punctuation.definition.string.template.end.js
+          pop: true
+        - match: '\$\{'
+          captures:
+            0: punctuation.definition.template-expression.begin.js
+          push:
+            - meta_scope: meta.template.expression.js
+            - meta_content_scope: source.js.embedded.expression
+            - match: '\}'
+              scope: punctuation.definition.template-expression.end.js
+              pop: true
+            - include: expressions
+        - include: string-content
+
+  literal-number:
+    - match: '(?i)(?:\B[-+]|\b)0x[0-9a-f]*\.(\B|\b[0-9]+)'
+      scope: invalid.illegal.numeric.hex.js
+    - match: '(?:\B[-+]|\b)0[0-9]+\.(\B|\b[0-9]+)'
+      scope: invalid.illegal.numeric.octal.js
+    - match: |-
+        (?xi)
+        (?:\B[-+])?
+        (?:
+          \b0b[0-1]*|                 # binary
+          \b0o[0-7]*|                 # octal
+          \b0x[0-9a-f]*|              # hex
+          (
+            \B\.[0-9]+|               # e.g. .999
+            \b[0-9]+(\.[0-9]*)?       # e.g. 999.999, 999. or 999
+          )(e[-+]?[0-9]+)?            # e.g. e+123, E-123
+        )
+      scope: constant.numeric.js
+    - match: '(?:\B[-+]|\b)(Infinity)\b'
+      scope: constant.language.infinity.js
+
+  string-content:
+    - match: \\\s*\n
+      scope: constant.character.escape.newline.js
+    - match: '\\(x[\da-fA-F][\da-fA-F]|u[\da-fA-F][\da-fA-F][\da-fA-F][\da-fA-F]|.)'
+      scope: constant.character.escape.js
+
+  regexp-complete:
+    - match: '/(?=(?:[^/\\\[]|\\.|\[([^\]\\]|\\.)+\])+/(?![/*])[gimy]*(?!\s*[a-zA-Z0-9_$]))'
+      scope: punctuation.definition.string.begin.js
+      push: regexp
+
+  regexp:
+    - meta_scope: string.regexp.js
+    - match: "(/)([gimy]*)"
+      captures:
+        1: punctuation.definition.string.end.js
+        2: keyword.other.js
+      pop: true
+    - match: '(?=.|\n)'
+      push:
+        - match: '(?=/)'
+          pop: true
+        - include: scope:source.regexp.js
+  
+  constants:
+    - match: \btrue\b
+      scope: constant.language.boolean.true.js
+    - match: \bfalse\b
+      scope: constant.language.boolean.false.js
+    - match: \bnull\b
+      scope: constant.language.null.js
+    - match: \bundefined\b
+      scope: constant.language.undefined.js
+    - match: \bNaN\b
+      scope: constant.language.nan.js

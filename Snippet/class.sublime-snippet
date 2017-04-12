@@ -3,6 +3,6 @@
 	${0:$TM_SELECTED_TEXT}
 }]]></content>
     <tabTrigger>class</tabTrigger>
-    <scope>source.js</scope>
+    <scope>source.js, source.mjs</scope>
     <description>class … {…}</description>
 </snippet>

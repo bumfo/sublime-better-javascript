@@ -5,7 +5,7 @@
 	<key>name</key>
 	<string>Symbol List Instance</string>
 	<key>scope</key>
-	<string>source.js entity.name.instance</string>
+	<string>source.js entity.name.instance, source.mjs entity.name.instance</string>
 	<key>settings</key>
 	<dict>
 		<key>showInSymbolList</key>
