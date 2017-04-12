@@ -20,6 +20,8 @@ variables:
   keyword_lookahead: '{{declar_var}}|{{control_keywords}}'
   lexp_lookahead: '(?<![[:alnum:]_$])(?!\b(?:{{keyword_lookahead}})\b)[\{\(\[''"`/[:alnum:]_$]|[\.][[:digit:]]'
 
+  number_lookahead: '[0-9]+'
+
   control_keywords: 'break|do|case|else|catch|export|return|while|finally|with|continue|for|switch|yield|debugger|default|if|throw|import|try'
 
 contexts:
@@ -231,8 +233,6 @@ contexts:
           set: formal-parameters
         - match: '(?=\S)'
           set: formal-parameters
-        - match: '(?=\S)'
-          pop: true
 
   parameter-binding-element-list-continue:
     - scope: punctuation.delimiter
@@ -263,6 +263,11 @@ contexts:
       pop: true
 
   parameter-binding-element:
+    - scope: punctuation.definition.rest
+      match: '\.\.\.'
+      set: parameter-binding-element
+    - scope: invalid.illegal
+      match: '\.'
     - scope: punctuation.delimiter.elision
       match: ','
     - scope: punctuation.definition.binding-array.begin.js
@@ -272,7 +277,7 @@ contexts:
       match: '\{'
       set:
         - meta_scope: meta.binding.object
-        - match: '(?=[\["'']|{{identifier}}\s*:)'
+        - match: '(?=[\["'']|(?:{{identifier}}|{{number_lookahead}})\s*:)'
           push: [parameter-binding-after-property-name, object-property-name]
         - match: '(?={{identifier}})'
           push: parameter-single-name-binding
@@ -337,10 +342,10 @@ contexts:
     - include: literal-string-template
     - include: literal-number
     - include: constant
+    - include: function-expression
     - scope: variable.function.js
       match: '{{identifier}}(?=\s*\()'
       pop: true
-    - include: function-expression
     - scope: variable.other.identifier
       match: '{{identifier}}'
       pop: true
