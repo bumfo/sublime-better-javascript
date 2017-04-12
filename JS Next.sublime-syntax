@@ -591,11 +591,14 @@ contexts:
           match: ';'
         - scope: storage.type.static.js
           match: '\b(?:static)\b'
-        - include: method-definitions
+        - include: class-method-definitions
+        - scope: punctuation.definition.block.end.js
+          match: '\}'
+          pop: true
     - match: '(?=\S)'
       pop: true
 
-  method-definitions:
+  class-method-definitions:
     - match: '(?={{identifier}})'
       push:
         - scope: entity.name.function.class.js
@@ -643,9 +646,6 @@ contexts:
         - match: '(?=\S)'
           pop: true
     - include: statement-groups
-    - scope: punctuation.definition.block.end.js
-      match: '\}'
-      pop: true
 
   assignment-expression:
     - match: ''
