@@ -305,9 +305,66 @@ contexts:
       pop: true
 
   after-call-expression:
-    - include: after-member-expression
+    - scope: punctuation.section.brackets.begin
+      match: '\['
+      push:
+        - scope: punctuation.section.brackets.end
+          match: '\]'
+          pop: true
+        - include: expressions
+    - scope: punctuation.accessor.js
+      match: '\.'
+      set:
+        - meta_scope: meta.property-accessor
+        - scope: variable.function.property.js
+          match: '{{identifier}}(?=\s*\()'
+          set: after-call-expression
+        - scope: meta.property.js
+          match: '{{identifier}}'
+          set: after-call-expression
+        - match: '(?=\S)'
+          pop: true
+    - include: cover-call-arguments-and-arrow-function
+    # - match: '(?=\S)'
+    #   pop: true
+  
+  after-member-expression:
+    - scope: punctuation.section.brackets.begin
+      match: '\['
+      push:
+        - scope: punctuation.section.brackets.end
+          match: '\]'
+          pop: true
+        - include: expressions
+    - scope: punctuation.accessor.js
+      match: '\.'
+      set:
+        - meta_scope: meta.property-accessor
+        - scope: variable.function.property.js
+          match: '{{identifier}}(?=\s*\()'
+          set: after-member-expression
+        - scope: meta.property.js
+          match: '{{identifier}}'
+          set: after-member-expression
+        - match: '(?=\S)'
+          pop: true
     - match: '(?=\S)'
       pop: true
+
+  new-after-member-expression:
+    - scope: punctuation.accessor.js
+      match: '\.'
+      set:
+        - meta_scope: meta.new-property-accessor
+        - scope: variable.type.js
+          match: '{{identifier}}(?=\s*\()'
+          set: new-after-member-expression
+        - scope: variable.type.maybe.js
+          match: '{{identifier}}'
+          set: new-after-member-expression
+        - match: '(?=\S)'
+          pop: true
+    - include: after-member-expression
 
   call-expression:
     - match: ''
@@ -341,47 +398,37 @@ contexts:
     - match: '(?=\S)'
       pop: true
 
-  after-member-expression:
-    - scope: punctuation.section.brackets.begin
-      match: '\['
-      push:
-        - scope: punctuation.section.brackets.end
-          match: '\]'
-          pop: true
-        - include: expressions
-    - scope: punctuation.accessor.js
-      match: '\.'
-      set:
-        - scope: variable.function.property.js
-          match: '{{identifier}}(?=\s*\()'
-          set: after-member-expression
-        - scope: meta.property.js
-          match: '{{identifier}}'
-          set: after-member-expression
-        - match: '(?=\S)'
-          pop: true
-    - match: '(?=\S)'
+  new-member-expression:
+    - scope: variable.type.js
+      match: '(?!\b(?:{{keyword_lookahead}}|function|class)\b){{identifier}}(?=\s*\()'
       pop: true
+    - scope: variable.type.maybe.js
+      match: '(?!\b(?:{{keyword_lookahead}}|function|class)\b){{identifier}}'
+      pop: true
+    - include: member-expression
 
   member-expression:
     - scope: keyword.operator.new.js
       match: '\b(?:new)\b'
       set:
-        - match: '(?={{identifier}}(?:\s*\.\s*{{identifier}})*\s*(?:$|[^\[\.\w$\s]))'
-          set:
-            - scope: punctuation
-              match: '\.'
-            - scope: variable.type.js
-              match: '{{identifier}}(?=\s*(?:$|[^\[\.\w$\s]))'
-              set:
-                - match: '(?=\S)'
-                  set: new-arguments
-            - scope: variable.other.js
-              match: '{{identifier}}'
-            - match: (?=\S)
-              pop: true
+        # - match: '(?!\b(?:{{keyword_lookahead}}|function|class)\b)(?={{identifier}}(?:\s*\.\s*{{identifier}})*\s*(?:$|[^\[\.\w$\s]))'
+        #   set:
+        #     - scope: punctuation
+        #       match: '\.'
+        #     - scope: variable.type.js
+        #       match: '{{identifier}}(?=\s*(?:[^\[\.\w$\s]))'
+        #       set:
+        #         - match: '(?=\S)'
+        #           set: new-arguments
+        #     - scope: variable.type.maybe.js
+        #       match: '{{identifier}}(?=\s*$)'
+        #       set: [new-arguments, after-member-expression]
+        #     - scope: variable.other.js
+        #       match: '{{identifier}}'
+        #     - match: (?=\S)
+        #       pop: true
         - match: '(?=\S)'
-          set: [new-arguments, after-member-expression, member-expression]
+          set: [new-arguments, new-after-member-expression, new-member-expression]
     - match: ''
       set: primary-expression
 
