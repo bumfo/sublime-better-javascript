@@ -110,6 +110,7 @@ contexts:
   statements:
     - include: import-statements
     - include: variable-statements
+    - include: let-or-const-statements
     - scope: keyword.control
       match: '\b(?:{{control_keywords}})\b'
     - scope: storage.type.declar.js
@@ -138,16 +139,33 @@ contexts:
         - include: statements
 
   variable-statements:
-    - scope: storage.type.var.js
+    - scope: meta.variable-declaration storage.type.var.js
       match: '\b(?:var)\b'
       push: [variable-declaration-list-continue, variable-declaration]
-  
+
   variable-statement:
-    - scope: storage.type.var.js
+    - scope: meta.variable-declaration storage.type.var.js
       match: '\b(?:var)\b'
       set: [variable-declaration-list-continue, variable-declaration]
 
+  let-or-const-statements:
+    - scope: meta.variable-declaration storage.type.let.js
+      match: '\b(?:let)\b'
+      push: [variable-declaration-list-continue, variable-declaration]
+    - scope: meta.variable-declaration storage.type.const.js
+      match: '\b(?:const)\b'
+      push: [variable-declaration-list-continue, variable-declaration]
+  
+  let-or-const-statement:
+    - scope: meta.variable-declaration storage.type.let.js
+      match: '\b(?:let)\b'
+      set: [variable-declaration-list-continue, variable-declaration]
+    - scope: meta.variable-declaration storage.type.const.js
+      match: '\b(?:const)\b'
+      set: [variable-declaration-list-continue, variable-declaration]
+
   variable-declaration-list-continue:
+    - meta_content_scope: meta.variable-declaration
     - scope: punctuation.delimiter
       match: ','
       set: [variable-declaration-list-continue, variable-declaration]
