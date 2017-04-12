@@ -111,6 +111,7 @@ contexts:
     - include: import-statements
     - include: variable-statements
     - include: let-or-const-statements
+    # - include: for-statements
     - scope: keyword.control
       match: '\b(?:{{control_keywords}})\b'
     - scope: storage.type.declar.js
@@ -232,9 +233,24 @@ contexts:
     - match: '(?=\S)'
       pop: true
 
-  iteration-statements:
+  for-statements:
     - scope: keyword.control.for.js
       match: '\b(?:for)\b'
+      set:
+        - scope: punctuation.definition.group.begin.js
+          match: '\('
+          push:
+            - scope: punctuation.definition.group.end.js
+              match: '\)'
+              pop: true
+            - match: '(?=\b(?:var)\b)'
+              push: [for-expression, variable-statement]
+        - match: '(?=\S)'
+          pop: true
+
+  for-expression:
+    - match: '(?=\S)'
+      pop: true
 
   unary-expressions:
     - scope: keyword.operator.unary.word
