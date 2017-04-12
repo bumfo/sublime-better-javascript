@@ -21,6 +21,7 @@ variables:
   lexp_lookahead: '(?<![[:alnum:]_$])(?!\b(?:{{keyword_lookahead}})\b)[\{\(\[''"`/[:alnum:]_$]|[\.][[:digit:]]'
 
   number_lookahead: '[0-9]+'
+  property_name_lookahead: '[\["'']|(?:{{identifier}}|{{number_lookahead}})'
 
   control_keywords: 'break|do|case|else|catch|export|return|while|finally|with|continue|for|switch|yield|debugger|default|if|throw|import|try'
 
@@ -341,7 +342,7 @@ contexts:
       match: '\{'
       set:
         - meta_scope: meta.binding.object
-        - match: '(?=[\["'']|(?:{{identifier}}|{{number_lookahead}})\s*:)'
+        - match: '(?={{property_name_lookahead}}\s*:)'
           push: [parameter-binding-after-property-name, object-property-name]
         - match: '(?={{identifier}})'
           push: parameter-single-name-binding
@@ -383,7 +384,8 @@ contexts:
       pop: true
 
   binding-initializer:
-    - scope: punctuation.definition.initializer
+    # - scope: punctuation.definition.initializer
+    - scope: keyword.operator.initializer.js
       match: '='
       set: assignment-expression
     - match: '(?=\S)'
@@ -422,27 +424,52 @@ contexts:
     - scope: punctuation.definition.block.begin.js
       match: '\{'
       push:
-        - match: '(?={{identifier}})'
-          push:
-            - scope: entity.name.function.class.js
-              match: '{{identifier}}(?=\s*\()'
-              set: formal-parameters
-            - scope: meta.identifier
-              match: '{{identifier}}'
-              set:
-                - match: '(?=[=])'
-                  set: binding-initializer
-                - match: '(?=\S)'
-                  pop: true
-        - match: '(?=\{)'
-          push:
-            - include: statements
-            - match: ''
-              pop: true
-        - scope: punctuation.definition.block.end.js
-          match: '\}'
-          pop: true
+        - scope: punctuation.terminator
+          match: ';'
+        - scope: storage.type.static.js
+          match: '\b(?:static)\b'
+        - include: method-definitions
     - match: '(?=\S)'
+      pop: true
+
+  method-definitions:
+    - match: '(?={{identifier}})'
+      push:
+        - scope: entity.name.function.class.js
+          match: '{{identifier}}(?=\s*\()'
+          set: formal-parameters
+        - scope: storage.type.accessor.get.js
+          match: '\b(?:get)\b'
+          set:
+            - scope: entity.name.function.getter.js
+              match: '{{identifier}}'
+              set: formal-parameters
+            - match: '(?=\S)'
+              pop: true
+        - scope: storage.type.accessor.set.js
+          match: '\b(?:set)\b'
+          set:
+            - scope: entity.name.function.setter.js
+              match: '{{identifier}}'
+              set: formal-parameters
+            - match: '(?=\S)'
+              pop: true
+        - scope: meta.identifier
+          match: '{{identifier}}'
+          set:
+            - match: '(?=[=])'
+              set: binding-initializer
+            - match: '(?=\S)'
+              pop: true
+    - match: (?={{property_name_lookahead}}\s*\()
+      push: [formal-parameters, object-property-name]
+    - match: '(?=\{)'
+      push:
+        - include: statements
+        - match: ''
+          pop: true
+    - scope: punctuation.definition.block.end.js
+      match: '\}'
       pop: true
 
   assignment-expression:
