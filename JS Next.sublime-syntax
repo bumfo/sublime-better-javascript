@@ -16,7 +16,6 @@ variables:
   identifier: '[_$[:alpha:]][_$[:alnum:]]*'
   constant_identifier: '[[:upper:]][_$[:digit:][:upper:]]*\b'
   func_lookahead: '\s*\b(async\s+)?function\b'
-  # arrow_func_lookahead: '\s*(\basync\s*)?([_$[:alpha:]][_$[:alnum:]]*|\([^\(]*?\))\s*=>'
   arrow_func_lookahead: '(?:[_$[:alpha:]][_$[:alnum:]]*|\([^\(]*?\))\s*=>'
   keyword_lookahead: '{{declar_var}}|{{control_keywords}}'
   lexp_lookahead: '(?<![[:alnum:]_$])(?!\b(?:{{keyword_lookahead}})\b)[\{\(\[''"`/[:alnum:]_$]|[\.][[:digit:]]'
@@ -411,22 +410,6 @@ contexts:
     - scope: keyword.operator.new.js
       match: '\b(?:new)\b'
       set:
-        # - match: '(?!\b(?:{{keyword_lookahead}}|function|class)\b)(?={{identifier}}(?:\s*\.\s*{{identifier}})*\s*(?:$|[^\[\.\w$\s]))'
-        #   set:
-        #     - scope: punctuation
-        #       match: '\.'
-        #     - scope: variable.type.js
-        #       match: '{{identifier}}(?=\s*(?:[^\[\.\w$\s]))'
-        #       set:
-        #         - match: '(?=\S)'
-        #           set: new-arguments
-        #     - scope: variable.type.maybe.js
-        #       match: '{{identifier}}(?=\s*$)'
-        #       set: [new-arguments, after-member-expression]
-        #     - scope: variable.other.js
-        #       match: '{{identifier}}'
-        #     - match: (?=\S)
-        #       pop: true
         - match: '(?=\S)'
           set: [new-arguments, new-after-member-expression, new-member-expression]
     - match: ''
