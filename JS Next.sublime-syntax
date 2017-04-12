@@ -110,7 +110,7 @@ contexts:
     - include: import-statements
     - include: variable-statements
     - include: let-or-const-statements
-    # - include: for-statements
+    - include: for-statements
     - scope: keyword.control
       match: '\b(?:{{control_keywords}})\b'
     - scope: storage.type.declar.js
@@ -141,33 +141,33 @@ contexts:
         - include: statements
 
   variable-statements:
-    - scope: meta.variable-declaration storage.type.var.js
+    - scope: meta.variable-declaration.js storage.type.var.js
       match: '\b(?:var)\b'
       push: [variable-declaration-list-continue, variable-declaration]
 
   variable-statement:
-    - scope: meta.variable-declaration storage.type.var.js
+    - scope: meta.variable-declaration.js storage.type.var.js
       match: '\b(?:var)\b'
       set: [variable-declaration-list-continue, variable-declaration]
 
   let-or-const-statements:
-    - scope: meta.variable-declaration storage.type.let.js
+    - scope: meta.variable-declaration.js storage.type.let.js
       match: '\b(?:let)\b'
       push: [variable-declaration-list-continue, variable-declaration]
-    - scope: meta.variable-declaration storage.type.const.js
+    - scope: meta.variable-declaration.js storage.type.const.js
       match: '\b(?:const)\b'
       push: [variable-declaration-list-continue, variable-declaration]
   
   let-or-const-statement:
-    - scope: meta.variable-declaration storage.type.let.js
+    - scope: meta.variable-declaration.js storage.type.let.js
       match: '\b(?:let)\b'
       set: [variable-declaration-list-continue, variable-declaration]
-    - scope: meta.variable-declaration storage.type.const.js
+    - scope: meta.variable-declaration.js storage.type.const.js
       match: '\b(?:const)\b'
       set: [variable-declaration-list-continue, variable-declaration]
 
   variable-declaration-list-continue:
-    - meta_content_scope: meta.variable-declaration
+    - meta_content_scope: meta.variable-declaration.js
     - scope: punctuation.delimiter
       match: ','
       set: [variable-declaration-list-continue, variable-declaration]
@@ -235,19 +235,53 @@ contexts:
   for-statements:
     - scope: keyword.control.for.js
       match: '\b(?:for)\b'
-      set:
-        - scope: punctuation.definition.group.begin.js
-          match: '\('
-          push:
-            - scope: punctuation.definition.group.end.js
-              match: '\)'
-              pop: true
-            - match: '(?=\b(?:var)\b)'
-              push: [for-expression, variable-statement]
-        - match: '(?=\S)'
-          pop: true
+      push: for-group
 
-  for-expression:
+  for-group:
+    - scope: punctuation.definition.group.begin.js
+      match: '\('
+      push:
+        - meta_scope: meta.for-group
+        - scope: punctuation.definition.group.end.js
+          match: '\)'
+          pop: true
+        - match: '(?=\b(?:var)\b)'
+          push: [for-expression-start, variable-statement]
+        - match: '(?=\b(?:let)\b)'
+          push: [for-expression-start, let-or-const-statement]
+        - match: (?=\S)
+          push: [for-expression-start, assignment-expression]
+    - match: '(?=\S)'
+      pop: true
+
+  for-expression-start:
+    - scope: keyword.operator.in
+      match: '\b(?:in)\b'
+      set: for-expression-after-in-or-of
+    - scope: keyword.operator.of
+      match: '\b(?:of)\b'
+      set: for-expression-after-in-or-of
+    - scope: punctuation.terminator.for.js
+      match: ';'
+      set: for-expression-after-one-semicolon
+    - match: '(?=\S)'
+      pop: true
+
+  for-expression-after-one-semicolon:
+    - scope: punctuation.terminator.for.js
+      match: ';'
+      set: for-expression-after-two-semicolon
+    - include: expressions
+    - match: '(?=\S)'
+      pop: true
+
+  for-expression-after-two-semicolon:
+    - include: expressions
+    - match: '(?=\S)'
+      pop: true
+
+  for-expression-after-in-or-of:
+    - include: expressions
     - match: '(?=\S)'
       pop: true
 
