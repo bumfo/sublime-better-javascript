@@ -38,7 +38,7 @@ contexts:
   global:
     - include: statements
 
-  import:
+  import-statements:
     - scope: keyword.control.import.js
       match: '\b(?:import)\b'
       push:
@@ -108,7 +108,8 @@ contexts:
       pop: true
 
   statements:
-    - include: import
+    - include: import-statements
+    - include: variable-statements
     - scope: keyword.control
       match: '\b(?:{{control_keywords}})\b'
     - scope: storage.type.declar.js
@@ -135,6 +136,85 @@ contexts:
           match: '\}'
           pop: true
         - include: statements
+
+  variable-statements:
+    - scope: storage.type.var.js
+      match: '\b(?:var)\b'
+      push: [variable-declaration-list-continue, variable-declaration]
+  
+  variable-statement:
+    - scope: storage.type.var.js
+      match: '\b(?:var)\b'
+      set: [variable-declaration-list-continue, variable-declaration]
+
+  variable-declaration-list-continue:
+    - scope: punctuation.delimiter
+      match: ','
+      set: [variable-declaration-list-continue, variable-declaration]
+    - match: '(?=\S)'
+      pop: true
+
+  variable-declaration:
+    - match: '(?=\b(?:{{keyword_lookahead}}|function|class)\b)'
+      pop: true
+    - match: '(?={{identifier}})'
+      set: variable-binding-identifier
+    - include: variable-binding-pattern
+    - match: '(?=\S)'
+      pop: true
+
+  variable-binding-pattern:
+    - scope: punctuation.definition.binding-array.begin.js
+      match: '\['
+      set: [binding-array-end, variable-declaration-list-continue, variable-declaration]
+    - scope: punctuation.definition.binding-object.begin.js
+      match: '\{'
+      set:
+        - meta_scope: meta.binding.object
+        - match: '(?={{property_name_lookahead}}\s*:)'
+          push: [variable-binding-after-property-name, object-property-name]
+        - match: '(?={{identifier}})'
+          push: variable-binding-identifier
+        - scope: punctuation.delimiter
+          match: ','
+        - scope: punctuation.definition.binding-object.end.js
+          match: '\}'
+          set: binding-initializer
+        - match: '(?=\S)'
+          pop: true
+
+  variable-binding-after-property-name:
+    - scope: punctuation.separator
+      match: ':'
+      set: variable-declaration
+    - match: '(?=\S)'
+      pop: true
+
+  variable-binding-identifier:
+    - scope: variable.other.declaration
+      match: '{{identifier}}'
+      set: binding-initializer
+    - match: '(?=\S)'
+      pop: true
+
+  binding-array-end:
+    - scope: punctuation.definition.binding-array.end.js
+      match: '\]'
+      set: binding-initializer
+    - match: '(?=\S)'
+      pop: true
+
+  binding-initializer:
+    # - scope: punctuation.definition.initializer
+    - scope: keyword.operator.initializer.js
+      match: '='
+      set: assignment-expression
+    - match: '(?=\S)'
+      pop: true
+
+  iteration-statements:
+    - scope: keyword.control.for.js
+      match: '\b(?:for)\b'
 
   unary-expressions:
     - scope: keyword.operator.unary.word
@@ -386,13 +466,6 @@ contexts:
     - match: '(?=\S)'
       pop: true
 
-  binding-array-end:
-    - scope: punctuation.definition.binding-array.end.js
-      match: '\]'
-      set: binding-initializer
-    - match: '(?=\S)'
-      pop: true
-
   parameter-binding-element:
     - scope: punctuation.definition.rest
       match: '\.\.\.'
@@ -401,6 +474,13 @@ contexts:
       match: '\.'
     - scope: punctuation.delimiter.elision
       match: ','
+    - match: '(?={{identifier}})'
+      set: parameter-single-name-binding
+    - include: parameter-binding-pattern
+    - match: '(?=\S)'
+      pop: true
+
+  parameter-binding-pattern:
     - scope: punctuation.definition.binding-array.begin.js
       match: '\['
       set: [binding-array-end, parameter-binding-element-list-continue, parameter-binding-element]
@@ -419,10 +499,6 @@ contexts:
           set: binding-initializer
         - match: '(?=\S)'
           pop: true
-    - match: '(?={{identifier}})'
-      set: parameter-single-name-binding
-    - match: '(?=\S)'
-      pop: true
 
   parameter-binding-after-property-name:
     - scope: punctuation.separator
@@ -446,14 +522,6 @@ contexts:
           pop: true
         - match: '(?=\S)'
           pop: true
-    - match: '(?=\S)'
-      pop: true
-
-  binding-initializer:
-    # - scope: punctuation.definition.initializer
-    - scope: keyword.operator.initializer.js
-      match: '='
-      set: assignment-expression
     - match: '(?=\S)'
       pop: true
 
