@@ -7,4 +7,4 @@ scope: source.mjs
 
 contexts:
   main:
-    - include: scope:source.js2
+    - include: scope:source.js
