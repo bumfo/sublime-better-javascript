@@ -139,6 +139,8 @@ contexts:
           match: '\}'
           pop: true
         - include: statements
+    - match: '(?=\S)'
+      pop: true
 
   variable-statements:
     - scope: meta.variable-declaration.js storage.type.var.js
@@ -509,9 +511,9 @@ contexts:
               pop: true
             - scope: entity.name.function.async.js
               match: '{{identifier}}'
-              set: formal-parameters
+              set: [statement-group, formal-parameters]
             - match: '(?=\S)'
-              set: formal-parameters
+              set: [statement-group, formal-parameters]
         - include: arrow-function
         - match: '(?=\S)'
           pop: true
@@ -525,16 +527,16 @@ contexts:
               pop: true
             - scope: entity.name.function.generator.js
               match: '{{identifier}}'
-              set: formal-parameters
+              set: [statement-group, formal-parameters]
             - match: '(?=\S)'
-              set: formal-parameters
+              set: [statement-group, formal-parameters]
         - match: '(?=\b(?:{{keyword_lookahead}})\b)'
           pop: true
         - scope: entity.name.function.js
           match: '{{identifier}}'
-          set: formal-parameters
+          set: [statement-group, formal-parameters]
         - match: '(?=\S)'
-          set: formal-parameters
+          set: [statement-group, formal-parameters]
     - include: arrow-function
 
   arrow-function:
