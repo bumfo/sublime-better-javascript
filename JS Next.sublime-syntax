@@ -111,6 +111,7 @@ contexts:
     - include: variable-statements
     - include: let-or-const-statements
     - include: for-statements
+    - include: return-statements
     - scope: keyword.control
       match: '\b(?:{{control_keywords}})\b'
     - scope: storage.type.declar.js
@@ -233,6 +234,11 @@ contexts:
       set: assignment-expression
     - match: '(?=\S)'
       pop: true
+
+  return-statements:
+    - scope: keyword.control.return.js
+      match: '\b(?:return)\b'
+      push: expression
 
   for-statements:
     - scope: keyword.control.for.js
