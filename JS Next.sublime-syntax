@@ -458,6 +458,78 @@ contexts:
     - match: ''
       set: primary-expression
 
+  object-literal-delimiter:
+    - scope: punctuation.delimiter
+      match: ','
+      pop: true
+    # - scope: invalid.illegal
+    #   match: '[^{}()\s:]+'
+    #   pop: true
+    - match: '(?={{identifier}})'
+      set:
+        - scope: invalid.illegal
+          match: '{{identifier}}(?=\s*\()'
+          set: [object-literal-delimiter, statement-group, formal-parameters]
+        - scope: invalid.illegal
+          match: '{{identifier}}'
+          set: 
+            - scope: invalid.illegal
+              match: ':'
+              set: [object-literal-delimiter, assignment-expression]
+            - include: object-literal-after-property-name
+        - match: '(?=\S)'
+          pop: true
+    - match: '(?=\S)'
+      pop: true
+
+  object-literal-after-property-name:
+    - scope: punctuation.separator
+      match: ':'
+      set: [object-literal-delimiter, assignment-expression]
+    - match: '(?=\()'
+      set: [object-literal-delimiter, statement-group, formal-parameters]
+    - match: '(?=\S)'
+      pop: true
+
+  object-literal:
+    - scope: punctuation.definition.literal.object.begin.js
+      match: '\{'
+      set:
+        - meta_scope: meta.object.js
+        - match: '(?={{identifier}})'
+          push:
+            - scope: entity.name.function.class.js
+              match: '{{identifier}}(?=\s*\()'
+              set: [object-literal-delimiter, statement-group, formal-parameters]
+            - scope: entity.name.property-variable
+              match: '{{identifier}}(?=\s*,)'
+              set: [object-literal-delimiter]
+            - scope: meta.identifier.property
+              match: '{{identifier}}(?=\s*:)'
+              set: object-literal-after-property-name
+            - scope: meta.identifier
+              match: '{{identifier}}'
+              set: object-literal-after-property-name
+            - match: '(?=\S)'
+              pop: true
+        - match: '(?={{property_name_lookahead}})'
+          push: [object-literal-after-property-name, object-property-name]
+        - scope: keyword.generator.asterisk.js
+          match: '\*'
+          push:
+            - scope: entity.name.function.generator.js
+              match: '{{identifier}}'
+              set: [object-literal-delimiter, statement-group, formal-parameters]
+            - match: '(?=\S)'
+              pop: true
+        - scope: invalid.illegal.js
+          match: ':'
+          push: [object-literal-delimiter, assignment-expression]
+        - include: statement-groups
+        - scope: punctuation.definition.literal.object.end.js
+          match: '\}'
+          pop: true
+
   primary-expression:
     # - meta_scope: meta.primary-expression
     - include: regexp-complete
@@ -489,14 +561,7 @@ contexts:
           match: '\]'
           pop: true
         - include: expressions
-    - scope: punctuation.definition.literal.object.begin.js
-      match: '\{'
-      set:
-        - meta_scope: meta.object.js
-        - scope: punctuation.definition.literal.object.end.js
-          match: '\}'
-          pop: true
-        - include: expressions
+    - include: object-literal
     - match: ''
       pop: true
 
@@ -680,14 +745,14 @@ contexts:
           match: ';'
         - scope: storage.type.static.js
           match: '\b(?:static)\b'
-        - include: class-method-definitions
+        - include: class-method-or-field-definitions
         - scope: punctuation.definition.block.end.js
           match: '\}'
           pop: true
     - match: '(?=\S)'
       pop: true
 
-  class-method-definitions:
+  class-method-or-field-definitions:
     - match: '(?={{identifier}})'
       push:
         - scope: entity.name.function.class.js
