@@ -1,0 +1,17 @@
+{
+  "cmd":
+  [
+    "node",
+    "--use_strict",
+    "--es_staging",
+    "$packages/Better Javascript/Build Systems/transpile.js",
+    "$file"
+  ],
+  "env":
+  {
+    "NODE_PATH": "/usr/local/lib/node",
+    "PATH": "$PATH:/usr/local/bin"
+  },
+  "selector": "source.mjs",
+  "working_dir": "$project_path"
+}

@@ -884,6 +884,7 @@ contexts:
         2: punctuation.definition.string.template.begin.js
       set:
         - meta_scope: string.template.js
+        - meta_include_prototype: false
         - match: "`"
           scope: punctuation.definition.string.template.end.js
           pop: true
@@ -925,6 +926,7 @@ contexts:
       pop: true
 
   string-content:
+    - meta_include_prototype: false
     - match: \\\s*\n
       scope: constant.character.escape.newline.js
     - match: '\\(x[\da-fA-F][\da-fA-F]|u[\da-fA-F][\da-fA-F][\da-fA-F][\da-fA-F]|.)'

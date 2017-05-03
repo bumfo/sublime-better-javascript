@@ -1,0 +1,6 @@
+<snippet>
+	<content><![CDATA[${1/(^(?=[^,]))|(,\s*)|([^,.]+)|\./(?1)(?2)(?3$3 = $3\n)/g}${1/((?:.|\n)+)/(?1\n)/}constructor(${1}) {${0:$TM_SELECTED_TEXT}}]]></content>
+	<tabTrigger>constructor</tabTrigger>
+	<scope>source.mjs meta.class.js -meta.class.methods.js</scope>
+	<description>Constructor</description>
+</snippet>
