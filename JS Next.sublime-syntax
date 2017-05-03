@@ -745,7 +745,7 @@ contexts:
   class-body:
     - scope: punctuation.definition.block.begin.js
       match: '\{'
-      push:
+      set:
         - meta_scope: meta.class.js
         - scope: punctuation.terminator
           match: ';'

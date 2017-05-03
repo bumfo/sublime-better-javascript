@@ -184,6 +184,8 @@ var nodeTags = {
   [NODE_PARAMETERS_PAREN]: 'parameters paren',
   [NODE_PARAM]: 'param',
   [NODE_REPLACED]: 'replaced',
+
+  [EMPTY_TAG]: 'EMPTY TAG',
 }
 
 function node(t) {
@@ -1643,6 +1645,44 @@ function transform() {
     // dflush()
   }
 
+  function replaceStaticInitializerVars(i, p, set, className) {
+    log(set)
+    if (cars[i] !== 0) {
+      a[q++] = cars[i]
+    }
+    while (p !== q) {
+      // var k = i
+      i = a[--q]
+
+      if (types[i] === NODE_IDENTIFIER) {
+        var j = cars[i]
+        if (j !== 0) {
+          // dprint(tokens[j])
+
+          if (set.has(tokens[j])) {
+            transformStaticFieldIdentifier(i, j, className)
+          }
+        }
+
+        if (cdrs[i] !== 0) {
+          a[q++] = cdrs[i]
+        }
+      } else {
+        // dprint(tokens[i])
+
+        if (cdrs[i] !== 0) {
+          a[q++] = cdrs[i]
+        }
+        if (types[i] !== NODE_FUNCTION) {
+          if (cars[i] !== 0) {
+            a[q++] = cars[i]
+          }
+        }
+      }
+    }
+    // dflush()
+  }
+
   function transformMethod(i, p) {
     pushVars()
 
@@ -1691,6 +1731,118 @@ function transform() {
       }
 
       replaceMethodVars(i, q, fieldVarSet)
+      k = j
+
+      break
+    }
+
+    popVars()
+  }
+
+  function transformStaticMethod(i, p) {
+    pushVars()
+
+    if (cars[i] !== 0) {
+      a[q++] = cars[i]
+    }
+    while (p !== q) {
+      i = a[--q]
+
+      if (types[i] === NODE_PARAMETERS_PAREN) {
+        getFunctionParameters(i, q)
+      } else if (types[i] === NODE_FUNCTION_BRACE) {
+        log(varStack[varStack.length - 1])
+        getFunctionVars(i, q)
+        log(varStack[varStack.length - 1])
+      }
+
+      if (cdrs[i] !== 0) {
+        a[q++] = cdrs[i]
+      }
+    }
+
+    var set = new Set()
+
+    var k = varStack.length - 1
+    for (var j = fieldIndices.length - 1; j >= 0; --j) {
+      var fieldVarSet = new Set()
+
+      for (var t = k; t > j; --t) {
+        var s = varStack[t]
+        var n = s.length
+        for (var l = 0; l < n; ++l) {
+          set.add(s[l])
+        }
+      }
+
+      var s = varStack[j]
+      var n = s.length
+      for (var l = 0; l < n; ++l) {
+        var o = s[l]
+        if (!set.has(o)) {
+          // log(o)
+          fieldVarSet.add(o)
+          set.add(o)
+        }
+      }
+
+      replaceMethodVars(i, q, fieldVarSet)
+      k = j
+
+      break
+    }
+
+    popVars()
+  }
+
+  function transformStaticInitializer(i, p, className) {
+    pushVars()
+
+    if (cars[i] !== 0) {
+      a[q++] = cars[i]
+    }
+    while (p !== q) {
+      i = a[--q]
+
+      if (types[i] === NODE_PARAMETERS_PAREN) {
+        getFunctionParameters(i, q)
+      } else if (types[i] === NODE_FUNCTION_BRACE) {
+        log(varStack[varStack.length - 1])
+        getFunctionVars(i, q)
+        log(varStack[varStack.length - 1])
+      }
+
+      if (cdrs[i] !== 0) {
+        a[q++] = cdrs[i]
+      }
+    }
+
+    var set = new Set()
+
+    var k = varStack.length - 1
+    for (var j = fieldIndices.length - 1; j >= 0; --j) {
+      var fieldVarSet = new Set()
+
+      for (var t = k; t > j; --t) {
+        var s = varStack[t]
+        var n = s.length
+        for (var l = 0; l < n; ++l) {
+          set.add(s[l])
+        }
+      }
+
+      var s = varStack[j]
+      var n = s.length
+      for (var l = 0; l < n; ++l) {
+        var o = s[l]
+        if (!set.has(o)) {
+          // log(o)
+          fieldVarSet.add(o)
+          set.add(o)
+        }
+      }
+
+      replaceStaticInitializerVars(i, q, fieldVarSet, className)
       k = j
 
       break
@@ -1870,9 +2022,12 @@ function transform() {
   function transformClassBody(i, p, className, superClass) {
     fieldIndices.push(pushVars())
     var methods = []
+    var staticMethods = []
     var constructorIndice = -1
 
     var fields = []
+    var staticFields = []
+    var staticNames = []
 
     var indiceBeforeFirstField = -1
 
@@ -1889,13 +2044,18 @@ function transform() {
         log(`${memberIsStatic ? 'static ' : ''}field: ${memberName}`)
         if (!memberIsStatic) {
           addVar(memberName)
-        }
-        if (indiceBeforeFirstField === -1)
-          indiceBeforeFirstField = k
-        removeClassMember(i, k)
-        fields.push(i)
-        if (indent.length === 0) {
-          indent = classMemberIndent
+          if (indiceBeforeFirstField === -1) {
+            indiceBeforeFirstField = k
+          }
+          removeClassMember(i, k)
+          fields.push(i)
+          if (indent.length === 0) {
+            indent = classMemberIndent
+          }
+        } else {
+          staticNames.push(memberName)
+          removeClassMember(i, k)
+          staticFields.push(i)
         }
       } else if (types[i] === NODE_CLASS_METHOD) {
         getClassMemberDescriptor(i, q)
@@ -1907,6 +2067,9 @@ function transform() {
           if (memberName === 'constructor') {
             constructorIndice = i
           }
+        } else {
+          staticNames.push(memberName)
+          staticMethods.push(i)
         }
       }
 
@@ -1947,6 +2110,155 @@ function transform() {
 
     popVars()
     fieldIndices.pop()
+
+
+    if (staticNames.length > 0) {
+      fieldIndices.push(pushVars())
+
+      var n = staticNames.length
+      for (var i = 0; i < n; ++i) {
+        addVar(staticNames[i])
+      }
+
+      var n = staticMethods.length
+      for (var i = 0; i < n; ++i) {
+        transformStaticMethod(staticMethods[i], q)
+      }
+
+      var xxx = buildClassStaticInitializer(staticFields, className)
+      transformStaticInitializer(xxx, q, className)
+
+      popVars()
+      fieldIndices.pop()
+
+      return xxx
+    }
+  }
+
+  function buildClassStaticInitializerBody(indent, className) {
+    var e = node(NODE_FUNCTION_BRACE)
+    var f0 = textNode('{', PUNCTUATOR)
+    var f1 = textNode('\n' + indent, BLANK)
+    var f2 = textNode('}', PUNCTUATOR)
+    var f3 = textNode('', BLANK)
+    cars[e] = f0
+    cdrs[f0] = f1
+    cdrs[f1] = f2
+    cdrs[f2] = f3
+
+    return e
+  }
+
+  function transformStaticFieldIdentifier(i, j, className) {
+    setNode(i, NODE_REPLACED)
+
+    var t = textNode(className, IDENTIFIER)
+    var tt = textNode('.', OPERATOR)
+    cdrs[t] = tt
+    cdrs[tt] = j
+    cars[i] = t
+  }
+
+  function transformStaticClassFieldInitializer(i, p, className) {
+    // console.log('??' + tokens[i])
+
+    var j = i
+    if (cars[j] !== 0) {
+      a[q++] = cars[j]
+    }
+
+    while (p !== q) {
+      var k = j
+      j = a[--q]
+
+      if (types[j] === IDENTIFIER) {
+        setNode(i, NODE_EXPR_STATEMENT)
+        var b = node(NODE_IDENTIFIER)
+        cars[b] = cdrs[k]
+        cdrs[k] = b
+        transformStaticFieldIdentifier(b, j, className)
+
+        while (p !== q) {
+          var k = j
+          j = a[--q]
+
+          if (cdrs[j] !== 0) {
+            a[q++] = cdrs[j]
+          }
+        }
+      } else {
+        if (cdrs[k] === j) {
+          cdrs[k] = cdrs[j]
+          j = k
+        }
+
+        if (cdrs[j] !== 0) {
+          a[q++] = cdrs[j]
+        }
+      }
+    }
+  }
+
+  function transformClassStaticInitializer(i, p, staticFields, className, indent) {
+    log(staticFields)
+
+    if (cars[i] !== 0) {
+      a[q++] = cars[i]
+    }
+
+    i = a[--q]
+    if (cdrs[i] !== 0) {
+      a[q++] = cdrs[i]
+    }
+
+    while (p !== q) {
+      var k = i
+      i = a[--q]
+
+      while (types[i] === BLANK || types[i] === COMMENT) {
+        if (cdrs[i] !== 0) {
+          i = cdrs[i]
+        }
+      }
+
+      if (types[i] === NODE_SUPER) {
+        k = i
+        // while (cdrs[k] !== 0 && types[cdrs[k]] === BLANK || types[cdrs[k]] === COMMENT) {
+        //   k = cdrs[k]
+        // }
+      }
+
+      var kk = cdrs[k]
+      var n = staticFields.length
+      for (var j = 0; j < n; ++j) {
+        var t = staticFields[j]
+
+        if (hasInitializer(t, q)) {
+          cdrs[k] = textNode('\n' + indent + '  ', BLANK)
+          k = cdrs[k]
+          transformStaticClassFieldInitializer(t, q, className)
+          cdrs[k] = t
+          k = cdrs[k]
+          // console.log('~' + tokens[t])
+        }
+      }
+      cdrs[k] = kk
+
+      break
+    }
+    dflush()
+  }
+
+  function buildClassStaticInitializer(staticFields, className) {
+    var e = node(NODE_REPLACED)
+    var f = textNode(' ', BLANK)
+    var g = buildClassStaticInitializerBody('', className)
+    transformClassStaticInitializer(g, q, staticFields, className, '')
+
+    cars[e] = f
+    cdrs[f] = g
+
+    return e
   }
 
   function transformClass(i, p) {
@@ -1973,7 +2285,12 @@ function transform() {
           superClass = tokens[k]
         }
       } else if (types[i] === NODE_BRACE) {
-        transformClassBody(i, q, className, superClass)
+        var xxx = transformClassBody(i, q, className, superClass)
+        if (xxx) {
+          var tt = cdrs[i]
+          cdrs[i] = xxx
+          cdrs[cdrs[i]] = tt
+        }
       }
 
       if (cdrs[i] !== 0) {
