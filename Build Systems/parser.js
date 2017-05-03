@@ -1683,7 +1683,45 @@ function transform() {
     // dflush()
   }
 
-  function transformMethod(i, p) {
+  function replaceStaticFieldVars(i, p, set, className) {
+    log(set)
+    if (cars[i] !== 0) {
+      a[q++] = cars[i]
+    }
+    while (p !== q) {
+      // var k = i
+      i = a[--q]
+
+      if (types[i] === NODE_IDENTIFIER) {
+        var j = cars[i]
+        if (j !== 0) {
+          // dprint(tokens[j])
+
+          if (set.has(tokens[j])) {
+            transformStaticFieldIdentifier(i, j, className)
+          }
+        }
+
+        if (cdrs[i] !== 0) {
+          a[q++] = cdrs[i]
+        }
+      } else {
+        // dprint(tokens[i])
+
+        if (cdrs[i] !== 0) {
+          a[q++] = cdrs[i]
+        }
+        if (types[i] !== NODE_FUNCTION) {
+          if (cars[i] !== 0) {
+            a[q++] = cars[i]
+          }
+        }
+      }
+    }
+    // dflush()
+  }
+
+  function transformMethod(i, p, className) {
     pushVars()
 
     if (cars[i] !== 0) {
@@ -1708,10 +1746,42 @@ function transform() {
     var set = new Set()
 
     var k = varStack.length - 1
-    for (var j = fieldIndices.length - 1; j >= 0; --j) {
+
+    var jj = fieldIndices.length - 1
+    var gg = staticFieldIndices.length - 1
+
+    var jjj = false
+    var ggg = false
+
+    for (; jj >= 0 || gg >= 0;) {
+      var c = -1
+
+      var j
+      if (jj >= 0) {
+        j = fieldIndices[jj]
+        c = j
+      }
+      var g
+      if (gg >= 0) {
+        g = staticFieldIndices[gg]
+        if (g > c) {
+          c = g
+        }
+      }
+
+      if (c === j) {
+        if (jjj) {
+          break
+        }
+      } else if (c === g) {
+        if (ggg) {
+          break
+        }
+      }
+
       var fieldVarSet = new Set()
 
-      for (var t = k; t > j; --t) {
+      for (var t = k; t > c; --t) {
         var s = varStack[t]
         var n = s.length
         for (var l = 0; l < n; ++l) {
@@ -1719,7 +1789,7 @@ function transform() {
         }
       }
 
-      var s = varStack[j]
+      var s = varStack[c]
       var n = s.length
       for (var l = 0; l < n; ++l) {
         var o = s[l]
@@ -1730,10 +1800,19 @@ function transform() {
         }
       }
 
-      replaceMethodVars(i, q, fieldVarSet)
-      k = j
+      if (c === j) {
+        replaceMethodVars(i, q, fieldVarSet)
+        --jj
+        jjj = true
+      } else if (c === g) {
+        replaceStaticFieldVars(i, q, fieldVarSet, className)
+        --gg
+        ggg = true
+      } else {
+        break
+      }
 
-      break
+      k = c
     }
 
     popVars()
@@ -1764,7 +1843,8 @@ function transform() {
     var set = new Set()
 
     var k = varStack.length - 1
-    for (var j = fieldIndices.length - 1; j >= 0; --j) {
+    for (var jj = staticFieldIndices.length - 1; jj >= 0; --jj) {
+      var j = staticFieldIndices[jj]
       var fieldVarSet = new Set()
 
       for (var t = k; t > j; --t) {
@@ -1820,7 +1900,8 @@ function transform() {
     var set = new Set()
 
     var k = varStack.length - 1
-    for (var j = fieldIndices.length - 1; j >= 0; --j) {
+    for (var jj = staticFieldIndices.length - 1; jj >= 0; --jj) {
+      var j = staticFieldIndices[jj]
       var fieldVarSet = new Set()
 
       for (var t = k; t > j; --t) {
@@ -2018,13 +2099,14 @@ function transform() {
   }
 
   var fieldIndices = []
+  var staticFieldIndices = []
 
   function transformClassBody(i, p, className, superClass) {
-    fieldIndices.push(pushVars())
     var methods = []
     var staticMethods = []
     var constructorIndice = -1
 
+    var instanceNames = []
     var fields = []
     var staticFields = []
     var staticNames = []
@@ -2043,7 +2125,7 @@ function transform() {
         getClassMemberDescriptor(i, q)
         log(`${memberIsStatic ? 'static ' : ''}field: ${memberName}`)
         if (!memberIsStatic) {
-          addVar(memberName)
+          instanceNames.push(memberName)
           if (indiceBeforeFirstField === -1) {
             indiceBeforeFirstField = k
           }
@@ -2061,7 +2143,7 @@ function transform() {
         getClassMemberDescriptor(i, q)
         log(`${memberIsStatic ? 'static ' : ''}method: ${memberName}`)
         if (!memberIsStatic) {
-          addVar(memberName)
+          instanceNames.push(memberName)
           methods.push(i)
 
           if (memberName === 'constructor') {
@@ -2099,27 +2181,35 @@ function transform() {
       methods.push(constructorIndice)
     }
 
+    if (staticNames.length > 0) {
+      staticFieldIndices.push(pushVars())
+
+      var n = staticNames.length
+      for (var i = 0; i < n; ++i) {
+        addVar(staticNames[i])
+      }
+    }
+
+    fieldIndices.push(pushVars())
+
+    var n = instanceNames.length
+    for (var i = 0; i < n; ++i) {
+      addVar(instanceNames[i])
+    }
+
     if (fields.length > 0) {
       transformConstructor(constructorIndice, q, fields, indent)
     }
 
     var n = methods.length
     for (var i = 0; i < n; ++i) {
-      transformMethod(methods[i], q)
+      transformMethod(methods[i], q, className)
     }
 
     popVars()
     fieldIndices.pop()
 
-
     if (staticNames.length > 0) {
-      fieldIndices.push(pushVars())
-
-      var n = staticNames.length
-      for (var i = 0; i < n; ++i) {
-        addVar(staticNames[i])
-      }
-
       var n = staticMethods.length
       for (var i = 0; i < n; ++i) {
         transformStaticMethod(staticMethods[i], q)
@@ -2129,7 +2219,7 @@ function transform() {
       transformStaticInitializer(xxx, q, className)
 
       popVars()
-      fieldIndices.pop()
+      staticFieldIndices.pop()
 
       return xxx
     }
