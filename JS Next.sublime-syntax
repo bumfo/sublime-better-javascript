@@ -9,17 +9,18 @@ variables:
   declar_var: 'var|let|const|static'
   class_keyword: 'class|struct'
   storage_classes: '{{declar_var}}|class|function|async'
-  binary_operators: '!==|===|<=|>=|!=|==|=|\+=|\-=|\*=|%=|<<=|>>=|>>>=|&=|\|=|\^=|\*\*=|\/=|\*\*|\/|(?:\+)(?!\+)|(?:\-)(?!\-)|\*|%|>>>|<<|>>|<|>|&&|\|\||&|\||\^|\?|:'
+  binary_operators: '!==|===|<=|>=|!=|==|=|\+=|\-=|\*=|%=|<<=|>>=|>>>=|&=|\|=|\^=|\*\*=|\/=|\*\*|\/|(?:\+)(?!\+)|(?:\-)(?!\-)|\*|%|>>>|<<|>>|<|>|&&|\|\||&|\||\^' #|\?|:
+  ternary_operators: '\?|:'
   unary_operators_after: '\+\+|\-\-'
   unary_operators: '\.\.\.|!|~|\+\+|\-\-|\+|\-'
-  operators: '{{binary_operators}}|{{unary_operators}}'
+  operators: '{{ternary_operators}}|{{binary_operators}}|{{unary_operators}}'
   punctuators: '\{|\(|\)|\[|\]|\.|;|,|=>|\}'
   identifier: '[_$[:alpha:]][_$[:alnum:]]*'
   constant_identifier: '[[:upper:]][_$[:digit:][:upper:]]*\b'
   func_lookahead: '\s*\b(async\s+)?function\b'
   arrow_func_lookahead: '(?:[_$[:alpha:]][_$[:alnum:]]*|\([^\(]*?\))\s*=>'
   keyword_lookahead: '{{declar_var}}|{{control_keywords}}'
-  lexp_lookahead: '(?<![[:alnum:]_$])(?!\b(?:{{keyword_lookahead}})\b)[\{\(\[''"`/[:alnum:]_$]|[\.][[:digit:]]'
+  lexp_lookahead: '(?!\b(?:{{keyword_lookahead}})\b)[\{\(\[''"`/[:alnum:]_$]|[\.][[:digit:]]' #(?<![[:alnum:]_$])
 
   number_lookahead: '[0-9]+'
   property_name_lookahead: '[\["'']|(?:{{identifier}}|{{number_lookahead}})'
@@ -113,6 +114,7 @@ contexts:
     - include: let-or-const-statements
     - include: for-statements
     - include: return-statements
+    - include: switch-statements
     - scope: keyword.control
       match: '\b(?:{{control_keywords}})\b'
     - scope: storage.type.declar.js
@@ -141,6 +143,54 @@ contexts:
           match: '\}'
           pop: true
         - include: statements
+    - match: '(?=\S)'
+      pop: true
+
+  switch-statements:
+    - scope: keyword.control.switch.js
+      match: '\b(?:switch)\b'
+      push: switch-parens
+
+  switch-parens:
+    - scope: punctuation.definition.group.begin.js
+      match: '\('
+      push:
+        - meta_scope: meta.switch-parens
+        - scope: punctuation.definition.group.end.js
+          match: '\)'
+          pop: true
+        - match: (?=\S)
+          push: expression
+    - match: '(?=\S)'
+      set: swicth-brace
+
+  swicth-brace:
+    - scope: punctuation.definition.switch-block.begin.js
+      match: '\{'
+      set:
+        - meta_scope: meta.switch-parens
+        - scope: keyword.case
+          match: '\b(?:case)\b'
+          push: [after-case, expression]
+        - scope: keyword.default
+          match: '\b(?:default)\b'
+          push: after-case
+        - include: statement-groups
+        - scope: punctuation.definition.switch-block.end.js
+          match: '\}'
+          pop: true
+    - match: '(?=\S)'
+      pop: true
+
+  after-case:
+    - scope: punctuation.colon
+      match: ':'
+      set:
+        - match: '(?=\b(?:case|default)\b)'
+          pop: true
+        - include: statements
+        - match: '(?=\S)'
+          pop: true
     - match: '(?=\S)'
       pop: true
 
@@ -331,15 +381,29 @@ contexts:
       match: '{{unary_operators_after}}'
       set: after-eol-after-lhs-expression
 
-  binary-operators:
+  binary-operator:
     - scope: keyword.operator.binary
       match: '{{binary_operators}}'
       set: unary-expression
 
+  conditional-operator:
+    - scope: keyword.operator.ternary
+      match: '\?'
+      push: [unary-expression, after-conditional-operator]
+
+  after-conditional-operator:
+    - include: unary-expressions
+    - scope: keyword.operator.ternary
+      match: ':'
+      pop: true
+    - match: '(?=\S)'
+      pop: true
+
   after-eol-after-lhs-expression:
     # - meta_content_scope: meta.after-eol-after-lhs-expression
     - meta_content_scope: meta.expression.after-eol.js
-    - include: binary-operators
+    - include: binary-operator
+    - include: conditional-operator
     - match: '(?=\S)'
       pop: true
 
@@ -347,7 +411,8 @@ contexts:
     # - meta_content_scope: meta.after-lhs-expression
     - meta_content_scope: meta.expression.js
     - include: unary-operator-after
-    - include: binary-operators
+    - include: binary-operator
+    - include: conditional-operator
     - match: '(?=\n)'
       set: after-eol-after-lhs-expression
     - match: '(?=\S)'
@@ -547,13 +612,13 @@ contexts:
     - include: function-expression
     - include: class-expression
     - scope: variable.function.js
-      match: '{{identifier}}(?=\s*\()'
+      match: '(?<![[:alnum:]_$]){{identifier}}(?=\s*\()'
       pop: true
     - scope: variable.function.struct.js
-      match: '{{identifier}}(?=\s*\{)'
+      match: '(?<![[:alnum:]_$]){{identifier}}(?=\s*\{)'
       set: object-literal
     - scope: variable.other.identifier
-      match: '{{identifier}}'
+      match: '(?<![[:alnum:]_$]){{identifier}}'
       pop: true
     - scope: punctuation.section.group.begin.js
       match: '\('
@@ -932,6 +997,7 @@ contexts:
             \b[0-9]+(\.[0-9]*)?       # e.g. 999.999, 999. or 999
           )(e[-+]?[0-9]+)?            # e.g. e+123, E-123
         )
+        (?![[:alnum:]_$])
       scope: constant.numeric.js
       pop: true
     - match: '(?:\B[-+]|\b)(Infinity)\b'
