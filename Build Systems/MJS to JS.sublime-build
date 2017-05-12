@@ -4,7 +4,7 @@
     "node",
     "--use_strict",
     "--es_staging",
-    "$packages/Better Javascript/Build Systems/transpile.js",
+    "$packages/Better Javascript/Build Systems/lib/transpile.js",
     "$file"
   ],
   "env":

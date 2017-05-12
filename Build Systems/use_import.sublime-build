@@ -4,7 +4,7 @@
     "node",
     "--use_strict",
     "--es_staging",
-    "$packages/Better Javascript/Build Systems/entry.js",
+    "$packages/Better Javascript/Build Systems/lib/entry.js",
     "$file"
   ],
   "env":

@@ -107,6 +107,7 @@ var NODE_FUNCTION = --t
 var NODE_VAR_DECLAR = --t
 var NODE_LET_DECLAR = --t
 var NODE_CONST_DECLAR = --t
+var NODE_STATIC_DECLAR = --t
 
 var NODE_SUPER = --t
 
@@ -755,7 +756,9 @@ function isDeclaration(i) {
     tokens[i] === 'function' ||
     tokens[i] === 'var' ||
     tokens[i] === 'let' ||
-    tokens[i] === 'const')
+    tokens[i] === 'const' ||
+    tokens[i] === 'static'
+  )
 }
 
 function parseDeclaration(i) {
@@ -767,6 +770,8 @@ function parseDeclaration(i) {
     i = parseVariableDeclaration(i)
   } else if (tokens[i] === 'let' || tokens[i] === 'const') {
     i = parseVariableDeclaration(i)
+  } else if (tokens[i] === 'static') {
+    i = parseStaticDeclaration(i)
   }
 
   return i
@@ -808,6 +813,43 @@ function parseVariableDeclaration(i) {
   }
 
   // append(node('end var declar'))
+  pop()
+
+  return i
+}
+
+function parseStaticDeclaration(i) {
+  if (tokens[i] === 'static') {
+    push(i++, NODE_STATIC_DECLAR)
+  }
+  i = white(i)
+
+  while (i < N) {
+    if (types[i] === IDENTIFIER) {
+      push(i++, NODE_BINDING_IDENTIFIER)
+      var j = lookaheadWhite(i)
+
+      if (types[j] === OPERATOR && tokens[j] === '=') {
+        i = eat(i, j)
+        i = parseInitializer(i)
+        j = lookaheadWhite(i)
+      }
+
+      append(node('end static declaration'))
+      pop()
+
+      if (types[j] === PUNCTUATOR && tokens[j] === ',') {
+        i = eat(i, j)
+        append(i++)
+        i = white(i)
+        continue
+      }
+    }
+
+    break
+  }
+
+  // append(node('end static declar'))
   pop()
 
   return i
@@ -1818,7 +1860,7 @@ function transform() {
     popVars()
   }
 
-  function transformStaticMethod(i, p) {
+  function transformStaticMethod(i, p, className) {
     pushVars()
 
     if (cars[i] !== 0) {
@@ -1866,7 +1908,8 @@ function transform() {
         }
       }
 
-      replaceMethodVars(i, q, fieldVarSet)
+      // replaceMethodVars(i, q, fieldVarSet)
+      replaceStaticFieldVars(i, q, fieldVarSet, className)
       k = j
 
       break
@@ -2212,7 +2255,7 @@ function transform() {
     if (staticNames.length > 0) {
       var n = staticMethods.length
       for (var i = 0; i < n; ++i) {
-        transformStaticMethod(staticMethods[i], q)
+        transformStaticMethod(staticMethods[i], q, className)
       }
 
       var xxx = buildClassStaticInitializer(staticFields, className)

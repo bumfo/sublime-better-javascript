@@ -6,7 +6,8 @@ scope: source.js
 variables:
   es17_keywords: 'break|do|in|typeof|case|else|instanceof|var|catch|export|new|void|class|extends|return|while|const|finally|super|with|continue|for|switch|yield|debugger|function|this|default|if|throw|delete|import|try|await'
   es17_punctuators: '\{|\(|\)|\[|\]|\.|\.\.\.|;|,|<|>|<=|>=|==|!=|===|!==|\+|\-|\*|%|\+\+|\-\-|<<|>>|>>>|&|\||\^|!|~|&&|\|\||?|:|=|\+=|\-=|\*=|%=|<<=|>>=|>>>=|&=|\|=|\^=|=>|\*\*|\*\*=|\/|\/=|\}'
-  declar_var: 'var|let|const'
+  declar_var: 'var|let|const|static'
+  class_keyword: 'class|struct'
   storage_classes: '{{declar_var}}|class|function|async'
   binary_operators: '!==|===|<=|>=|!=|==|=|\+=|\-=|\*=|%=|<<=|>>=|>>>=|&=|\|=|\^=|\*\*=|\/=|\*\*|\/|(?:\+)(?!\+)|(?:\-)(?!\-)|\*|%|>>>|<<|>>|<|>|&&|\|\||&|\||\^|\?|:'
   unary_operators_after: '\+\+|\-\-'
@@ -548,6 +549,9 @@ contexts:
     - scope: variable.function.js
       match: '{{identifier}}(?=\s*\()'
       pop: true
+    - scope: variable.function.struct.js
+      match: '{{identifier}}(?=\s*\{)'
+      set: object-literal
     - scope: variable.other.identifier
       match: '{{identifier}}'
       pop: true
@@ -722,7 +726,7 @@ contexts:
 
   class-expression:
     - scope: storage.type.class
-      match: '\b(?:class)\b'
+      match: '\b(?:{{class_keyword}})\b'
       set:
         - scope: entity.name.type.class.js
           match: '{{identifier}}'
@@ -743,6 +747,12 @@ contexts:
       set: class-body
 
   class-body:
+    - match: '(?=\()'
+      set: [class-body-pure, formal-parameters]
+    - match: '(?=\{)'
+      set: class-body-pure
+
+  class-body-pure:
     - scope: punctuation.definition.block.begin.js
       match: '\{'
       set:
@@ -791,6 +801,9 @@ contexts:
         - scope: meta.identifier
           match: '{{identifier}}'
           set:
+            # - scope: punctuation.separator
+            #   match: ','
+            #   pop: true
             - match: '(?=[=])'
               set: binding-initializer
             - match: '(?=\S)'

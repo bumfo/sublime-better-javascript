@@ -307,10 +307,12 @@
       return requests[absuri]
     }
 
-    function doPreprocess(source, { baseuri, uri, loader, transpile = identify }) {
+    async function doPreprocess(source, { baseuri, uri, loader, transpile = identify }) {
       let absuri = uri
       if (loader) {
-        exported[absuri] = { default: loader(source) }
+        // exported[absuri] = { default: loader(source) }
+        var loaded = await loader(source)
+        exported[absuri] = (typeof loaded === 'object' && loaded !== null) ? loaded : { default: loaded }
 
         return []
       }
@@ -327,7 +329,7 @@
         return []
       }
 
-      return doPreprocess(await cacheRequest(absuri), context)
+      return await doPreprocess(await cacheRequest(absuri), context)
     }
 
     async function __load(baseuri, absuri) {
@@ -354,7 +356,7 @@
 
       var rr = await r
 
-      await aqueue(...doPreprocess(rr, context))
+      await aqueue(...await doPreprocess(rr, context))
         .grow(context => preprocess(context))
 
       return __import(absuri)
