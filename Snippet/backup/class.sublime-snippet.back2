@@ -1,5 +1,5 @@
 <snippet>
-    <content><![CDATA[class ${1:A} ${2/(.+)|.*/(?1:extends )/}${2:B}${2/(.+)|.*/(?1: )/}{
+    <content><![CDATA[class ${1:${TM_FILENAME/(.+)\..+|.*/$1/:name}} ${2/(.+)|.*/(?1:extends )/}${2:Base}${2/(.+)|.*/(?1: )/}{
 	${0:$TM_SELECTED_TEXT}
 }]]></content>
     <tabTrigger>class</tabTrigger>
