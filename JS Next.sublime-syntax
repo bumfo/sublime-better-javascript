@@ -579,6 +579,22 @@ contexts:
             - scope: meta.identifier.property
               match: '{{identifier}}(?=\s*:)'
               set: object-literal-after-property-name
+            - scope: storage.type.accessor.get.js
+              match: '\b(?:get)\b'
+              set:
+                - scope: entity.name.function.getter.js
+                  match: '{{identifier}}'
+                  set: [object-literal-delimiter, statement-group, formal-parameters]
+                - match: '(?=\S)'
+                  pop: true
+            - scope: storage.type.accessor.set.js
+              match: '\b(?:set)\b'
+              set:
+                - scope: entity.name.function.setter.js
+                  match: '{{identifier}}'
+                  set: [object-literal-delimiter, statement-group, formal-parameters]
+                - match: '(?=\S)'
+                  pop: true
             - scope: meta.identifier
               match: '{{identifier}}'
               set: object-literal-after-property-name
