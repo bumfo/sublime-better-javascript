@@ -39,6 +39,16 @@ contexts:
   global:
     - include: statements
 
+  export-statements:
+    - scope: keyword.control.export.js
+      match: '\b(?:export)\b'
+      push:
+        - scope: keyword.control.export.default.js
+          match: '\b(?:default)\b'
+          set: expression
+        - match: '(?=\S)'
+          pop: true
+
   import-statements:
     - scope: keyword.control.import.js
       match: '\b(?:import)\b'
@@ -110,6 +120,7 @@ contexts:
 
   statements:
     - include: import-statements
+    - include: export-statements
     - include: variable-statements
     - include: let-or-const-statements
     - include: for-statements
@@ -953,6 +964,7 @@ contexts:
       scope: punctuation.definition.string.begin.js
       set:
         - meta_scope: string.quoted.single.js
+        - meta_include_prototype: false
         - match: (')|(\n)
           captures:
             1: punctuation.definition.string.end.js
@@ -964,6 +976,7 @@ contexts:
         0: punctuation.definition.string.begin.js
       set:
         - meta_scope: string.quoted.double.js
+        - meta_include_prototype: false
         - match: (")|(\n)
           captures:
             1: punctuation.definition.string.end.js
