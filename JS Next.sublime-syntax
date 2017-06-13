@@ -9,7 +9,7 @@ variables:
   declar_var: 'var|let|const|static'
   class_keyword: 'class|struct'
   storage_classes: '{{declar_var}}|class|function|async'
-  binary_operators: '!==|===|<=|>=|!=|==|=|\+=|\-=|\*=|%=|<<=|>>=|>>>=|&=|\|=|\^=|\*\*=|\/=|\*\*|\/|(?:\+)(?!\+)|(?:\-)(?!\-)|\*|%|>>>|<<|>>|<|>|&&|\|\||&|\||\^' #|\?|:
+  binary_operators: '!==|===|<=|>=|!=|==|=|\+=|\-=|\*=|%=|<<=|>>=|>>>=|&=|\|=|\^=|\*\*=|\/=|\*\*|\/|(?:\+)(?!\+)|(?:\-)(?!\-)|\*|%|>>>|<<|>>|<|>|&&|\|\||&|\||\^|\binstanceof\b' #|\?|:
   ternary_operators: '\?|:'
   unary_operators_after: '\+\+|\-\-'
   unary_operators: '\.\.\.|!|~|\+\+|\-\-|\+|\-'
