@@ -9,8 +9,10 @@ variables:
   declar_var: 'var|let|const|static'
   class_keyword: 'class|struct'
   storage_classes: '{{declar_var}}|class|function|async'
-  binary_operators: '!==|===|<=|>=|!=|==|=|\+=|\-=|\*=|%=|<<=|>>=|>>>=|&=|\|=|\^=|\*\*=|\/=|\*\*|\/|(?:\+)(?!\+)|(?:\-)(?!\-)|\*|%|>>>|<<|>>|<|>|&&|\|\||&|\||\^|\binstanceof\b' #|\?|:
+  binary_operators_word: '\b(?:instanceof)\b(?!\$)'
+  binary_operators: '!==|===|<=|>=|!=|==|=|\+=|\-=|\*=|%=|<<=|>>=|>>>=|&=|\|=|\^=|\*\*=|\/=|\*\*|\/|(?:\+)(?!\+)|(?:\-)(?!\-)|\*|%|>>>|<<|>>|<|>|&&|\|\||&|\||\^|{{binary_operators_word}}' #|\?|:
   ternary_operators: '\?|:'
+  unary_operators_word: '\b(?:delete|void|typeof|await)\b(?!\$)'
   unary_operators_after: '\+\+|\-\-'
   unary_operators: '\.\.\.|!|~|\+\+|\-\-|\+|\-'
   operators: '{{ternary_operators}}|{{binary_operators}}|{{unary_operators}}'
@@ -364,7 +366,7 @@ contexts:
 
   unary-expressions:
     - scope: keyword.operator.unary.word
-      match: '\b(?:delete|void|typeof|await)\b'
+      match: '{{unary_operators_word}}'
       push: unary-expression
     - scope: keyword.operator.unary
       match: '{{unary_operators}}'
@@ -375,7 +377,7 @@ contexts:
   unary-expression:
     - meta_content_scope: meta.unary-expression
     - scope: keyword.operator.unary.word
-      match: '\b(?:delete|void|typeof|await)\b'
+      match: '{{unary_operators_word}}'
     - scope: keyword.operator.unary
       match: '{{unary_operators}}'
     - match: '(?={{lexp_lookahead}})'
