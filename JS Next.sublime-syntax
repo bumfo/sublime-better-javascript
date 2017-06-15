@@ -99,9 +99,15 @@ contexts:
     - match: '(?=\S)'
       pop: true
 
+  string:
+    - include: literal-string
+    - match: '(?=\S)'
+      pop: true
+
   export-from:
     - scope: keyword.control.export.js
       match: '\b(?:from)\b'
+      set: string
     - match: '(?=\S)'
       pop: true
 
@@ -110,13 +116,21 @@ contexts:
       match: '\b(?:import)\b'
       push:
         - meta_scope: meta.import.js
+        - match: '(?=\b(?:{{es17_keywords}})\b)'
+          pop: true
         - scope: variable.other.import.default.js
           match: '(?={{identifier}})'
-          set: [import-from, default-import-delimiter, import-identifier]
+          set: [meta-import, import-from, default-import-delimiter, import-identifier]
         - match: '(?=\*|\{)'
-          set: [import-from, after-default-import]
+          set: [meta-import, import-from, after-default-import]
         - match: '(?=\S)'
           pop: true
+
+  meta-import:
+    - meta_content_scope: meta.import.js
+    - match: ''
+      pop: true
+
 
   import-identifier:
     - scope: storage.import.default.js
@@ -171,9 +185,9 @@ contexts:
       pop: true
 
   import-from:
-    - meta_scope: meta.import.js
     - scope: keyword.control.import.js
       match: '\b(?:from)\b'
+      set: string
     - match: '(?=\S)'
       pop: true
 
