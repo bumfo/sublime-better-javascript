@@ -46,26 +46,27 @@ contexts:
     - match: ''
       pop: true
 
+  export-brace:
+    - scope: punctuation.delimiter
+      match: ','
+    - scope: variable.other.default.js
+      match: '(?={{identifier}})'
+      push: export-identifier
+    - scope: punctuation.export.begin.js
+      match: '\}'
+      pop: true
+
   export-statements:
     - scope: keyword.control.export.js
       match: '\b(?:export)\b'
       push:
         - meta_scope: meta.export.js
-        - scope: constant.other.import.js
+        - scope: constant.other.export.js
           match: '\*'
-          set: [meta-export, export-as]
+          set: [meta-export, export-from, export-as]
         - scope: punctuation.export.begin
           match: '\{'
-          set:
-            - meta_scope: meta.export.js
-            - scope: punctuation.delimiter
-              match: ','
-            - scope: variable.other.default.js
-              match: '(?={{identifier}})'
-              push: export-identifier
-            - scope: punctuation.export.begin.js
-              match: '\}'
-              pop: true
+          set: [meta-export, export-from, export-brace]
         - scope: keyword.control.export.default.js
           match: '\b(?:default)\b'
           set: [meta-export, expression]
@@ -95,6 +96,12 @@ contexts:
           pop: true
         - match: '(?=\S)'
           pop: true
+    - match: '(?=\S)'
+      pop: true
+
+  export-from:
+    - scope: keyword.control.export.js
+      match: '\b(?:from)\b'
     - match: '(?=\S)'
       pop: true
 
