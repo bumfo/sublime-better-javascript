@@ -41,24 +41,34 @@ contexts:
   global:
     - include: statements
 
+  meta-export:
+    - meta_content_scope: meta.export.js
+    - match: ''
+      pop: true
+
   export-statements:
     - scope: keyword.control.export.js
       match: '\b(?:export)\b'
       push:
-        - scope: punctuation.multi-export.begin
+        - meta_scope: meta.export.js
+        - scope: constant.other.import.js
+          match: '\*'
+          set: [meta-export, export-as]
+        - scope: punctuation.export.begin
           match: '\{'
           set:
+            - meta_scope: meta.export.js
             - scope: punctuation.delimiter
               match: ','
             - scope: variable.other.default.js
               match: '(?={{identifier}})'
               push: export-identifier
-            - scope: punctuation.multi-export.begin.js
+            - scope: punctuation.export.begin.js
               match: '\}'
               pop: true
         - scope: keyword.control.export.default.js
           match: '\b(?:default)\b'
-          set: expression
+          set: [meta-export, expression]
         - match: '(?=\S)'
           pop: true
 
@@ -102,6 +112,9 @@ contexts:
           pop: true
 
   import-identifier:
+    - scope: storage.import.default.js
+      match: '\b(?:default)\b'
+      set: import-as
     - scope: meta.import.identifier.js
       match: '{{identifier}}(?=\s*\b(?:as)\b)'
       set: import-as
