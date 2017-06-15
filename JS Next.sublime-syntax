@@ -45,11 +45,48 @@ contexts:
     - scope: keyword.control.export.js
       match: '\b(?:export)\b'
       push:
+        - scope: punctuation.multi-export.begin
+          match: '\{'
+          set:
+            - scope: punctuation.delimiter
+              match: ','
+            - scope: variable.other.default.js
+              match: '(?={{identifier}})'
+              push: export-identifier
+            - scope: punctuation.multi-export.begin.js
+              match: '\}'
+              pop: true
         - scope: keyword.control.export.default.js
           match: '\b(?:default)\b'
           set: expression
         - match: '(?=\S)'
           pop: true
+
+  export-identifier:
+    - scope: storage.export.default.js
+      match: '\b(?:default)\b'
+      set: export-as
+    - scope: variable.other.export.js
+      match: '{{identifier}}(?=\s*\b(?:as)\b)'
+      set: export-as
+    - scope: meta.identifier.export.js
+      match: '{{identifier}}'
+      set: export-as
+
+  export-as:
+    - scope: keyword.control.export.as.js
+      match: '\b(?:as)\b'
+      set:
+        - scope: storage.export.default.js
+          match: '\b(?:default)\b'
+          pop: true
+        - scope: meta.identifier.export.js
+          match: '{{identifier}}'
+          pop: true
+        - match: '(?=\S)'
+          pop: true
+    - match: '(?=\S)'
+      pop: true
 
   import-statements:
     - scope: keyword.control.import.js
@@ -92,7 +129,7 @@ contexts:
       set:
         - scope: punctuation.delimiter
           match: ','
-        - scope: variable.other.import.default.js
+        - scope: variable.other.import.js
           match: '(?={{identifier}})'
           push: import-identifier
         - scope: punctuation
@@ -102,7 +139,7 @@ contexts:
       pop: true
 
   import-as:
-    - scope: keyword.control.import.js
+    - scope: keyword.control.import.as.js
       match: '\b(?:as)\b'
       set:
         - scope: variable.other.identifier.js
