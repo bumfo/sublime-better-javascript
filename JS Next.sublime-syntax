@@ -131,7 +131,6 @@ contexts:
     - match: ''
       pop: true
 
-
   import-identifier:
     - scope: storage.import.default.js
       match: '\b(?:default)\b'
