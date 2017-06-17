@@ -3,6 +3,11 @@
 name: JS Next
 scope: source.js
 
+file_extensions:
+  - js
+  - mjs
+  - jsx
+
 variables:
   es17_keywords: 'break|do|in|typeof|case|else|instanceof|var|catch|export|new|void|class|extends|return|while|const|finally|super|with|continue|for|switch|yield|debugger|function|this|default|if|throw|delete|import|try|await'
   es17_punctuators: '\{|\(|\)|\[|\]|\.|\.\.\.|;|,|<|>|<=|>=|==|!=|===|!==|\+|\-|\*|%|\+\+|\-\-|<<|>>|>>>|&|\||\^|!|~|&&|\|\||?|:|=|\+=|\-=|\*=|%=|<<=|>>=|>>>=|&=|\|=|\^=|=>|\*\*|\*\*=|\/|\/=|\}'
@@ -22,12 +27,16 @@ variables:
   func_lookahead: '\s*\b(async\s+)?function\b'
   arrow_func_lookahead: '(?:[_$[:alpha:]][_$[:alnum:]]*|\([^\(]*?\))\s*=>'
   keyword_lookahead: '{{declar_var}}|{{control_keywords}}'
-  lexp_lookahead: '(?!\b(?:{{keyword_lookahead}})\b)[\{\(\[''"`/[:alnum:]_$]|[\.][[:digit:]]' #(?<![[:alnum:]_$])
+  lexp_lookahead: '(?!\b(?:{{keyword_lookahead}})\b)[\{\(\[''"`/[:alnum:]_$]|[\.][[:digit:]]|{{jsx_lookahead}}' #(?<![[:alnum:]_$])
 
   number_lookahead: '[0-9]+'
   property_name_lookahead: '[\["'']|(?:{{identifier}}|{{number_lookahead}})'
 
   control_keywords: 'break|do|case|else|catch|export|return|while|finally|with|continue|for|switch|yield|debugger|default|if|throw|import|try'
+
+
+
+  jsx_lookahead: '(?=</?{{identifier}})'
 
 contexts:
 
@@ -710,7 +719,7 @@ contexts:
           pop: true
 
   primary-expression:
-    # - meta_scope: meta.primary-expression
+    - include: jsx-expression
     - include: regexp-complete
     - include: literal-string
     - include: literal-string-template
@@ -1156,4 +1165,42 @@ contexts:
       pop: true
     - match: \bNaN\b
       scope: constant.language.nan.js
+      pop: true
+
+
+
+
+  jsx-expression:
+    - scope: meta.jsx-expression
+      match: '(</)({{identifier}})'
+      captures:
+        1: punctuation.definition.tag.begin.html
+        2: meta.tag.block.any.html entity.name.tag.block.any.html
+      set: jsx-after-close-tag-name
+    - scope: meta.jsx-expression
+      match: '(<)({{identifier}})'
+      captures:
+        1: punctuation.definition.tag.begin.html
+        2: meta.tag.block.any.html entity.name.tag.block.any.html
+      set: jsx-after-open-tag-name
+
+  jsx-tag:
+    - match: '(?=<{{identifier}})'
+      push: jsx-expression
+    - match: '(?=</{{identifier}})'
+      pop: true
+
+  jsx-after-open-tag-name:
+    - meta_content_scope: meta.jsx
+    - scope: punctuation.definition.tag.end.html
+      match: '/>'
+      pop: true
+    - scope: punctuation.definition.tag.end.html
+      match: '>'
+      set: [jsx-expression, jsx-tag]
+
+  jsx-after-close-tag-name:
+    - meta_content_scope: meta.jsx
+    - scope: punctuation.definition.tag.end.html
+      match: '>'
       pop: true
