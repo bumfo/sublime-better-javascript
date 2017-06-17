@@ -936,7 +936,18 @@ contexts:
   extends-expression-after-name:
     - match: '(?=\{)'
       pop: true
-    - include: extends-expression
+    - scope: punctuation
+      match: '\.'
+      set: extends-expression-after-dot
+    - match: '(?=\S)'
+      set: after-member-expression
+
+  extends-expression-after-dot:
+    - match: '(?=\{)'
+      pop: true
+    - scope: entity.other.inherited-class.js
+      match: '{{identifier}}'
+      set: extends-expression-after-name
 
   class-body:
     - match: '(?=\()'
