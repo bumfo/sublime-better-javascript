@@ -918,20 +918,33 @@ contexts:
   class-tail:
     - scope: storage.modifier.extends.js
       match: '\b(?:extends)\b'
-      set: 
-        - scope: entity.other.inherited-class.js
-          match: '{{identifier}}'
-          set: class-body
-        - match: '(?=\S)'
-          set: class-body
+      set: [class-body, extends-expression]        
     - match: '(?=\S)'
       set: class-body
+
+  extends-expression:
+    - scope: punctuation
+      match: '\.'
+    - match: '(?={{es17_keywords}})'
+      set: expression
+    - scope: entity.other.inherited-class.js
+      match: '{{identifier}}'
+      set: extends-expression-after-name
+    - match: '(?=\S)'
+      set: expression
+
+  extends-expression-after-name:
+    - match: '(?=\{)'
+      pop: true
+    - include: extends-expression
 
   class-body:
     - match: '(?=\()'
       set: [class-body-pure, formal-parameters]
     - match: '(?=\{)'
       set: class-body-pure
+    - match: '(?=\S)'
+      pop: true
 
   class-body-pure:
     - scope: punctuation.definition.block.begin.js
