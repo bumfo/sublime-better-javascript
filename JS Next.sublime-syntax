@@ -14,7 +14,7 @@ variables:
   declar_var: 'var|let|const|static'
   class_keyword: 'class|struct'
   storage_classes: '{{declar_var}}|class|function|async'
-  binary_operators_word: '\b(?:instanceof)\b(?!\$)'
+  binary_operators_word: '\b(?:instanceof|in)\b(?!\$)'
   binary_operators: '!==|===|<=|>=|!=|==|=|\+=|\-=|\*=|%=|<<=|>>=|>>>=|&=|\|=|\^=|\*\*=|\/=|\*\*|\/|(?:\+)(?!\+)|(?:\-)(?!\-)|\*|%|>>>|<<|>>|<|>|&&|\|\||&|\||\^|{{binary_operators_word}}' #|\?|:
   ternary_operators: '\?|:'
   unary_operators_word: '\b(?:delete|void|typeof|await)\b(?!\$)'
@@ -398,7 +398,7 @@ contexts:
           pop: true
         - match: '(?=\b(?:var)\b)'
           push: [for-expression-start, variable-statement]
-        - match: '(?=\b(?:let)\b)'
+        - match: '(?=\b(?:let|const)\b)'
           push: [for-expression-start, let-or-const-statement]
         - match: (?=\S)
           push: [for-expression-start, expression]
@@ -655,6 +655,16 @@ contexts:
     - match: '(?=\S)'
       pop: true
 
+  async-in-object-literal:
+    - scope: storage.type.async.js
+      match: '\b(?:async(?!\s*\())\b'
+      push:
+        - scope: entity.name.function.async.js
+          match: '{{identifier}}'
+          set: [object-literal-delimiter, statement-group, formal-parameters]
+        - match: '(?=\S)'
+          set: formal-parameters
+
   object-literal:
     - scope: punctuation.definition.literal.object.begin.js
       match: '\{'
@@ -662,14 +672,7 @@ contexts:
         - meta_scope: meta.object.js
         - match: '(?={{identifier}})'
           push:
-            - scope: storage.type.async.js
-              match: '\b(?:async)\b'
-              push:
-                - scope: entity.name.function.async.js
-                  match: '{{identifier}}'
-                  set: [object-literal-delimiter, statement-group, formal-parameters]
-                - match: '(?=\S)'
-                  pop: true
+            - include: async-in-object-literal
             - scope: entity.name.function.class.js
               match: '{{identifier}}(?=\s*\()'
               set: [object-literal-delimiter, statement-group, formal-parameters]
