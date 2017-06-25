@@ -27,7 +27,7 @@ variables:
   func_lookahead: '\s*\b(async\s+)?function\b'
   arrow_func_lookahead: '(?:[_$[:alpha:]][_$[:alnum:]]*|\([^\(]*?\))\s*=>'
   keyword_lookahead: '{{declar_var}}|{{control_keywords}}'
-  lexp_lookahead: '(?!\b(?:{{keyword_lookahead}})\b)[\{\(\[''"`/[:alnum:]_$]|[\.][[:digit:]]|{{jsx_lookahead}}' #(?<![[:alnum:]_$])
+  lexp_lookahead: '(?!\b(?:{{keyword_lookahead}})\b)[\{\(\[''"`/[:alnum:]_$]|[\.][[:digit:]]|{{jsx_lookahead}}|{{decorator_lookahead}}' #(?<![[:alnum:]_$])
 
   number_lookahead: '[0-9]+'
   property_name_lookahead: '[\["'']|(?:{{identifier}}|{{number_lookahead}})'
@@ -37,6 +37,8 @@ variables:
 
 
   jsx_lookahead: '(?=</?{{identifier}})'
+
+  decorator_lookahead: '(?=@)'
 
 contexts:
 
@@ -730,6 +732,7 @@ contexts:
     - include: constant
     - include: function-expression
     - include: class-expression
+    - include: decorator
     - scope: variable.function.js
       match: '(?<![[:alnum:]_$]){{identifier}}(?=\s*\()'
       pop: true
@@ -963,18 +966,22 @@ contexts:
   class-body-pure:
     - scope: punctuation.definition.block.begin.js
       match: '\{'
-      set:
-        - meta_scope: meta.class.js
-        - scope: punctuation.terminator
-          match: ';'
-        - scope: storage.type.static.js
-          match: '\b(?:static)\b'
-        - include: class-method-or-field-definitions
+      set: 
+        - include: class-body-content
         - scope: punctuation.definition.block.end.js
           match: '\}'
           pop: true
     - match: '(?=\S)'
       pop: true
+
+  class-body-content:
+    - meta_scope: meta.class.js
+    - scope: punctuation.terminator
+      match: ';'
+    - scope: storage.type.static.js
+      match: '\b(?:static)\b'
+    - include: decorators
+    - include: class-method-or-field-definitions
 
   class-method-or-field-definitions:
     - match: '(?={{identifier}})'
@@ -1231,3 +1238,24 @@ contexts:
     - scope: punctuation.definition.tag.end.html
       match: '>'
       pop: true
+
+
+  decorator-meta:
+    - meta_content_scope: meta.decorator
+    - match: ''
+      pop: true
+
+  decorator-puncutation:
+    - scope: punctuation.decorator
+      match: '@'
+      pop: true
+
+  decorators:
+    - match: '(?=@)'
+      push: [decorator-meta, lhs-expression, decorator-puncutation]
+
+  decorator:
+    - match: '(?=@)'
+      set: [decorator-meta, lhs-expression, decorator-puncutation]
+
+
