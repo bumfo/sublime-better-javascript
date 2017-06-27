@@ -1219,6 +1219,7 @@ contexts:
       set: jsx-after-open-tag-name
 
   jsx-tag:
+    - include: jsx-injections
     - match: '(?=<{{identifier}})'
       push: jsx-expression
     - match: '(?=</{{identifier}})'
@@ -1226,6 +1227,7 @@ contexts:
 
   jsx-after-open-tag-name:
     - meta_content_scope: meta.jsx
+    - include: jsx-injections
     - scope: punctuation.definition.tag.end.html
       match: '/>'
       pop: true
@@ -1239,6 +1241,19 @@ contexts:
       match: '>'
       pop: true
 
+  jsx-injections:
+    - match: '(?=\{)'
+      push: jsx-injection
+
+  jsx-injection:
+    - scope: punctuation.definition.jsx-injection
+      match: '\{'
+      set: 
+        - scope: punctuation.definition.jsx-injection
+          match: '\}'
+          pop: true
+        - include: expressions
+
 
   decorator-meta:
     - meta_content_scope: meta.decorator
@@ -1246,7 +1261,7 @@ contexts:
       pop: true
 
   decorator-puncutation:
-    - scope: punctuation.decorator
+    - scope: punctuation.definition.decorator
       match: '@'
       pop: true
 
