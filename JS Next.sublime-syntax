@@ -37,6 +37,7 @@ variables:
 
 
   jsx_lookahead: '(?=</?{{identifier}})'
+  jsx_attribute_key: '[a-zA-Z_][a-zA-Z_\-0-9]*'
 
   decorator_lookahead: '(?=@)'
 
@@ -1256,12 +1257,12 @@ contexts:
         - include: expressions
 
   jsx-attributes:
-    - match: '(?=[a-zA-Z][a-zA-Z\-0-9]*)'
+    - match: '(?={{jsx_attribute_key}})'
       push: jsx-attribute
 
   jsx-attribute:
     - scope: entity.other.attribute-name
-      match: '[a-zA-Z][a-zA-Z\-0-9]*'
+      match: '{{jsx_attribute_key}}'
       set:
         - scope: punctuation.separator.key-value
           match: '='
