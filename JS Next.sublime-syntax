@@ -1227,6 +1227,7 @@ contexts:
 
   jsx-after-open-tag-name:
     - meta_content_scope: meta.jsx
+    - include: jsx-attributes
     - include: jsx-injections
     - scope: punctuation.definition.tag.end.html
       match: '/>'
@@ -1253,6 +1254,24 @@ contexts:
           match: '\}'
           pop: true
         - include: expressions
+
+  jsx-attributes:
+    - match: '(?=[a-zA-Z][a-zA-Z\-0-9]*)'
+      push: jsx-attribute
+
+  jsx-attribute:
+    - scope: entity.other.attribute-name
+      match: '[a-zA-Z][a-zA-Z\-0-9]*'
+      set:
+        - scope: punctuation.separator.key-value
+          match: '='
+          set:
+            - match: '(?=")'
+              set: literal-string
+            - match: '(?=\S)'
+              pop: true
+        - match: '(?=\S)'
+          pop: true
 
 
   decorator-meta:
