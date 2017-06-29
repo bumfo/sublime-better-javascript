@@ -893,6 +893,12 @@ contexts:
       pop: true
     - include: literal-string
     - include: literal-number
+    - match: '(\[)\s*({{identifier}})\s*(\])(?=\s*\()'
+      captures:
+        1: punctuation.section.computed.begin.js
+        2: entity.name.function.const-computed
+        3: punctuation.section.computed.end.js
+      pop: true
     - scope: punctuation.section.computed.begin.js
       match: '\['
       set:
