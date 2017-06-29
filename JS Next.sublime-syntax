@@ -893,12 +893,23 @@ contexts:
       pop: true
     - include: literal-string
     - include: literal-number
-    - match: '(\[)\s*({{identifier}})\s*(\])(?=\s*\()'
+    - scope: entity.name.function.const-computed
+      match: '(\[)\s*({{identifier}})\s*(\])(?=\s*\()'
       captures:
         1: punctuation.section.computed.begin.js
-        2: entity.name.function.const-computed
+        # 2: entity.name.function.const-computed
         3: punctuation.section.computed.end.js
       pop: true
+    - match: '(\[)(?=\s*(?:{{identifier}}\s*(?:\.\s*{{identifier}}\s*)+)(?:\])(?:\s*\())'
+      captures:
+        1: punctuation.section.computed.begin.js
+      set:
+        - meta_scope: entity.name.function.const-computed
+        - scope: punctuation.accessor.js
+          match: '\.'
+        - scope: punctuation.section.computed.end.js
+          match: '\]'
+          pop: true
     - scope: punctuation.section.computed.begin.js
       match: '\['
       set:
