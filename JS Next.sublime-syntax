@@ -985,6 +985,7 @@ contexts:
     - scope: punctuation.definition.block.begin.js
       match: '\{'
       set: 
+        - meta_scope: meta.class.js
         - include: class-body-content
         - scope: punctuation.definition.block.end.js
           match: '\}'
@@ -993,7 +994,6 @@ contexts:
       pop: true
 
   class-body-content:
-    - meta_scope: meta.class.js
     - scope: punctuation.terminator
       match: ';'
     - scope: storage.type.static.js
