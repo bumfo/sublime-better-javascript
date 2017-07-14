@@ -1,0 +1,7 @@
+<snippet>
+    <content><![CDATA[@Component()
+class ${1:VueComponent} extends Vue {${0:$TM_SELECTED_TEXT}}]]></content>
+    <tabTrigger>@Component</tabTrigger>
+    <scope>source.js</scope>
+    <description>Vue Component</description>
+</snippet>

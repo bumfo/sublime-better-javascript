@@ -1,5 +1,5 @@
 <snippet>
-	<content><![CDATA[import ${1:Module} from '${2:${1/./$0/g}}'
+	<content><![CDATA[import ${1:Module} from '${2:${1/./$0/g}}.mjs'
 ]]></content>
 	<tabTrigger>import</tabTrigger>
 	<scope>source.js, source.mjs</scope>
