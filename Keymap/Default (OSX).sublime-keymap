@@ -1,0 +1,13 @@
+// Singlequote for lisp
+[
+  { "keys": ["tab"], "command": "my_insert_snippet", "args": {}, "context":
+    [
+      { "key": "selector", "operator": "equal", "operand": "source.js"},
+      { "key": "auto_complete_visible", "operator": "equal", "operand": false, "match_all": true },
+      { "key": "selection_empty", "operator": "equal", "operand": true, "match_all": true },
+      { "key": "has_next_field", "operator": "equal", "operand": false, "match_all": true },
+      { "key": "has_prev_field", "operator": "equal", "operand": false, "match_all": true },
+      { "key": "preceding_text", "operator": "regex_match", "operand": "^.*\\bfn$", "match_all": true },
+    ],
+  },
+]
