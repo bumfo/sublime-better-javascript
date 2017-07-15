@@ -1441,7 +1441,7 @@ contexts:
       match: '(:){{attribute_name}}'
       captures:
         1: punctuation.vue.expr
-      push: tag-stuff-attribute-punctuation-and-js-expr-value
+      push: [tag-stuff-attribute-punctuation-and-js-expr-value, tag-stuff-modifier]
 
   tag-stuff-modifier:
     - match: '(\.)([a-zA-Z]+)'
