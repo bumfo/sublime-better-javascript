@@ -1351,12 +1351,13 @@ contexts:
     #   set: assignment-expression
 
   vue-template-contents:
-    - meta_content_scope: text.html.embedded
+    - meta_content_scope: meta.vue-template text.html.vue.embedded.js
+    - meta_include_prototype: false
     - match: '(?=`)'
       pop: true
-    # - include: scope:text.html.basic
-
     - include: other-tags
+    - include: vue-template-tags
+    # - include: scope:text.html.basic
 
   vue-template-content-context:
     - match: ''
@@ -1366,13 +1367,13 @@ contexts:
       #     pop: true
 
   vue-template-content-begin:
-    - scope: punctuation.definition.string.vue-template.begin.js
+    - scope: meta.string.vue-template punctuation.definition.string.vue-template.begin.js
       match: '`'
       pop: true
 
 
   vue-template-content-end:
-    - scope: punctuation.definition.string.vue-template.end.js
+    - scope: meta.string.vue-template punctuation.definition.string.vue-template.end.js
       match: '`'
       pop: true
 
@@ -1387,10 +1388,15 @@ contexts:
       captures:
         1: punctuation.definition.tag.begin.html
         2: entity.name.tag.other.html
-      push: [meta-other-begin, tag-end]
+      push: [meta-other-end, tag-end]
 
   meta-other-begin:
     - meta_scope: meta.tag.other.begin.html
+    - match: ''
+      pop: true
+
+  meta-other-end:
+    - meta_scope: meta.tag.other.end.html
     - match: ''
       pop: true
 
@@ -1483,3 +1489,27 @@ contexts:
   js-expr-contents:
     - meta_content_scope: source.js.embedded.html
     - include: expressions
+
+  js-expr-mustache-content:
+    - meta_scope: meta.string.quoted.double.html
+    - match: '(?=\}\})'
+      pop: true
+    - include: js-expr-contents
+
+
+  vue-template-tags:
+    - scope: support.function.vue
+      match: '\{\{'
+      push: [vue-mustache-end, mustache-js-expr-context]
+
+  vue-mustache-end:
+    - scope: support.function.vue
+      match: '\}\}'
+      pop: true
+
+  mustache-js-expr-context:
+    - match: ''
+      set: js-expr-mustache-content
+      # with_prototype:
+      #   - match: '(?=\}\})'
+      #     pop: true
