@@ -41,6 +41,9 @@ variables:
 
   decorator_lookahead: '(?=@)'
 
+
+  attribute_name: '[a-zA-Z_\-][a-zA-Z0-9_\-]*(?![a-zA-Z0-9_\-])'
+
 contexts:
 
   prototype:
@@ -671,58 +674,60 @@ contexts:
   object-literal:
     - scope: punctuation.definition.literal.object.begin.js
       match: '\{'
-      set:
-        - meta_scope: meta.object.js
-        - match: '(?={{identifier}})'
-          push:
-            - include: async-in-object-literal
-            - scope: entity.name.function.class.js
-              match: '{{identifier}}(?=\s*\()'
-              set: [object-literal-delimiter, statement-group, formal-parameters]
-            - scope: entity.name.property-variable
-              match: '{{identifier}}(?=\s*,)'
-              set: [object-literal-delimiter]
-            - scope: meta.identifier.property
-              match: '{{identifier}}(?=\s*:)'
-              set: object-literal-after-property-name
-            - scope: storage.type.accessor.get.js
-              match: '\b(?:get)\b'
-              set:
-                - scope: entity.name.function.getter.js
-                  match: '{{identifier}}'
-                  set: [object-literal-delimiter, statement-group, formal-parameters]
-                - match: '(?=\S)'
-                  pop: true
-            - scope: storage.type.accessor.set.js
-              match: '\b(?:set)\b'
-              set:
-                - scope: entity.name.function.setter.js
-                  match: '{{identifier}}'
-                  set: [object-literal-delimiter, statement-group, formal-parameters]
-                - match: '(?=\S)'
-                  pop: true
-            - scope: meta.identifier
-              match: '{{identifier}}'
-              set: object-literal-after-property-name
-            - match: '(?=\S)'
-              pop: true
-        - match: '(?={{property_name_lookahead}})'
-          push: [object-literal-after-property-name, object-property-name]
-        - scope: keyword.generator.asterisk.js
-          match: '\*'
-          push:
-            - scope: entity.name.function.generator.js
+      set: object-literal-content
+
+  object-literal-content:
+    - meta_scope: meta.object.js
+    - match: '(?={{identifier}})'
+      push:
+        - include: async-in-object-literal
+        - scope: entity.name.function.class.js
+          match: '{{identifier}}(?=\s*\()'
+          set: [object-literal-delimiter, statement-group, formal-parameters]
+        - scope: entity.name.property-variable
+          match: '{{identifier}}(?=\s*,)'
+          set: [object-literal-delimiter]
+        - scope: meta.identifier.property
+          match: '{{identifier}}(?=\s*:)'
+          set: object-literal-after-property-name
+        - scope: storage.type.accessor.get.js
+          match: '\b(?:get)\b'
+          set:
+            - scope: entity.name.function.getter.js
               match: '{{identifier}}'
               set: [object-literal-delimiter, statement-group, formal-parameters]
             - match: '(?=\S)'
               pop: true
-        - scope: invalid.illegal.js
-          match: ':'
-          push: [object-literal-delimiter, assignment-expression]
-        - include: statement-groups
-        - scope: punctuation.definition.literal.object.end.js
-          match: '\}'
+        - scope: storage.type.accessor.set.js
+          match: '\b(?:set)\b'
+          set:
+            - scope: entity.name.function.setter.js
+              match: '{{identifier}}'
+              set: [object-literal-delimiter, statement-group, formal-parameters]
+            - match: '(?=\S)'
+              pop: true
+        - scope: meta.identifier
+          match: '{{identifier}}'
+          set: object-literal-after-property-name
+        - match: '(?=\S)'
           pop: true
+    - match: '(?={{property_name_lookahead}})'
+      push: [object-literal-after-property-name, object-property-name]
+    - scope: keyword.generator.asterisk.js
+      match: '\*'
+      push:
+        - scope: entity.name.function.generator.js
+          match: '{{identifier}}'
+          set: [object-literal-delimiter, statement-group, formal-parameters]
+        - match: '(?=\S)'
+          pop: true
+    - scope: invalid.illegal.js
+      match: ':'
+      push: [object-literal-delimiter, assignment-expression]
+    - include: statement-groups
+    - scope: punctuation.definition.literal.object.end.js
+      match: '\}'
+      pop: true
 
   primary-expression:
     - include: jsx-expression
@@ -1304,10 +1309,146 @@ contexts:
 
   decorators:
     - match: '(?=@)'
-      push: [decorator-meta, lhs-expression, decorator-puncutation]
+      push: decorator
 
   decorator:
+    - include: vue-component-decorator
     - match: '(?=@)'
       set: [decorator-meta, lhs-expression, decorator-puncutation]
 
 
+
+  vue-component-decorator:
+    - match: '(@)(Component)(?=\()'
+      captures:
+        1: punctuation.definition.decorator
+        2: variable.function.decorator
+      set:
+        - scope: punctuation.section.parens.begin
+          match: '\('
+          set:
+            - scope: punctuation.definition.literal.object.begin.js
+              match: '\{'
+              push: 
+                - meta_scope: meta.object.component.js
+                - match: '\b(template)\b(:)'
+                  captures:
+                    1: meta.identifier.property
+                    2: punctuation.separator
+                  push: [object-literal-delimiter, vue-template-expression]
+                - include: object-literal-content
+            - include: expressions
+            - scope: punctuation.section.parens.end
+              match: '\)'
+              pop: true
+
+  vue-template-expression:
+    - scope: punctuation.definition.string.vue-template.begin.js
+      match: '(?=`)'
+      push: [vue-template-content-end, vue-template-content-context, vue-template-content-begin]
+    - match: '(?=\S)'
+      pop: true
+    #   set: assignment-expression
+
+  vue-template-contents:
+    - meta_content_scope: text.html.embedded
+    - match: '(?=`)'
+      pop: true
+    # - include: scope:text.html.basic
+
+    - include: other-tags
+
+  vue-template-content-context:
+    - match: ''
+      set: vue-template-contents
+      # with_prototype:
+      #   - match: '(?=`)'
+      #     pop: true
+
+  vue-template-content-begin:
+    - scope: punctuation.definition.string.vue-template.begin.js
+      match: '`'
+      pop: true
+
+
+  vue-template-content-end:
+    - scope: punctuation.definition.string.vue-template.end.js
+      match: '`'
+      pop: true
+
+
+  other-tags:
+    - match: '(<)(?:([a-zA-Z0-9:]+)\b)'
+      captures:
+        1: punctuation.definition.tag.begin.html
+        2: entity.name.tag.other.html
+      push: [meta-other-begin, tag-stuff]
+    - match: '(</)(?:([a-zA-Z0-9:]+)\b)'
+      captures:
+        1: punctuation.definition.tag.begin.html
+        2: entity.name.tag.other.html
+      push: [meta-other-begin, tag-end]
+
+  meta-other-begin:
+    - meta_scope: meta.tag.other.begin.html
+    - match: ''
+      pop: true
+
+  tag-stuff:
+    - include: tag-stuff-vue-attributes
+    - include: tag-stuff-other-attributes
+    - include: tag-end
+
+  tag-end:
+    - scope: punctuation.definition.tag.end.html
+      match: '>'
+      pop: true
+
+  tag-stuff-vue-attributes:
+    - scope: entity.other.attribute-name.html storage.type
+      match: '(@){{attribute_name}}'
+      captures:
+        1: punctuation.vue.on
+      push: tag-stuff-attribute-punctuation-and-js-expr-value
+    - scope: entity.other.attribute-name.html keyword.vue.directives
+      match: 'v-(?:for|if|show|model)'
+      push: tag-stuff-attribute-punctuation-and-js-expr-value
+    - scope: entity.other.attribute-name.html meta.vue.v-bind
+      match: '(:){{attribute_name}}'
+      captures:
+        1: punctuation.vue.expr
+      push: tag-stuff-attribute-punctuation-and-js-expr-value
+
+
+  tag-stuff-attribute-punctuation-and-js-expr-value:
+    - scope: punctuation.separator.key-value.html
+      match: '='
+      set:
+        - scope: punctuation.definition.string.begin.html
+          match: '"'
+          set: [end-double-quote, js-expr-double-quoted-content]
+          # with_prototype:
+          #   - match: '(?=")'
+          #     pop: true
+        - scope: string.unquoted.html
+          match: '{{attribute_name}}(?!\s*=)'
+          pop: true
+        - match: '(?=\S)'
+          pop: true
+    - match: '(?=\S)'
+      pop: true
+
+  js-expr-double-quoted-content:
+    - meta_scope: meta.string.quoted.double.html
+    - match: '(?=")'
+      pop: true
+    - include: js-expr-contents
+
+  end-double-quote:
+    - scope: punctuation.definition.string.end.html
+      match: '"'
+      pop: true
+
+  js-expr-contents:
+    - meta_content_scope: source.js.embedded.html
+    - include: expressions
