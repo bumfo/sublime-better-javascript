@@ -1378,12 +1378,12 @@ contexts:
 
 
   other-tags:
-    - match: '(<)(?:([a-zA-Z0-9:]+)\b)'
+    - match: '(<)(?:([a-zA-Z0-9:\-]+)\b)'
       captures:
         1: punctuation.definition.tag.begin.html
         2: entity.name.tag.other.html
       push: [meta-other-begin, tag-stuff]
-    - match: '(</)(?:([a-zA-Z0-9:]+)\b)'
+    - match: '(</)(?:([a-zA-Z0-9:\-]+)\b)'
       captures:
         1: punctuation.definition.tag.begin.html
         2: entity.name.tag.other.html
