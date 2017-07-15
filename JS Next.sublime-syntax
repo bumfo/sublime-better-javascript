@@ -1399,6 +1399,30 @@ contexts:
     - include: tag-stuff-other-attributes
     - include: tag-end
 
+  tag-stuff-other-attributes:
+    - scope: entity.other.attribute-name.html
+      match: '{{attribute_name}}'
+      push: tag-stuff-attribute-punctuation-and-value
+
+  tag-stuff-attribute-punctuation-and-value:
+    - scope: punctuation.separator.key-value.html
+      match: '='
+      set:
+        - scope: punctuation.definition.string.begin.html
+          match: '"'
+          set:
+            - meta_scope: string.quoted.double.html
+            - scope: punctuation.definition.string.end.html
+              match: '"'
+              pop: true
+        - scope: string.unquoted.html
+          match: '{{attribute_name}}(?!\s*=)'
+          pop: true
+        - match: '(?=\S)'
+          pop: true
+    - match: '(?=\S)'
+      pop: true
+
   tag-end:
     - scope: punctuation.definition.tag.end.html
       match: '>'
@@ -1409,7 +1433,7 @@ contexts:
       match: '(@){{attribute_name}}'
       captures:
         1: punctuation.vue.on
-      push: tag-stuff-attribute-punctuation-and-js-expr-value
+      push: [tag-stuff-attribute-punctuation-and-js-expr-value, tag-stuff-modifier]
     - scope: entity.other.attribute-name.html keyword.vue.directives
       match: 'v-(?:for|if|show|model)'
       push: tag-stuff-attribute-punctuation-and-js-expr-value
@@ -1419,6 +1443,13 @@ contexts:
         1: punctuation.vue.expr
       push: tag-stuff-attribute-punctuation-and-js-expr-value
 
+  tag-stuff-modifier:
+    - match: '(\.)([a-zA-Z]+)'
+      captures:
+        1: punctuation
+        2: keyword.other.modifier
+    - match: '(?=\S)'
+      pop: true
 
   tag-stuff-attribute-punctuation-and-js-expr-value:
     - scope: punctuation.separator.key-value.html
