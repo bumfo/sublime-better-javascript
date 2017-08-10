@@ -1441,7 +1441,7 @@ contexts:
         1: punctuation.vue.on
       push: [tag-stuff-attribute-punctuation-and-js-expr-value, tag-stuff-modifier]
     - scope: entity.other.attribute-name.html keyword.vue.directives
-      match: 'v-(?:for|if|show|model)'
+      match: 'v-(?:for|if|show|model|[a-z]+)'
       push: tag-stuff-attribute-punctuation-and-js-expr-value
     - scope: entity.other.attribute-name.html meta.vue.v-bind
       match: '(:){{attribute_name}}'
